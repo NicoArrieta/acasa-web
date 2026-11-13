@@ -48,6 +48,9 @@ import {
   Activity,
   ArrowUpRight,
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
   MapPin,
   Check,
   Image as ImageIcon,
@@ -55,6 +58,11 @@ import {
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "orders" | "donweb">("dashboard");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((prev) => !prev);
+  };
 
   // State
   const [products, setProducts] = useState<Product[]>([]);
@@ -306,133 +314,263 @@ export default function AdminDashboardPage() {
   return (
     <div className="flex h-screen bg-[#fcfbfa] font-sans antialiased text-[#1a1a1a]">
       {/* 1. ACASA LUXURY ORANGE SIDEBAR */}
-      <aside className="w-72 bg-[#FC7D00] text-white flex flex-col flex-shrink-0 border-r border-[#e57000] select-none shadow-xl">
+      <aside
+        className={`bg-[#FC7D00] text-white flex flex-col flex-shrink-0 select-none shadow-xl transition-all duration-300 ease-in-out relative ${
+          sidebarCollapsed ? "w-20" : "w-72"
+        }`}
+      >
         {/* Brand identity header */}
-        <div className="p-6 border-b border-black/10 bg-black/5">
-          <Link href="/" target="_blank" className="flex items-center space-x-3 group">
-            <div className="bg-white p-2.5 rounded-2xl shadow-sm inline-flex items-center">
-              <img
-                src="/logo-tight.png"
-                alt="Acasa Calidad y Diseño"
-                className="h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-              />
+        <div className={`border-b border-[#c45600] transition-all duration-300 ${sidebarCollapsed ? "p-3 py-4" : "p-6"}`}>
+          {sidebarCollapsed ? (
+            <div className="flex flex-col items-center space-y-3">
+              <Link href="/" target="_blank" className="group" title="Acasa Calidad y Diseño">
+                <div className="bg-white p-2 rounded-xl shadow-sm inline-flex items-center justify-center">
+                  <img
+                    src="/logo-tight.png"
+                    alt="Acasa"
+                    className="h-6 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+              </Link>
+              <button
+                onClick={toggleSidebar}
+                className="p-1.5 rounded-lg bg-black/15 hover:bg-black/25 text-white transition-colors"
+                title="Expandir menú lateral"
+              >
+                <ChevronRight size={18} />
+              </button>
             </div>
-          </Link>
-          <div className="mt-3.5 flex items-center justify-between">
-            <span className="text-[10px] uppercase font-black tracking-[0.25em] text-white">
-              ADMIN SUITE · ACASA
-            </span>
-            <span className="text-[9px] uppercase px-2 py-0.5 rounded-full bg-black/20 text-white font-bold tracking-wider">
-              v2.0
-            </span>
-          </div>
+          ) : (
+            <div>
+              <div className="flex items-start justify-between">
+                <Link href="/" target="_blank" className="inline-block group">
+                  <div className="bg-white px-5 py-3 rounded-2xl shadow-sm inline-flex items-center">
+                    <img
+                      src="/logoAcasaTienda.webp"
+                      alt="Acasa Calidad y Diseño"
+                      className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                </Link>
+                <button
+                  onClick={toggleSidebar}
+                  className="p-1.5 rounded-lg bg-black/15 hover:bg-black/25 text-white transition-colors ml-2 mt-1"
+                  title="Colapsar menú lateral"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-[11px] uppercase font-bold tracking-wider text-white">
+                  ADMIN SUITE · ACASA
+                </span>
+                <span className="text-[10px] uppercase px-2.5 py-0.5 rounded-full bg-[#b85000] text-white font-bold tracking-wider">
+                  V2.0
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Navigation items */}
-        <nav className="flex-1 px-3 py-6 space-y-1.5 text-xs">
+        <nav className={`flex-1 py-6 space-y-2 text-xs ${sidebarCollapsed ? "px-2" : "px-4"}`}>
+          {/* Dashboard */}
           <button
             onClick={() => {
               setActiveTab("dashboard");
               setEditingProduct(null);
             }}
-            className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl transition-all duration-200 text-left ${
-              activeTab === "dashboard"
-                ? "bg-black text-white font-bold shadow-md"
-                : "text-white/90 hover:text-white hover:bg-black/10 font-semibold"
+            title={sidebarCollapsed ? "Escritorio & Tablero" : undefined}
+            className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
+              sidebarCollapsed
+                ? `justify-center py-3.5 rounded-2xl ${
+                    activeTab === "dashboard"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
+                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                    activeTab === "dashboard"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
             }`}
           >
-            <LayoutDashboard size={17} className={activeTab === "dashboard" ? "text-[#FC7D00]" : "text-white"} />
-            <span className="tracking-wide">Escritorio & Tablero</span>
+            <LayoutDashboard size={20} className={activeTab === "dashboard" ? "text-[#FC7D00]" : "text-white"} />
+            {!sidebarCollapsed && <span className="tracking-wide text-[13px]">Escritorio & Tablero</span>}
+
+            {sidebarCollapsed && (
+              <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                Escritorio & Tablero
+              </span>
+            )}
           </button>
 
+          {/* Products */}
           <button
             onClick={() => {
               setActiveTab("products");
             }}
-            className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl transition-all duration-200 text-left ${
-              activeTab === "products"
-                ? "bg-black text-white font-bold shadow-md"
-                : "text-white/90 hover:text-white hover:bg-black/10 font-semibold"
+            title={sidebarCollapsed ? "Catálogo de Productos" : undefined}
+            className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
+              sidebarCollapsed
+                ? `justify-center py-3.5 rounded-2xl ${
+                    activeTab === "products"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
+                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                    activeTab === "products"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
             }`}
           >
-            <Package size={17} className={activeTab === "products" ? "text-[#FC7D00]" : "text-white"} />
-            <div className="flex-1 flex justify-between items-center">
-              <span className="tracking-wide">Catálogo de Productos</span>
-              <span
-                className={`text-[11px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                  activeTab === "products" ? "bg-white/20 text-white" : "bg-black/20 text-white"
-                }`}
-              >
-                {products.length}
-              </span>
-            </div>
+            <Package size={20} className={activeTab === "products" ? "text-[#FC7D00]" : "text-white"} />
+            {!sidebarCollapsed && (
+              <div className="flex-1 flex justify-between items-center">
+                <span className="tracking-wide text-[13px]">Catálogo de Productos</span>
+                <span
+                  className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
+                    activeTab === "products" ? "bg-[#FC7D00] text-white" : "bg-[#b85000] text-white"
+                  }`}
+                >
+                  {products.length}
+                </span>
+              </div>
+            )}
+            {sidebarCollapsed && (
+              <>
+                <span className="absolute top-2 right-2 text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-[#b85000] text-white">
+                  {products.length}
+                </span>
+                <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                  Catálogo de Productos ({products.length})
+                </span>
+              </>
+            )}
           </button>
 
+          {/* Orders */}
           <button
             onClick={() => {
               setActiveTab("orders");
               setEditingProduct(null);
             }}
-            className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl transition-all duration-200 text-left ${
-              activeTab === "orders"
-                ? "bg-black text-white font-bold shadow-md"
-                : "text-white/90 hover:text-white hover:bg-black/10 font-semibold"
+            title={sidebarCollapsed ? "Gestión de Pedidos" : undefined}
+            className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
+              sidebarCollapsed
+                ? `justify-center py-3.5 rounded-2xl ${
+                    activeTab === "orders"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
+                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                    activeTab === "orders"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
             }`}
           >
-            <ShoppingCart size={17} className={activeTab === "orders" ? "text-[#FC7D00]" : "text-white"} />
-            <div className="flex-1 flex justify-between items-center">
-              <span className="tracking-wide">Gestión de Pedidos</span>
-              {activeOrdersCount > 0 && (
-                <span className="text-[10px] bg-black text-white px-2 py-0.5 rounded-full font-bold">
-                  {activeOrdersCount}
+            <ShoppingCart size={20} className={activeTab === "orders" ? "text-[#FC7D00]" : "text-white"} />
+            {!sidebarCollapsed && (
+              <div className="flex-1 flex justify-between items-center">
+                <span className="tracking-wide text-[13px]">Gestión de Pedidos</span>
+                <span
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                    activeTab === "orders" ? "bg-[#FC7D00] text-white" : "bg-white text-[#FC7D00]"
+                  }`}
+                >
+                  {activeOrdersCount > 0 ? activeOrdersCount : ""}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
+            {sidebarCollapsed && (
+              <>
+                {activeOrdersCount > 0 && (
+                  <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-white ring-2 ring-[#FC7D00]" />
+                )}
+                <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                  Gestión de Pedidos {activeOrdersCount > 0 ? `(${activeOrdersCount})` : ""}
+                </span>
+              </>
+            )}
           </button>
 
+          {/* DonWeb */}
           <button
             onClick={() => {
               setActiveTab("donweb");
               setEditingProduct(null);
             }}
-            className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl transition-all duration-200 text-left ${
-              activeTab === "donweb"
-                ? "bg-black text-white font-bold shadow-md"
-                : "text-white/90 hover:text-white hover:bg-black/10 font-semibold"
+            title={sidebarCollapsed ? "Multimedia DonWeb" : undefined}
+            className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
+              sidebarCollapsed
+                ? `justify-center py-3.5 rounded-2xl ${
+                    activeTab === "donweb"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
+                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                    activeTab === "donweb"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
             }`}
           >
-            <UploadCloud size={17} className={activeTab === "donweb" ? "text-[#FC7D00]" : "text-white"} />
-            <span className="tracking-wide">Multimedia DonWeb</span>
+            <UploadCloud size={20} className={activeTab === "donweb" ? "text-[#FC7D00]" : "text-white"} />
+            {!sidebarCollapsed && <span className="tracking-wide text-[13px]">Multimedia DonWeb</span>}
+            {sidebarCollapsed && (
+              <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                Multimedia DonWeb
+              </span>
+            )}
           </button>
         </nav>
 
         {/* Quick Branch & Store Info Box */}
-        <div className="p-4 mx-3 mb-4 rounded-xl bg-black/15 backdrop-blur-xs border border-white/20 text-white space-y-2">
-          <div className="flex items-center space-x-2 text-[10px] uppercase font-bold tracking-widest text-white/95">
-            <MapPin size={12} className="text-white" />
-            <span>Sucursales Activas</span>
+        {sidebarCollapsed ? (
+          <div
+            className="p-2 mx-2 mb-4 rounded-2xl bg-[#c45600] text-white flex justify-center py-3 relative group cursor-pointer"
+            title="Sucursales Activas"
+          >
+            <MapPin size={18} className="text-white" />
+            <span className="absolute left-full ml-3 px-3 py-2 bg-[#0e0e10] text-white text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 leading-relaxed">
+              <strong>Sucursales:</strong><br />
+              Ciudad: Av. Mitre 1398<br />
+              Luján: Alma Gardenia
+            </span>
           </div>
-          <div className="text-[11px] text-white/90 space-y-1">
-            <p className="flex justify-between">
-              <span className="text-white/75">Ciudad:</span>
-              <span className="font-bold text-white">Av. Mitre 1398</span>
-            </p>
-            <p className="flex justify-between">
-              <span className="text-white/75">Luján:</span>
-              <span className="font-bold text-white">Alma Gardenia</span>
-            </p>
+        ) : (
+          <div className="p-4 mx-4 mb-4 rounded-2xl bg-[#c45600] text-white space-y-2.5">
+            <div className="flex items-center space-x-2 text-[10px] uppercase font-bold tracking-widest text-white">
+              <MapPin size={13} className="text-white" />
+              <span>SUCURSALES ACTIVAS</span>
+            </div>
+            <div className="text-[12px] space-y-1.5">
+              <p className="flex justify-between items-center">
+                <span className="text-white/80">Ciudad:</span>
+                <span className="font-bold text-white">Av. Mitre 1398</span>
+              </p>
+              <p className="flex justify-between items-center">
+                <span className="text-white/80">Luján:</span>
+                <span className="font-bold text-white">Alma Gardenia</span>
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Store Link at bottom */}
-        <div className="p-4 border-t border-black/10 bg-black/5">
+        <div className={`border-t border-[#c45600] ${sidebarCollapsed ? "p-2" : "p-4"}`}>
           <Link
             href="/"
             target="_blank"
-            className="flex items-center justify-between text-xs text-white bg-black/20 hover:bg-black/35 p-3 rounded-xl border border-white/20 transition-all duration-200 group font-semibold"
+            title="Abrir Tienda Pública"
+            className={`flex items-center justify-between text-xs text-white bg-[#b85000] hover:bg-[#a64800] rounded-2xl transition-all duration-200 group font-bold shadow-sm ${
+              sidebarCollapsed ? "p-3 justify-center" : "p-4"
+            }`}
           >
-            <span>Abrir Tienda Pública</span>
-            <ArrowUpRight size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            {!sidebarCollapsed && <span className="text-[13px]">Abrir Tienda Pública</span>}
+            <ArrowUpRight size={16} className="text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </Link>
         </div>
       </aside>
@@ -442,6 +580,13 @@ export default function AdminDashboardPage() {
         {/* Top bar con naranja oficial del logo #FC7D00 */}
         <header className="h-16 bg-[#FC7D00] text-white px-8 flex items-center justify-between shadow-md">
           <div className="flex items-center space-x-3">
+            <button
+              onClick={toggleSidebar}
+              className="p-2 rounded-xl bg-black/15 hover:bg-black/25 text-white transition-colors flex items-center justify-center mr-1"
+              title={sidebarCollapsed ? "Expandir menú lateral" : "Colapsar menú lateral"}
+            >
+              <Menu size={18} />
+            </button>
             <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/90">
               ACASA TIENDA
             </span>
@@ -483,7 +628,7 @@ export default function AdminDashboardPage() {
         <div className="flex-1 overflow-y-auto py-8">
           {/* TAB 1: DASHBOARD & LIVE ANALYTICS */}
           {activeTab === "dashboard" && (
-            <div className="w-[90%] mx-auto space-y-7">
+            <div className="w-[97%] mx-auto space-y-7">
               {/* Luxury Control Bar: Period Filter & Refresh */}
               <div className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
                 <div className="flex items-center space-x-3">
@@ -1009,7 +1154,7 @@ export default function AdminDashboardPage() {
 
           {/* TAB 2: PRODUCTS (CATALOGUE & INLINE FORM SECTION) */}
           {activeTab === "products" && (
-            <div className="w-[90%] mx-auto space-y-6">
+            <div className="w-[97%] mx-auto space-y-6">
               {/* SUBVIEW 1: INLINE PRODUCT FORM SECTION (NO MODAL) */}
               {editingProduct ? (
                 <div className="space-y-6">
@@ -1502,7 +1647,7 @@ export default function AdminDashboardPage() {
 
           {/* TAB 3: ORDERS */}
           {activeTab === "orders" && (
-            <div className="w-[90%] mx-auto space-y-5">
+            <div className="w-[97%] mx-auto space-y-5">
               <div className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-sm flex justify-between items-center">
                 <div>
                   <h3 className="font-heading text-base font-bold text-gray-900 uppercase tracking-wide">
@@ -1588,7 +1733,7 @@ export default function AdminDashboardPage() {
 
           {/* TAB 4: DONWEB */}
           {activeTab === "donweb" && (
-            <div className="w-[90%] mx-auto space-y-6">
+            <div className="w-[97%] mx-auto space-y-6">
               <div className="bg-white p-7 rounded-2xl border border-gray-200/80 shadow-sm space-y-5">
                 <div className="flex items-center space-x-3.5 pb-4 border-b border-gray-100">
                   <div className="w-10 h-10 rounded-xl bg-black text-[#FC7D00] flex items-center justify-center">
