@@ -382,10 +382,10 @@ export default function AdminDashboardPage() {
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto py-6">
           {/* TAB 1: DASHBOARD & LIVE ANALYTICS */}
           {activeTab === "dashboard" && (
-            <div className="space-y-6 max-w-7xl mx-auto">
+            <div className="space-y-6 w-[90%] mx-auto">
               {/* Header Toolbar: Time Range + Refresh */}
               <div className="bg-white p-4 rounded-lg border border-[#dcdcde] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="flex items-center space-x-2">
@@ -881,7 +881,7 @@ export default function AdminDashboardPage() {
 
           {/* TAB 2: PRODUCTS (WOOCOMMERCE STYLE) */}
           {activeTab === "products" && (
-            <div className="space-y-4">
+            <div className="space-y-4 w-[90%] mx-auto">
               {/* Toolbar */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded border border-[#dcdcde] shadow-sm">
                 <div className="flex items-center space-x-2">
@@ -1041,7 +1041,7 @@ export default function AdminDashboardPage() {
 
           {/* TAB 3: ORDERS */}
           {activeTab === "orders" && (
-            <div className="space-y-4">
+            <div className="space-y-4 w-[90%] mx-auto">
               <div className="bg-white p-4 rounded border border-[#dcdcde] shadow-sm flex justify-between items-center">
                 <h3 className="font-bold text-sm text-gray-800">
                   Gestión de Pedidos ({orders.length} pedidos totales)
@@ -1119,7 +1119,7 @@ export default function AdminDashboardPage() {
 
           {/* TAB 4: DONWEB */}
           {activeTab === "donweb" && (
-            <div className="max-w-4xl mx-auto space-y-6">
+            <div className="w-[90%] mx-auto space-y-6">
               <div className="bg-white p-6 rounded border border-[#dcdcde] shadow-sm space-y-4">
                 <div className="flex items-center space-x-3 pb-3 border-b">
                   <UploadCloud className="text-[#2271b1]" size={28} />
