@@ -284,7 +284,7 @@ export default function AdminDashboardPage() {
             />
           </Link>
           <div className="mt-3 flex items-center justify-between">
-            <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-[#C5A880]">
+            <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-[#FC7D00]">
               ADMIN SUITE · ACASA
             </span>
             <span className="text-[9px] uppercase px-2 py-0.5 rounded-full bg-white/10 text-gray-300 font-semibold tracking-wider">
@@ -363,7 +363,7 @@ export default function AdminDashboardPage() {
         {/* Quick Branch & Store Info Box */}
         <div className="p-4 mx-3 mb-4 rounded-xl bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 space-y-2">
           <div className="flex items-center space-x-2 text-[10px] uppercase font-bold tracking-widest text-gray-400">
-            <MapPin size={12} className="text-[#C5A880]" />
+            <MapPin size={12} className="text-[#FC7D00]" />
             <span>Sucursales Activas</span>
           </div>
           <div className="text-[11px] text-gray-300 space-y-1">
@@ -394,13 +394,13 @@ export default function AdminDashboardPage() {
       {/* 2. MAIN WORKSPACE */}
       <main className="flex-1 flex flex-col overflow-hidden bg-[#faf9f8]">
         {/* Top bar */}
-        <header className="h-16 bg-white border-b border-gray-200/80 px-8 flex items-center justify-between shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        <header className="h-16 bg-[#FC7D00] text-white px-8 flex items-center justify-between shadow-md">
           <div className="flex items-center space-x-3">
-            <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#C5A880]">
+            <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/90">
               ACASA TIENDA
             </span>
-            <span className="text-gray-300 font-light">/</span>
-            <h2 className="font-heading text-base font-bold text-gray-900 uppercase tracking-wider">
+            <span className="text-white/40 font-light">/</span>
+            <h2 className="font-heading text-base font-bold text-white uppercase tracking-wider">
               {activeTab === "dashboard" && "Tablero de Tráfico & Conversión en Tiempo Real"}
               {activeTab === "products" && "Gestión y Catálogo de Muebles"}
               {activeTab === "orders" && "Gestión de Pedidos & Checkout"}
@@ -410,24 +410,24 @@ export default function AdminDashboardPage() {
 
           <div className="flex items-center space-x-4">
             {/* Supabase status badge */}
-            <div className="flex items-center space-x-2 bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full text-xs font-semibold shadow-xs">
+            <div className="flex items-center space-x-2 bg-black/20 backdrop-blur-xs text-white border border-white/20 px-3 py-1 rounded-full text-xs font-semibold shadow-xs">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-300" />
               </span>
-              <span className="tracking-wide">Supabase Cloud Activo</span>
+              <span className="tracking-wide text-white">Supabase Cloud Activo</span>
             </div>
 
-            <div className="h-4 w-[1px] bg-gray-200" />
+            <div className="h-4 w-[1px] bg-white/30" />
 
             {/* Admin Avatar */}
             <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-full bg-black text-white text-xs font-bold font-heading flex items-center justify-center border border-[#C5A880]">
+              <div className="w-8 h-8 rounded-full bg-white text-[#FC7D00] text-xs font-black font-heading flex items-center justify-center shadow-md">
                 A
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-xs font-bold text-gray-900 leading-none">Administrador</p>
-                <p className="text-[10px] text-gray-400 font-mono mt-0.5">Acasa Management</p>
+                <p className="text-xs font-bold text-white leading-none">Administrador</p>
+                <p className="text-[10px] text-white/80 font-mono mt-0.5">Acasa Management</p>
               </div>
             </div>
           </div>
