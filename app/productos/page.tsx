@@ -283,40 +283,22 @@ export function ProductsCatalog({ initialCategory }: ProductsCatalogProps) {
         </div>
       )}
 
-      {/* Active Filter Chips: Linea and Price */}
-      {(isPriceFilterActive || selectedLinea) && (
+      {/* Active Filter Chips: Price */}
+      {isPriceFilterActive && (
         <div className="flex flex-wrap items-center gap-[1.5vw] sm:gap-[0.8vw] pt-[1.2vh]">
           <span className="text-[2.8vw] sm:text-[1.2vw] lg:text-[0.68vw] text-gray-400 uppercase tracking-wider">
             Filtros activos:
           </span>
 
-          {selectedLinea && (
-            <button
-              onClick={() => setSelectedLinea("")}
-              className={`inline-flex items-center space-x-[1vw] sm:space-x-[0.4vw] text-white text-[3vw] sm:text-[1.2vw] lg:text-[0.7vw] font-medium px-[2.8vw] sm:px-[1.4vw] lg:px-[0.8vw] py-[0.4vh] sm:py-[0.3vh] rounded-full transition-colors ${
-                selectedLinea === "practica" ? "bg-[#9d482c]" : "bg-[#2d4332]"
-              }`}
-            >
-              <span>
-                {selectedLinea === "practica"
-                  ? "Línea Práctica · Compra fácil y estándar"
-                  : "Línea Premium · Compra personalizada y de diseño"}
-              </span>
-              <span className="text-white/80 hover:text-white font-bold ml-[0.2vw]">✕</span>
-            </button>
-          )}
-
-          {isPriceFilterActive && (
-            <button
-              onClick={handleResetPriceFilter}
-              className="inline-flex items-center space-x-[1vw] sm:space-x-[0.4vw] bg-gray-100 hover:bg-gray-200 text-black text-[3vw] sm:text-[1.2vw] lg:text-[0.7vw] font-medium px-[2.8vw] sm:px-[1.4vw] lg:px-[0.8vw] py-[0.4vh] sm:py-[0.3vh] rounded-full transition-colors"
-            >
-              <span>
-                Precio: {formatCurrency(priceRange[0])} — {formatCurrency(priceRange[1])}
-              </span>
-              <span className="text-gray-400 hover:text-black font-bold ml-[0.2vw]">✕</span>
-            </button>
-          )}
+          <button
+            onClick={handleResetPriceFilter}
+            className="inline-flex items-center space-x-[1vw] sm:space-x-[0.4vw] bg-gray-100 hover:bg-gray-200 text-black text-[3vw] sm:text-[1.2vw] lg:text-[0.7vw] font-medium px-[2.8vw] sm:px-[1.4vw] lg:px-[0.8vw] py-[0.4vh] sm:py-[0.3vh] rounded-full transition-colors"
+          >
+            <span>
+              Precio: {formatCurrency(priceRange[0])} — {formatCurrency(priceRange[1])}
+            </span>
+            <span className="text-gray-400 hover:text-black font-bold ml-[0.2vw]">✕</span>
+          </button>
         </div>
       )}
 
