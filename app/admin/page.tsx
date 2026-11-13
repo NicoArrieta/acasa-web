@@ -305,22 +305,24 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="flex h-screen bg-[#fcfbfa] font-sans antialiased text-[#1a1a1a]">
-      {/* 1. ACASA LUXURY SIDEBAR */}
-      <aside className="w-72 bg-[#0e0e10] text-white flex flex-col flex-shrink-0 border-r border-[#1f1f23] select-none">
+      {/* 1. ACASA LUXURY ORANGE SIDEBAR */}
+      <aside className="w-72 bg-[#FC7D00] text-white flex flex-col flex-shrink-0 border-r border-[#e57000] select-none shadow-xl">
         {/* Brand identity header */}
-        <div className="p-6 border-b border-white/10">
+        <div className="p-6 border-b border-black/10 bg-black/5">
           <Link href="/" target="_blank" className="flex items-center space-x-3 group">
-            <img
-              src="/logoAcasaTienda.webp"
-              alt="Acasa Calidad y Diseño"
-              className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-            />
+            <div className="bg-white p-2.5 rounded-2xl shadow-sm inline-flex items-center">
+              <img
+                src="/logo-tight.png"
+                alt="Acasa Calidad y Diseño"
+                className="h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
           </Link>
-          <div className="mt-3 flex items-center justify-between">
-            <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-[#FC7D00]">
+          <div className="mt-3.5 flex items-center justify-between">
+            <span className="text-[10px] uppercase font-black tracking-[0.25em] text-white">
               ADMIN SUITE · ACASA
             </span>
-            <span className="text-[9px] uppercase px-2 py-0.5 rounded-full bg-white/10 text-gray-300 font-semibold tracking-wider">
+            <span className="text-[9px] uppercase px-2 py-0.5 rounded-full bg-black/20 text-white font-bold tracking-wider">
               v2.0
             </span>
           </div>
@@ -333,13 +335,13 @@ export default function AdminDashboardPage() {
               setActiveTab("dashboard");
               setEditingProduct(null);
             }}
-            className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-lg transition-all duration-200 text-left ${
+            className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl transition-all duration-200 text-left ${
               activeTab === "dashboard"
-                ? "bg-white text-black font-bold shadow-lg"
-                : "text-gray-400 hover:text-white hover:bg-white/5"
+                ? "bg-black text-white font-bold shadow-md"
+                : "text-white/90 hover:text-white hover:bg-black/10 font-semibold"
             }`}
           >
-            <LayoutDashboard size={17} className={activeTab === "dashboard" ? "text-black" : "text-gray-400"} />
+            <LayoutDashboard size={17} className={activeTab === "dashboard" ? "text-[#FC7D00]" : "text-white"} />
             <span className="tracking-wide">Escritorio & Tablero</span>
           </button>
 
@@ -347,18 +349,18 @@ export default function AdminDashboardPage() {
             onClick={() => {
               setActiveTab("products");
             }}
-            className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-lg transition-all duration-200 text-left ${
+            className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl transition-all duration-200 text-left ${
               activeTab === "products"
-                ? "bg-white text-black font-bold shadow-lg"
-                : "text-gray-400 hover:text-white hover:bg-white/5"
+                ? "bg-black text-white font-bold shadow-md"
+                : "text-white/90 hover:text-white hover:bg-black/10 font-semibold"
             }`}
           >
-            <Package size={17} className={activeTab === "products" ? "text-black" : "text-gray-400"} />
+            <Package size={17} className={activeTab === "products" ? "text-[#FC7D00]" : "text-white"} />
             <div className="flex-1 flex justify-between items-center">
               <span className="tracking-wide">Catálogo de Productos</span>
               <span
-                className={`text-[11px] px-2 py-0.5 rounded-full font-mono ${
-                  activeTab === "products" ? "bg-black/10 text-black font-bold" : "bg-white/10 text-gray-300"
+                className={`text-[11px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                  activeTab === "products" ? "bg-white/20 text-white" : "bg-black/20 text-white"
                 }`}
               >
                 {products.length}
@@ -371,17 +373,17 @@ export default function AdminDashboardPage() {
               setActiveTab("orders");
               setEditingProduct(null);
             }}
-            className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-lg transition-all duration-200 text-left ${
+            className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl transition-all duration-200 text-left ${
               activeTab === "orders"
-                ? "bg-white text-black font-bold shadow-lg"
-                : "text-gray-400 hover:text-white hover:bg-white/5"
+                ? "bg-black text-white font-bold shadow-md"
+                : "text-white/90 hover:text-white hover:bg-black/10 font-semibold"
             }`}
           >
-            <ShoppingCart size={17} className={activeTab === "orders" ? "text-black" : "text-gray-400"} />
+            <ShoppingCart size={17} className={activeTab === "orders" ? "text-[#FC7D00]" : "text-white"} />
             <div className="flex-1 flex justify-between items-center">
               <span className="tracking-wide">Gestión de Pedidos</span>
               {activeOrdersCount > 0 && (
-                <span className="text-[10px] bg-[#c25e1a] text-white px-2 py-0.5 rounded-full font-bold">
+                <span className="text-[10px] bg-black text-white px-2 py-0.5 rounded-full font-bold">
                   {activeOrdersCount}
                 </span>
               )}
@@ -393,43 +395,43 @@ export default function AdminDashboardPage() {
               setActiveTab("donweb");
               setEditingProduct(null);
             }}
-            className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-lg transition-all duration-200 text-left ${
+            className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl transition-all duration-200 text-left ${
               activeTab === "donweb"
-                ? "bg-white text-black font-bold shadow-lg"
-                : "text-gray-400 hover:text-white hover:bg-white/5"
+                ? "bg-black text-white font-bold shadow-md"
+                : "text-white/90 hover:text-white hover:bg-black/10 font-semibold"
             }`}
           >
-            <UploadCloud size={17} className={activeTab === "donweb" ? "text-black" : "text-gray-400"} />
+            <UploadCloud size={17} className={activeTab === "donweb" ? "text-[#FC7D00]" : "text-white"} />
             <span className="tracking-wide">Multimedia DonWeb</span>
           </button>
         </nav>
 
         {/* Quick Branch & Store Info Box */}
-        <div className="p-4 mx-3 mb-4 rounded-xl bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 space-y-2">
-          <div className="flex items-center space-x-2 text-[10px] uppercase font-bold tracking-widest text-gray-400">
-            <MapPin size={12} className="text-[#FC7D00]" />
+        <div className="p-4 mx-3 mb-4 rounded-xl bg-black/15 backdrop-blur-xs border border-white/20 text-white space-y-2">
+          <div className="flex items-center space-x-2 text-[10px] uppercase font-bold tracking-widest text-white/95">
+            <MapPin size={12} className="text-white" />
             <span>Sucursales Activas</span>
           </div>
-          <div className="text-[11px] text-gray-300 space-y-1">
+          <div className="text-[11px] text-white/90 space-y-1">
             <p className="flex justify-between">
-              <span className="text-gray-400">Ciudad:</span>
-              <span className="font-medium text-white">Av. Mitre 1398</span>
+              <span className="text-white/75">Ciudad:</span>
+              <span className="font-bold text-white">Av. Mitre 1398</span>
             </p>
             <p className="flex justify-between">
-              <span className="text-gray-400">Luján:</span>
-              <span className="font-medium text-white">Alma Gardenia</span>
+              <span className="text-white/75">Luján:</span>
+              <span className="font-bold text-white">Alma Gardenia</span>
             </p>
           </div>
         </div>
 
         {/* Store Link at bottom */}
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-black/10 bg-black/5">
           <Link
             href="/"
             target="_blank"
-            className="flex items-center justify-between text-xs text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 p-3 rounded-lg border border-white/10 transition-all duration-200 group"
+            className="flex items-center justify-between text-xs text-white bg-black/20 hover:bg-black/35 p-3 rounded-xl border border-white/20 transition-all duration-200 group font-semibold"
           >
-            <span className="font-medium">Abrir Tienda Pública</span>
+            <span>Abrir Tienda Pública</span>
             <ArrowUpRight size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </Link>
         </div>
