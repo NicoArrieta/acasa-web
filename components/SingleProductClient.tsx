@@ -11,6 +11,7 @@ import ProductCard from "./ProductCard";
 import { trackAnalyticsEvent } from "@/lib/supabase";
 import {
   ChevronRight,
+  ChevronLeft,
   Plus,
   Minus,
   ShoppingBag,
@@ -102,6 +103,22 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
     })`
   )}`;
 
+
+  const currentImgIndex = product.images.findIndex((img) => img === (selectedImage || product.images[0]));
+  const activeImgIndex = currentImgIndex >= 0 ? currentImgIndex : 0;
+
+  const handlePrevImg = () => {
+    if (!product.images.length) return;
+    const nextIdx = (activeImgIndex - 1 + product.images.length) % product.images.length;
+    setSelectedImage(product.images[nextIdx]);
+  };
+
+  const handleNextImg = () => {
+    if (!product.images.length) return;
+    const nextIdx = (activeImgIndex + 1) % product.images.length;
+    setSelectedImage(product.images[nextIdx]);
+  };
+
   // Related products for "COMBINA CON"
   const crossSellProducts = allProducts
     .filter((p) => p.id !== product.id)
@@ -121,17 +138,60 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-[4vh] lg:gap-[3.5vw] items-start">
         {/* Columna Izquierda: Galería con imagen principal y miniaturas inferiores (estilo Acasa) */}
         <div className="lg:col-span-7 space-y-[2vh]">
-          {/* Imagen Principal */}
-          <div className="w-full aspect-square bg-[#fbfbfb] rounded-[1vw] sm:rounded-[0.5vw] overflow-hidden border border-gray-200 flex items-center justify-center p-[2vw] relative group">
+          {/* Imagen Principal con Carrusel interactivo */}
+          <div className="w-full aspect-square bg-[#fbfbfb] rounded-[1vw] sm:rounded-[0.5vw] overflow-hidden border border-gray-200 flex items-center justify-center p-[2vw] relative group select-none">
             <img
               src={selectedImage || product.images[0] || "/placeholder.jpg"}
               alt={product.title}
               className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105"
             />
+
+            {/* Badges */}
             {product.salePrice && (
-              <span className="absolute top-[3vw] sm:top-[1.2vw] left-[3vw] sm:left-[1.2vw] bg-[#c25e1a] text-white text-[2.6vw] sm:text-[1vw] lg:text-[0.72vw] font-bold uppercase tracking-wider px-[3vw] sm:px-[1.2vw] py-[0.5vh] rounded-full shadow-md">
+              <span className="absolute top-[3vw] sm:top-[1.2vw] left-[3vw] sm:left-[1.2vw] bg-[#c25e1a] text-white text-[2.6vw] sm:text-[1vw] lg:text-[0.72vw] font-bold uppercase tracking-wider px-[3vw] sm:px-[1.2vw] py-[0.5vh] rounded-full shadow-md z-10">
                 Oferta
               </span>
+            )}
+
+            {/* Carrusel: Botones Prev / Next (visibles en hover o móvil) */}
+            {product.images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={handlePrevImg}
+                  aria-label="Imagen anterior"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-lg flex items-center justify-center transition-all opacity-80 sm:opacity-0 sm:group-hover:opacity-100 hover:scale-110 z-20 cursor-pointer"
+                >
+                  <ChevronLeft size={22} />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextImg}
+                  aria-label="Imagen siguiente"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-lg flex items-center justify-center transition-all opacity-80 sm:opacity-0 sm:group-hover:opacity-100 hover:scale-110 z-20 cursor-pointer"
+                >
+                  <ChevronRight size={22} />
+                </button>
+
+                {/* Contador de imagen */}
+                <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-xs text-white text-[11px] font-mono px-2.5 py-0.5 rounded-full z-10">
+                  {activeImgIndex + 1} / {product.images.length}
+                </div>
+
+                {/* Indicadores de puntos (Dots) */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-1.5 z-10 bg-black/40 backdrop-blur-xs px-3 py-1.5 rounded-full">
+                  {product.images.map((_, dotIdx) => (
+                    <button
+                      key={dotIdx}
+                      type="button"
+                      onClick={() => setSelectedImage(product.images[dotIdx])}
+                      className={`h-2 rounded-full transition-all ${
+                        dotIdx === activeImgIndex ? "w-6 bg-white" : "w-2 bg-white/50 hover:bg-white/80"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </div>
 

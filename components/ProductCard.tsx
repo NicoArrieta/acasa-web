@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Product } from "@/lib/types";
 import { formatCurrency } from "@/lib/store";
 import { useCart } from "@/context/CartContext";
-import { Check } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ProductCardProps {
   product: Product;
@@ -14,6 +14,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
   const [justAdded, setJustAdded] = useState(false);
+  const [activeImgIndex, setActiveImgIndex] = useState(0);
 
   // Pricing calculations
   const regularPrice = product.regularPrice;

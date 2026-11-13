@@ -1,3 +1,16 @@
+export interface MediaItem {
+  id: string;
+  name: string;
+  alt: string;
+  url: string;
+  sizeBytes?: number;
+  width?: number;
+  height?: number;
+  mimeType: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface ProductVariation {
   id: string;
   name: string; // e.g. "Paraíso", "Petiribí", "Lino Gris"

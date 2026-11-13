@@ -8,6 +8,10 @@ import {
   DonWebFtpSettings,
 } from "@/lib/types";
 import { CATEGORIES } from "@/lib/data";
+import MediaLibraryView from "@/components/MediaLibraryView";
+import MediaPickerModal from "@/components/MediaPickerModal";
+import { uploadMediaItem } from "@/lib/media";
+import { getStoredMedia } from "@/lib/store";
 import {
   getStoredProducts,
   saveStoredProducts,
@@ -47,6 +51,9 @@ import {
   MousePointer,
   Activity,
   ArrowUpRight,
+  ArrowUp,
+  ArrowDown,
+  Images,
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
@@ -57,7 +64,11 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "orders" | "donweb">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "media" | "orders" | "donweb">("dashboard");
+  const [carouselPreviewIdx, setCarouselPreviewIdx] = useState(0);
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [manualImageUrl, setManualImageUrl] = useState("");
+  const [mediaLibraryCount, setMediaLibraryCount] = useState(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const toggleSidebar = () => {
@@ -111,6 +122,68 @@ export default function AdminDashboardPage() {
       fetchAnalytics();
     }
   }, [timeRange, activeTab]);
+
+  
+  useEffect(() => {
+    const m = getStoredMedia();
+    setMediaLibraryCount(m.length);
+    const handleUpdate = () => {
+      const list = getStoredMedia();
+      setMediaLibraryCount(list.length);
+    };
+    window.addEventListener("media_updated", handleUpdate);
+    return () => window.removeEventListener("media_updated", handleUpdate);
+  }, []);
+
+  const handleUploadToProduct = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !editingProduct) return;
+    const newUrls: string[] = [];
+    for (let i = 0; i < files.length; i++) {
+      try {
+        const item = await uploadMediaItem(files[i]);
+        newUrls.push(item.url);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    const currentImages = editingProduct.images || [];
+    setEditingProduct({
+      ...editingProduct,
+      images: [...currentImages, ...newUrls],
+    });
+  };
+
+  const handleAddManualUrl = () => {
+    if (!manualImageUrl.trim() || !editingProduct) return;
+    const currentImages = editingProduct.images || [];
+    setEditingProduct({
+      ...editingProduct,
+      images: [...currentImages, manualImageUrl.trim()],
+    });
+    setManualImageUrl("");
+  };
+
+  const handleMoveProductImage = (idx: number, direction: -1 | 1) => {
+    if (!editingProduct || !editingProduct.images) return;
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= editingProduct.images.length) return;
+    const list = [...editingProduct.images];
+    const temp = list[idx];
+    list[idx] = list[newIdx];
+    list[newIdx] = temp;
+    setEditingProduct({ ...editingProduct, images: list });
+    setCarouselPreviewIdx(newIdx);
+  };
+
+  const handleRemoveProductImage = (idx: number) => {
+    if (!editingProduct || !editingProduct.images) return;
+    const list = editingProduct.images.filter((_, i) => i !== idx);
+    setEditingProduct({ ...editingProduct, images: list });
+    if (carouselPreviewIdx >= list.length) {
+      setCarouselPreviewIdx(Math.max(0, list.length - 1));
+    }
+  };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -445,6 +518,52 @@ export default function AdminDashboardPage() {
                 </span>
                 <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
                   Catálogo de Productos ({products.length})
+                </span>
+              </>
+            )}
+          </button>
+
+                    {/* Media Library */}
+          <button
+            onClick={() => {
+              setActiveTab("media");
+              setEditingProduct(null);
+            }}
+            title={sidebarCollapsed ? "Biblioteca Multimedia" : undefined}
+            className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
+              sidebarCollapsed
+                ? `justify-center py-3.5 rounded-2xl ${
+                    activeTab === "media"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
+                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                    activeTab === "media"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
+            }`}
+          >
+            <Images size={20} className={activeTab === "media" ? "text-[#FC7D00]" : "text-white"} />
+            {!sidebarCollapsed && (
+              <div className="flex-1 flex justify-between items-center">
+                <span className="tracking-wide text-[13px]">Biblioteca Multimedia</span>
+                <span
+                  className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
+                    activeTab === "media" ? "bg-[#FC7D00] text-white" : "bg-[#b85000] text-white"
+                  }`}
+                >
+                  {mediaLibraryCount}
+                </span>
+              </div>
+            )}
+            {sidebarCollapsed && (
+              <>
+                <span className="absolute top-2 right-2 text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-[#b85000] text-white">
+                  {mediaLibraryCount}
+                </span>
+                <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                  Biblioteca Multimedia ({mediaLibraryCount})
                 </span>
               </>
             )}
@@ -1435,43 +1554,176 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
 
-                      {/* Image Preview & URL Card */}
+                      {/* 4. Carrusel de Fotografías del Producto */}
                       <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-4">
-                        <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider pb-3 border-b border-gray-100">
-                          4. Fotografía Principal
-                        </h4>
+                        <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                          <div>
+                            <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider">
+                              4. Carrusel de Fotos
+                            </h4>
+                            <p className="text-[11px] text-gray-400 font-light">
+                              {editingProduct.images?.length || 0} foto{editingProduct.images?.length === 1 ? "" : "s"} en el carrusel
+                            </p>
+                          </div>
+                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold font-mono">
+                            Auto WebP
+                          </span>
+                        </div>
 
-                        {/* Live Image Preview */}
-                        <div className="aspect-[4/3] rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center relative group">
-                          {editingProduct.images?.[0] ? (
-                            <img
-                              src={editingProduct.images[0]}
-                              alt="Vista previa"
-                              className="w-full h-full object-cover object-center"
-                              onError={(e) => {
-                                e.currentTarget.src = "https://acasatienda.com.ar/wp-content/uploads/2026/10/Living.webp";
-                              }}
-                            />
+                        {/* Interactive Live Carousel Preview */}
+                        <div className="aspect-[4/3] rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center relative group select-none">
+                          {editingProduct.images && editingProduct.images.length > 0 ? (
+                            <>
+                              <img
+                                src={editingProduct.images[carouselPreviewIdx] || editingProduct.images[0]}
+                                alt="Vista previa del carrusel"
+                                className="w-full h-full object-contain p-2"
+                              />
+
+                              {editingProduct.images.length > 1 && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => setCarouselPreviewIdx((prev) => (prev - 1 + editingProduct.images!.length) % editingProduct.images!.length)}
+                                    className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 shadow text-gray-700 flex items-center justify-center hover:bg-white transition-transform hover:scale-110"
+                                  >
+                                    <ChevronLeft size={16} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setCarouselPreviewIdx((prev) => (prev + 1) % editingProduct.images!.length)}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 shadow text-gray-700 flex items-center justify-center hover:bg-white transition-transform hover:scale-110"
+                                  >
+                                    <ChevronRight size={16} />
+                                  </button>
+                                  <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-0.5 rounded-full font-mono">
+                                    {carouselPreviewIdx + 1} / {editingProduct.images.length}
+                                  </div>
+                                </>
+                              )}
+
+                              <span className="absolute top-2 left-2 bg-[#FC7D00] text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs">
+                                {carouselPreviewIdx === 0 ? "★ Portada Principal" : `Foto ${carouselPreviewIdx + 1}`}
+                              </span>
+                            </>
                           ) : (
-                            <div className="text-center p-4 text-gray-400">
-                              <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                              <span className="text-[11px]">Ingresá una URL de imagen para previsualizar</span>
+                            <div className="text-center p-4 text-gray-400 space-y-1">
+                              <ImageIcon className="w-8 h-8 mx-auto opacity-50" />
+                              <span className="text-xs font-medium block">Sin fotos en el carrusel</span>
+                              <span className="text-[10px] text-gray-400">Seleccioná de la biblioteca o subí una imagen</span>
                             </div>
                           )}
                         </div>
 
-                        <div>
-                          <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">
-                            URL de la Imagen (DonWeb / Web)
+                        {/* Action buttons: Pick from Media Library or Upload new with WebP */}
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setIsMediaPickerOpen(true)}
+                            className="p-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 transition-colors flex items-center justify-center space-x-1.5 shadow-xs"
+                          >
+                            <Images size={15} className="text-[#FC7D00]" />
+                            <span>Desde Biblioteca</span>
+                          </button>
+
+                          <label className="p-3 bg-black hover:bg-gray-800 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center space-x-1.5 cursor-pointer shadow-xs">
+                            <UploadCloud size={15} />
+                            <span>Subir (Auto WebP)</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={handleUploadToProduct}
+                              className="hidden"
+                            />
                           </label>
+                        </div>
+
+                        {/* URL manual input */}
+                        <div className="flex gap-2">
                           <input
                             type="text"
-                            value={editingProduct.images?.[0] || ""}
-                            onChange={(e) => setEditingProduct({ ...editingProduct, images: [e.target.value] })}
-                            placeholder="https://acasatienda.com.ar/wp-content/uploads/..."
-                            className="w-full p-3 border border-gray-200 rounded-xl outline-none font-mono text-xs bg-gray-50/50 focus:bg-white"
+                            value={manualImageUrl}
+                            onChange={(e) => setManualImageUrl(e.target.value)}
+                            placeholder="O pegar URL directa..."
+                            className="flex-1 p-2.5 border border-gray-200 rounded-xl outline-none font-mono text-[11px] bg-gray-50/50 focus:bg-white"
                           />
+                          <button
+                            type="button"
+                            onClick={handleAddManualUrl}
+                            className="px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition-colors"
+                          >
+                            Agregar
+                          </button>
                         </div>
+
+                        {/* List of images in carousel with reordering and removal */}
+                        {editingProduct.images && editingProduct.images.length > 0 && (
+                          <div className="space-y-2 pt-2 border-t border-gray-100">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                              Fotos en orden del carrusel:
+                            </p>
+                            <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+                              {editingProduct.images.map((img, idx) => (
+                                <div
+                                  key={idx}
+                                  onClick={() => setCarouselPreviewIdx(idx)}
+                                  className={`flex items-center justify-between p-2 rounded-xl border text-xs transition-all cursor-pointer ${
+                                    idx === carouselPreviewIdx
+                                      ? "border-[#FC7D00] bg-[#FC7D00]/5 shadow-xs"
+                                      : "border-gray-200 hover:border-gray-300 bg-white"
+                                  }`}
+                                >
+                                  <div className="flex items-center space-x-2.5 min-w-0">
+                                    <div className="w-9 h-9 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
+                                      <img src={img} alt="" className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="font-semibold text-gray-800 text-[11px] truncate">
+                                        {idx === 0 ? "★ Portada Principal" : `Foto ${idx + 1}`}
+                                      </p>
+                                      <p className="text-[9px] text-gray-400 truncate max-w-[120px] font-mono">
+                                        {img.split("/").pop()}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
+                                    {/* Move Up */}
+                                    <button
+                                      type="button"
+                                      disabled={idx === 0}
+                                      onClick={() => handleMoveProductImage(idx, -1)}
+                                      className="p-1 rounded hover:bg-gray-100 text-gray-500 disabled:opacity-30"
+                                      title="Mover foto arriba en el carrusel"
+                                    >
+                                      <ArrowUp size={13} />
+                                    </button>
+                                    {/* Move Down */}
+                                    <button
+                                      type="button"
+                                      disabled={idx === editingProduct.images!.length - 1}
+                                      onClick={() => handleMoveProductImage(idx, 1)}
+                                      className="p-1 rounded hover:bg-gray-100 text-gray-500 disabled:opacity-30"
+                                      title="Mover foto abajo en el carrusel"
+                                    >
+                                      <ArrowDown size={13} />
+                                    </button>
+                                    {/* Remove */}
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveProductImage(idx)}
+                                      className="p-1 rounded hover:bg-red-50 text-red-500"
+                                      title="Quitar foto del carrusel"
+                                    >
+                                      <Trash2 size={13} />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         <div className="pt-2">
                           <button
@@ -1644,6 +1896,9 @@ export default function AdminDashboardPage() {
               )}
             </div>
           )}
+
+                    {/* TAB: MEDIA LIBRARY */}
+          {activeTab === "media" && <MediaLibraryView />}
 
           {/* TAB 3: ORDERS */}
           {activeTab === "orders" && (
@@ -1900,6 +2155,21 @@ export default function AdminDashboardPage() {
           )}
         </div>
       </main>
+      {/* Media Picker Modal */}
+      <MediaPickerModal
+        isOpen={isMediaPickerOpen}
+        onClose={() => setIsMediaPickerOpen(false)}
+        selectedUrls={editingProduct?.images || []}
+        onSelectImages={(newUrls) => {
+          if (!editingProduct) return;
+          const current = editingProduct.images || [];
+          const combined = [...current, ...newUrls.filter((u) => !current.includes(u))];
+          setEditingProduct({
+            ...editingProduct,
+            images: combined,
+          });
+        }}
+      />
     </div>
   );
 }

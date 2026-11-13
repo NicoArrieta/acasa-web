@@ -1,4 +1,4 @@
-import { Product, Order, Category, DonWebFtpSettings } from "./types";
+import { Product, Order, Category, DonWebFtpSettings, MediaItem } from "./types";
 import { INITIAL_PRODUCTS, INITIAL_ORDERS, CATEGORIES } from "./data";
 
 const STORAGE_KEYS = {
@@ -6,6 +6,7 @@ const STORAGE_KEYS = {
   ORDERS: "acasa_orders_v1",
   CATEGORIES: "acasa_categories_v1",
   DONWEB: "acasa_donweb_config_v1",
+  MEDIA: "acasa_media_library_v1",
 };
 
 export const DEFAULT_DONWEB_SETTINGS: DonWebFtpSettings = {
@@ -93,4 +94,57 @@ export function formatCurrency(amount: number): string {
     currency: "ARS",
     maximumFractionDigits: 0,
   }).format(amount);
+}
+
+export function getInitialMediaItems(): MediaItem[] {
+  const map = new Map<string, MediaItem>();
+  
+  // Extract images from INITIAL_PRODUCTS
+  INITIAL_PRODUCTS.forEach((prod) => {
+    prod.images.forEach((img, idx) => {
+      if (img && !map.has(img)) {
+        const fileName = img.split('/').pop() || `${prod.slug}-${idx + 1}.webp`;
+        map.set(img, {
+          id: `med_${Math.abs(img.split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0))}`,
+          name: fileName,
+          alt: `${prod.title} - Vista ${idx + 1}`,
+          url: img,
+          sizeBytes: 125000,
+          width: 1200,
+          height: 1200,
+          mimeType: 'image/webp',
+          createdAt: prod.createdAt || new Date().toISOString(),
+          updatedAt: prod.updatedAt || new Date().toISOString(),
+        });
+      }
+    });
+  });
+
+  return Array.from(map.values());
+}
+
+export function getStoredMedia(): MediaItem[] {
+  if (typeof window === "undefined") return getInitialMediaItems();
+  try {
+    const item = localStorage.getItem(STORAGE_KEYS.MEDIA);
+    if (!item) {
+      const initial = getInitialMediaItems();
+      saveStoredMedia(initial);
+      return initial;
+    }
+    const stored = JSON.parse(item) as MediaItem[];
+    return stored;
+  } catch {
+    return getInitialMediaItems();
+  }
+}
+
+export function saveStoredMedia(items: MediaItem[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEYS.MEDIA, JSON.stringify(items));
+    window.dispatchEvent(new Event("media_updated"));
+  } catch (err) {
+    console.error("Error saving media:", err);
+  }
 }
