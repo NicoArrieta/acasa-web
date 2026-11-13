@@ -6,6 +6,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import CartDrawer from "./CartDrawer";
 import WhatsAppButton from "./WhatsAppButton";
+import AnalyticsTracker from "./AnalyticsTracker";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -19,6 +20,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   if (isGateway) {
     return (
       <div className="flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden bg-black">
+        <Suspense fallback={null}>
+          <AnalyticsTracker />
+        </Suspense>
         <main className="h-full w-full">{children}</main>
         <CartDrawer />
       </div>
@@ -27,6 +31,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <Suspense fallback={null}>
+        <AnalyticsTracker />
+      </Suspense>
       <Suspense fallback={<div className="h-[10vh] bg-black" />}>
         <Navbar />
       </Suspense>

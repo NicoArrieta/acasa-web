@@ -2,17 +2,44 @@
 
 import React from "react";
 import WhatsAppIcon from "./WhatsAppIcon";
+import { trackAnalyticsEvent } from "@/lib/supabase";
+import { usePathname } from "next/navigation";
 
 export default function WhatsAppButton() {
+  const pathname = usePathname();
   const phoneNumber = "5492616843330";
   const message = "Hola! Quisiera consultar sobre un producto de Acasa Tienda.";
   const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+  const handleClick = () => {
+    let linea: "practica" | "premium" | "general" = "general";
+    if (pathname?.startsWith("/compra-facil") || pathname === "/practica") {
+      linea = "practica";
+    } else if (pathname?.startsWith("/interiorismo") || pathname === "/premium") {
+      linea = "premium";
+    } else {
+      const stored = typeof window !== "undefined" ? localStorage.getItem("acasa_line") : null;
+      if (stored === "practica" || stored === "premium") {
+        linea = stored as "practica" | "premium";
+      }
+    }
+
+    trackAnalyticsEvent({
+      event_type: "whatsapp_click",
+      linea,
+      path: pathname || "/",
+      metadata: {
+        source: "floating_button",
+      },
+    });
+  };
 
   return (
     <a
       href={url}
       target="_blank"
       rel="noreferrer"
+      onClick={handleClick}
       aria-label="Contactar por WhatsApp"
       className="fixed bottom-[2.5vh] right-[4vw] sm:right-[2vw] z-40 bg-[#25D366] text-white p-[3vw] sm:p-[0.8vw] min-p-[14px] rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center group"
     >

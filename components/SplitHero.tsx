@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowRight, Zap, Sparkles, Check, MapPin } from "lucide-react";
+import { trackAnalyticsEvent } from "@/lib/supabase";
 
 export default function SplitHero() {
   return (

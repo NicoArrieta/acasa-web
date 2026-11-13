@@ -8,6 +8,7 @@ import { INITIAL_PRODUCTS } from "@/lib/data";
 import { useCart } from "@/context/CartContext";
 import { Product } from "@/lib/types";
 import ProductCard from "./ProductCard";
+import { trackAnalyticsEvent } from "@/lib/supabase";
 import {
   ChevronRight,
   Plus,

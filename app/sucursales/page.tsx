@@ -3,6 +3,7 @@
 import React from "react";
 import { MapPin } from "lucide-react";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
+import { trackAnalyticsEvent } from "@/lib/supabase";
 
 export default function SucursalesPage() {
   const whatsappUrl =
