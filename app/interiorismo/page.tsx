@@ -1,0 +1,170 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { getStoredProducts } from "@/lib/store";
+import { Product } from "@/lib/types";
+import ProductCard from "@/components/ProductCard";
+import CategoriesCarousel from "@/components/CategoriesCarousel";
+import MostChosenSection from "@/components/MostChosenSection";
+import { ArrowRight, ChevronRight, Sparkles } from "lucide-react";
+
+export default function InteriorismoPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    setProducts(getStoredProducts());
+
+    const handleUpdate = () => {
+      setProducts(getStoredProducts());
+    };
+    window.addEventListener("products_updated", handleUpdate);
+    return () => window.removeEventListener("products_updated", handleUpdate);
+  }, []);
+
+  // Products for Interiorismo & Diseño (Línea Premium & Autor)
+  const interiorismoProducts = products.filter(
+    (p) => p.linea === "premium" || (p.slug !== "puff-cama" && p.slug !== "sofa-cama-but-carrito")
+  );
+
+  return (
+    <div className="space-y-[6vh] sm:space-y-[8vh] w-full pb-0 mb-0 bg-white text-gray-900">
+      {/* 1. Hero Banner (90vh) con fondo verde bosque oscuro elegante y textos de la maqueta */}
+      <section className="relative h-[85vh] sm:h-[90vh] w-full bg-[#263527] overflow-hidden flex items-center justify-center">
+        {/* Background image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 scale-105"
+          style={{
+            backgroundImage: `url('/split-premium.webp')`,
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-[#1c291d]/90 via-[#223323]/80 to-[#182319]/75" />
+        </div>
+
+        {/* Hero Content */}
+        <div className="relative z-10 w-[90%] mx-auto flex flex-col md:flex-row items-center justify-between gap-[4vh] md:gap-[3vw] text-white">
+          {/* Left Title */}
+          <div className="space-y-[2vh] text-center md:text-left max-w-[85vw] md:max-w-[55vw]">
+            <span className="inline-block text-[2.8vw] sm:text-[1.3vw] lg:text-[0.75vw] uppercase tracking-[0.25em] font-semibold text-[#a7f3d0] border-b border-[#a7f3d0]/30 pb-[0.4vh]">
+              COMPRA PERSONALIZADA Y DE DISEÑO
+            </span>
+            <h1 className="font-heading text-[8vw] sm:text-[5.5vw] lg:text-[4.2vw] font-bold tracking-tight uppercase leading-[1.1] text-white">
+              Muebles con carácter. <br />
+              <span className="italic font-serif font-normal text-white">Un espacio muy tuyo.</span>
+            </h1>
+            <div className="pt-[1.5vh] flex flex-col sm:flex-row items-center justify-center md:justify-start gap-[1.5vh] sm:gap-[1vw]">
+              <Link
+                href="/productos?linea=premium"
+                className="w-full sm:w-auto inline-flex items-center justify-center bg-white text-black text-[3.6vw] sm:text-[1.4vw] lg:text-[0.8vw] uppercase font-bold tracking-widest px-[6vw] sm:px-[3vw] lg:px-[2vw] py-[1.8vh] rounded-[1vw] sm:rounded-[0.4vw] lg:rounded-[0.2vw] hover:bg-black hover:text-white transition-all duration-300 shadow-xl"
+              >
+                <span>Explorar Catálogo</span>
+                <ArrowRight className="w-[4vw] sm:w-[1.8vw] lg:w-[1vw] h-[4vw] sm:h-[1.8vw] lg:h-[1vw] ml-[1vw] sm:ml-[0.5vw]" />
+              </Link>
+              <Link
+                href="#areas"
+                className="w-full sm:w-auto inline-flex items-center justify-center bg-transparent border border-white text-white text-[3.6vw] sm:text-[1.4vw] lg:text-[0.8vw] uppercase font-semibold tracking-widest px-[6vw] sm:px-[3vw] lg:px-[2vw] py-[1.8vh] rounded-[1vw] sm:rounded-[0.4vw] lg:rounded-[0.2vw] hover:bg-white/10 transition-all duration-300"
+              >
+                Ver Ambientes
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Description block (como en la captura) */}
+          <div className="max-w-[85vw] md:max-w-[32vw] text-center md:text-left space-y-[1.5vh] bg-black/25 backdrop-blur-sm p-[4vw] sm:p-[2vw] rounded-[1.5vw] sm:rounded-[0.6vw] border border-white/10">
+            <p className="text-[3.4vw] sm:text-[1.6vw] lg:text-[0.95vw] text-gray-200 font-light leading-relaxed">
+              Muebles, decoración y opciones de terminación para crear tu ambiente. Explorá el catálogo de ACASA Tienda o dejá que te acompañemos a elegir. Materiales, personalización y plazos según cada modelo.
+            </p>
+            <a
+              href="https://wa.me/5492616843330?text=Hola!%20Quiero%20asesoramiento%20personalizado%20para%20diseñar%20mi%20ambiente"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center text-[3vw] sm:text-[1.3vw] lg:text-[0.8vw] text-[#a7f3d0] hover:text-white font-semibold uppercase tracking-wider transition-colors pt-[0.5vh]"
+            >
+              <span>Quiero asesoramiento personal</span>
+              <ArrowRight className="w-[3.5vw] sm:w-[1.4vw] lg:w-[0.9vw] h-[3.5vw] sm:h-[1.4vw] lg:h-[0.9vw] ml-[0.5vw]" />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. ÁREAS PARA TU HOGAR - Carousel exactamente igual */}
+      <CategoriesCarousel theme="original" />
+
+      {/* 3. LO MÁS ELEGIDO - Exacto al diseño original */}
+      <MostChosenSection theme="original" />
+
+      {/* 4. TU SELECCIÓN DE INTERIORISMO - Exacto a la maqueta */}
+      <section className="w-[90%] mx-auto pt-[2vh]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-[2vh] mb-[4vh] border-b border-gray-100 pb-[2vh]">
+          <div className="space-y-[0.8vh]">
+            <span className="text-[3vw] sm:text-[1.3vw] lg:text-[0.72vw] uppercase tracking-[0.25em] text-gray-400 font-semibold block">
+              TU SELECCIÓN PERSONALIZADA Y DE DISEÑO
+            </span>
+            <h2 className="font-heading text-[6vw] sm:text-[3.5vw] lg:text-[2.2vw] font-bold tracking-wider uppercase text-gray-900">
+              PIEZAS QUE HACEN <span className="italic font-serif font-normal">LA DIFERENCIA</span>
+            </h2>
+            <p className="text-[3.2vw] sm:text-[1.5vw] lg:text-[0.9vw] text-gray-500 font-light max-w-[65ch] leading-relaxed">
+              Todo el catálogo de muebles y decoración de ACASA Tienda, organizado para elegir mejor. Encontrá tu modelo, revisá sus opciones y sumalo al carrito. El asesoramiento es opcional.
+            </p>
+          </div>
+          <a
+            href="https://wa.me/5492616843330?text=Hola!%20Quiero%20asesoramiento%20para%20compra%20personalizada%20y%20de%20diseño"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center text-[3.2vw] sm:text-[1.4vw] lg:text-[0.85vw] font-semibold text-black hover:text-[#2f3e2f] uppercase tracking-wider transition-colors pb-[0.5vh] border-b-2 border-black"
+          >
+            <span>Quiero asesoramiento</span>
+            <ArrowRight className="w-[3.6vw] sm:w-[1.6vw] lg:w-[0.9vw] h-[3.6vw] sm:h-[1.6vw] lg:h-[0.9vw] ml-[0.5vw]" />
+          </a>
+        </div>
+
+        {/* 2-column grid on mobile, 4 columns on desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-[2.5vw] sm:gap-x-[2vw] lg:gap-x-[1.5vw] gap-y-[3vh] sm:gap-y-[4vh]">
+          {interiorismoProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+
+        <div className="mt-[5vh] sm:mt-[6vh] text-center">
+          <Link
+            href="/productos?linea=premium"
+            className="w-full sm:w-auto inline-flex items-center justify-center bg-black text-white text-[3.6vw] sm:text-[1.5vw] lg:text-[0.8vw] uppercase font-bold tracking-widest px-[8vw] sm:px-[4vw] lg:px-[3vw] py-[1.8vh] rounded-[1vw] sm:rounded-[0.4vw] lg:rounded-[0.2vw] hover:bg-gray-800 transition-all duration-300 shadow-md hover:shadow-lg"
+          >
+            <span>Ver Todos los Productos</span>
+            <ArrowRight className="w-[4vw] sm:w-[1.8vw] lg:w-[1vw] h-[4vw] sm:h-[1.8vw] lg:h-[1vw] ml-[1vw] sm:ml-[0.5vw]" />
+          </Link>
+        </div>
+      </section>
+
+      {/* 5. Banner de Filosofía Acasa */}
+      <section className="relative py-[8vh] sm:py-[10vh] bg-[#141414] text-white overflow-hidden w-full !mb-0 border-b-0">
+        <div
+          className="absolute inset-0 bg-cover bg-fixed bg-center opacity-30"
+          style={{
+            backgroundImage: `url('https://acasatienda.com.ar/wp-content/uploads/2026/10/Comedor.webp')`,
+          }}
+        />
+        <div className="relative z-10 w-[90%] mx-auto text-center space-y-[2vh]">
+          <span className="text-[3.2vw] sm:text-[1.5vw] lg:text-[0.75vw] uppercase tracking-[0.3em] font-medium text-gray-300">
+            Filosofía Acasa
+          </span>
+          <h2 className="font-heading text-[6.5vw] sm:text-[4.2vw] lg:text-[3.2vw] font-bold uppercase tracking-tight leading-tight">
+            DISEÑO QUE ACOMPAÑA TU FORMA DE VIVIR
+          </h2>
+          <p className="text-[3.6vw] sm:text-[2vw] lg:text-[1.1vw] font-light text-gray-300 max-w-[85vw] sm:max-w-[70vw] lg:max-w-[55vw] mx-auto leading-relaxed">
+            Cada mueble es diseñado respetando la nobleza de los materiales, la pureza de sus líneas y la necesidad de crear hogares confortables y atemporales.
+          </p>
+          <div className="pt-[1vh]">
+            <Link
+              href="/sucursales?linea=premium"
+              className="inline-flex items-center text-[3.4vw] sm:text-[1.5vw] lg:text-[0.8vw] uppercase tracking-widest font-bold border-b border-white pb-[0.4vh] hover:text-gray-300 hover:border-gray-300 transition-colors"
+            >
+              Conocé nuestros Showrooms
+              <ChevronRight className="w-[4vw] sm:w-[1.8vw] lg:w-[1vw] h-[4vw] sm:h-[1.8vw] lg:h-[1vw] ml-[0.3vw]" />
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}

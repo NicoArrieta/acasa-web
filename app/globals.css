@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Manrope:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-josefin: 'Josefin Sans', sans-serif;
+  --font-manrope: 'Manrope', sans-serif;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-manrope);
+  color: #1a1a1a;
+  background-color: #ffffff;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: var(--font-josefin);
+  letter-spacing: 0.05em;
+}
+
+/* Fluid scrollbar */
+::-webkit-scrollbar {
+  width: 0.4vw;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 0.2vw;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
