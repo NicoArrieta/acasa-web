@@ -20,6 +20,7 @@ import {
 import {
   AnalyticsSummary,
   getAnalyticsSummary,
+  supabase,
 } from "@/lib/supabase";
 import {
   LayoutDashboard,
@@ -46,8 +47,10 @@ import {
   MousePointer,
   Activity,
   ArrowUpRight,
+  ArrowLeft,
   MapPin,
-  SlidersHorizontal,
+  Check,
+  Image as ImageIcon,
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
@@ -68,8 +71,7 @@ export default function AdminDashboardPage() {
   const [productSearch, setProductSearch] = useState("");
   const [selectedCatFilter, setSelectedCatFilter] = useState("all");
 
-  // Product modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Product Form state (Inline Section, NOT Modal)
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
 
   // DonWeb upload state
@@ -102,10 +104,10 @@ export default function AdminDashboardPage() {
     }
   }, [timeRange, activeTab]);
 
-  const handleSaveProduct = (e: React.FormEvent) => {
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct?.title || !editingProduct?.regularPrice) {
-      alert("Completá el título y precio regular del producto.");
+      alert("Por favor completá el nombre y precio del producto.");
       return;
     }
 
@@ -117,19 +119,22 @@ export default function AdminDashboardPage() {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 
+    let targetProduct: Product;
+
     if (editingProduct.id) {
       // Update
       const idx = currentList.findIndex((p) => p.id === editingProduct.id);
+      targetProduct = {
+        ...(currentList[idx] as Product),
+        ...(editingProduct as Product),
+        updatedAt: new Date().toISOString().split("T")[0],
+      };
       if (idx > -1) {
-        currentList[idx] = {
-          ...(currentList[idx] as Product),
-          ...(editingProduct as Product),
-          updatedAt: new Date().toISOString().split("T")[0],
-        };
+        currentList[idx] = targetProduct;
       }
     } else {
       // Create new
-      const newProd: Product = {
+      targetProduct = {
         id: `prod-${Date.now()}`,
         slug,
         title: editingProduct.title,
@@ -151,20 +156,47 @@ export default function AdminDashboardPage() {
         createdAt: new Date().toISOString().split("T")[0],
         updatedAt: new Date().toISOString().split("T")[0],
       };
-      currentList.unshift(newProd);
+      currentList.unshift(targetProduct);
     }
 
     setProducts(currentList);
     saveStoredProducts(currentList);
-    setIsModalOpen(false);
+
+    // Sync to Supabase in background
+    try {
+      await supabase.from("products").upsert({
+        id: targetProduct.id,
+        slug: targetProduct.slug,
+        title: targetProduct.title,
+        sku: targetProduct.sku,
+        short_description: targetProduct.shortDescription,
+        description: targetProduct.description,
+        regular_price: targetProduct.regularPrice,
+        sale_price: targetProduct.salePrice,
+        category: targetProduct.category,
+        subcategory: targetProduct.subcategory,
+        linea: targetProduct.linea,
+        stock: targetProduct.stock,
+        images: targetProduct.images,
+        variations: targetProduct.variations,
+        dimensions: targetProduct.dimensions,
+        updated_at: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.debug("Supabase product sync:", err);
+    }
+
     setEditingProduct(null);
   };
 
-  const handleDeleteProduct = (id: string) => {
+  const handleDeleteProduct = async (id: string) => {
     if (confirm("¿Estás seguro de que querés eliminar este producto?")) {
       const updated = products.filter((p) => p.id !== id);
       setProducts(updated);
       saveStoredProducts(updated);
+      try {
+        await supabase.from("products").delete().eq("id", id);
+      } catch (_) {}
     }
   };
 
@@ -188,6 +220,7 @@ export default function AdminDashboardPage() {
     saveStoredOrders(updated);
   };
 
+  // DonWeb upload handler
   const handleUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -296,7 +329,10 @@ export default function AdminDashboardPage() {
         {/* Navigation items */}
         <nav className="flex-1 px-3 py-6 space-y-1.5 text-xs">
           <button
-            onClick={() => setActiveTab("dashboard")}
+            onClick={() => {
+              setActiveTab("dashboard");
+              setEditingProduct(null);
+            }}
             className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-lg transition-all duration-200 text-left ${
               activeTab === "dashboard"
                 ? "bg-white text-black font-bold shadow-lg"
@@ -308,7 +344,9 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("products")}
+            onClick={() => {
+              setActiveTab("products");
+            }}
             className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-lg transition-all duration-200 text-left ${
               activeTab === "products"
                 ? "bg-white text-black font-bold shadow-lg"
@@ -329,7 +367,10 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("orders")}
+            onClick={() => {
+              setActiveTab("orders");
+              setEditingProduct(null);
+            }}
             className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-lg transition-all duration-200 text-left ${
               activeTab === "orders"
                 ? "bg-white text-black font-bold shadow-lg"
@@ -348,7 +389,10 @@ export default function AdminDashboardPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("donweb")}
+            onClick={() => {
+              setActiveTab("donweb");
+              setEditingProduct(null);
+            }}
             className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-lg transition-all duration-200 text-left ${
               activeTab === "donweb"
                 ? "bg-white text-black font-bold shadow-lg"
@@ -393,7 +437,7 @@ export default function AdminDashboardPage() {
 
       {/* 2. MAIN WORKSPACE */}
       <main className="flex-1 flex flex-col overflow-hidden bg-[#faf9f8]">
-        {/* Top bar */}
+        {/* Top bar con naranja oficial del logo #FC7D00 */}
         <header className="h-16 bg-[#FC7D00] text-white px-8 flex items-center justify-between shadow-md">
           <div className="flex items-center space-x-3">
             <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/90">
@@ -402,7 +446,7 @@ export default function AdminDashboardPage() {
             <span className="text-white/40 font-light">/</span>
             <h2 className="font-heading text-base font-bold text-white uppercase tracking-wider">
               {activeTab === "dashboard" && "Tablero de Tráfico & Conversión en Tiempo Real"}
-              {activeTab === "products" && "Gestión y Catálogo de Muebles"}
+              {activeTab === "products" && (editingProduct ? "Configuración y Detalle del Mueble" : "Gestión y Catálogo de Muebles")}
               {activeTab === "orders" && "Gestión de Pedidos & Checkout"}
               {activeTab === "donweb" && "Almacenamiento Multimedia DonWeb"}
             </h2>
@@ -441,7 +485,7 @@ export default function AdminDashboardPage() {
               {/* Luxury Control Bar: Period Filter & Refresh */}
               <div className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-black text-[#C5A880] flex items-center justify-center shadow-md">
+                  <div className="w-10 h-10 rounded-xl bg-black text-[#FC7D00] flex items-center justify-center shadow-md">
                     <Activity size={20} />
                   </div>
                   <div>
@@ -505,7 +549,7 @@ export default function AdminDashboardPage() {
                     disabled={analyticsLoading}
                     className="flex items-center space-x-2 px-4 py-2 bg-black hover:bg-neutral-800 text-white text-xs font-semibold rounded-xl shadow-sm transition-all duration-200 disabled:opacity-50"
                   >
-                    <RefreshCw size={13} className={analyticsLoading ? "animate-spin text-[#C5A880]" : "text-[#C5A880]"} />
+                    <RefreshCw size={13} className={analyticsLoading ? "animate-spin text-[#FC7D00]" : "text-[#FC7D00]"} />
                     <span className="tracking-wider uppercase text-[11px]">Actualizar</span>
                   </button>
                 </div>
@@ -513,7 +557,7 @@ export default function AdminDashboardPage() {
 
               {/* 4 Primary Hero KPI Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                {/* 1. Tráfico Web Total */}
+                {/* 1. Tráfico Total */}
                 <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative overflow-hidden flex flex-col justify-between group hover:border-black/30 transition-all duration-300">
                   <div>
                     <div className="flex items-center justify-between">
@@ -655,7 +699,7 @@ export default function AdminDashboardPage() {
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2.5">
-                        <div className="p-2 rounded-lg bg-black text-[#C5A880]">
+                        <div className="p-2 rounded-lg bg-black text-[#FC7D00]">
                           <TrendingUp size={16} />
                         </div>
                         <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider">
@@ -821,7 +865,7 @@ export default function AdminDashboardPage() {
                   <div>
                     <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                       <div className="flex items-center space-x-2.5">
-                        <div className="p-2 rounded-lg bg-black text-[#C5A880]">
+                        <div className="p-2 rounded-lg bg-black text-[#FC7D00]">
                           <MousePointer size={15} />
                         </div>
                         <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider">
@@ -883,7 +927,7 @@ export default function AdminDashboardPage() {
                   <div>
                     <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                       <div className="flex items-center space-x-2.5">
-                        <div className="p-2 rounded-lg bg-black text-[#C5A880]">
+                        <div className="p-2 rounded-lg bg-black text-[#FC7D00]">
                           <Clock size={15} />
                         </div>
                         <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider">
@@ -961,162 +1005,496 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-          {/* TAB 2: PRODUCTS (WOOCOMMERCE STYLE) */}
+          {/* TAB 2: PRODUCTS (CATALOGUE & INLINE FORM SECTION) */}
           {activeTab === "products" && (
-            <div className="w-[90%] mx-auto space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-gray-200/80 shadow-sm">
-                <div className="flex items-center space-x-3">
-                  <button
-                    onClick={() => {
-                      setEditingProduct({
-                        title: "",
-                        regularPrice: 0,
-                        stock: 10,
-                        category: "comedor",
-                        linea: "practica",
-                        images: [],
-                        variations: [
-                          {
-                            name: "Madera",
-                            options: [
-                              { id: "opt-1", name: "Petiribí", type: "madera", inStock: true, priceAdjustment: 30000 },
-                              { id: "opt-2", name: "Paraíso", type: "madera", inStock: true, priceAdjustment: 0 },
-                            ],
-                          },
-                        ],
-                      });
-                      setIsModalOpen(true);
-                    }}
-                    className="bg-black text-white hover:bg-[#c25e1a] text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-xl flex items-center space-x-2 transition-all shadow-sm"
-                  >
-                    <Plus size={16} />
-                    <span>Añadir Producto</span>
-                  </button>
+            <div className="w-[90%] mx-auto space-y-6">
+              {/* SUBVIEW 1: INLINE PRODUCT FORM SECTION (NO MODAL) */}
+              {editingProduct ? (
+                <div className="space-y-6">
+                  {/* Form Header with Back Button */}
+                  <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center space-x-3.5">
+                      <button
+                        type="button"
+                        onClick={() => setEditingProduct(null)}
+                        className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:text-black hover:bg-gray-100 transition-colors flex items-center justify-center"
+                        title="Volver al Catálogo"
+                      >
+                        <ArrowLeft size={18} />
+                      </button>
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#FC7D00]">
+                          {editingProduct.id ? "EDICIÓN DE MUEBLE" : "NUEVA ALTA DE CATÁLOGO"}
+                        </span>
+                        <h3 className="font-heading text-lg font-bold text-gray-900 uppercase tracking-wide">
+                          {editingProduct.id
+                            ? `Editar: ${editingProduct.title || "Producto"}`
+                            : "Añadir Nuevo Mueble al Catálogo"}
+                        </h3>
+                      </div>
+                    </div>
 
-                  <select
-                    value={selectedCatFilter}
-                    onChange={(e) => setSelectedCatFilter(e.target.value)}
-                    className="text-xs border border-gray-300 rounded-xl px-3 py-2.5 outline-none bg-white font-medium"
-                  >
-                    <option value="all">Todas las categorías</option>
-                    {CATEGORIES.map((c) => (
-                      <option key={c.id} value={c.slug}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    <div className="flex items-center space-x-3 self-end sm:self-auto">
+                      <button
+                        type="button"
+                        onClick={() => setEditingProduct(null)}
+                        className="px-4 py-2.5 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveProduct}
+                        className="bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center space-x-2"
+                      >
+                        <Save size={15} />
+                        <span>Guardar Producto</span>
+                      </button>
+                    </div>
+                  </div>
 
-                <div className="relative w-full sm:w-72">
-                  <input
-                    type="text"
-                    placeholder="Buscar por título o SKU..."
-                    value={productSearch}
-                    onChange={(e) => setProductSearch(e.target.value)}
-                    className="w-full text-xs pl-9 pr-3 py-2.5 border border-gray-300 rounded-xl outline-none focus:border-black bg-white"
-                  />
-                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                </div>
-              </div>
+                  {/* Form Main Body: 2 Columns */}
+                  <form onSubmit={handleSaveProduct} className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
+                    {/* Left 2 Columns: Main Info */}
+                    <div className="lg:col-span-2 space-y-6">
+                      {/* Card 1: Essential Information */}
+                      <div className="bg-white p-7 rounded-2xl border border-gray-200/80 shadow-sm space-y-5">
+                        <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider pb-3 border-b border-gray-100">
+                          1. Información Principal del Mueble
+                        </h4>
 
-              {/* Table */}
-              <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
-                <table className="w-full text-xs text-left">
-                  <thead className="bg-[#faf9f8] border-b text-gray-500 uppercase font-bold text-[10px] tracking-wider">
-                    <tr>
-                      <th className="p-4 w-16">Foto</th>
-                      <th className="p-4">Nombre</th>
-                      <th className="p-4">Línea</th>
-                      <th className="p-4">SKU</th>
-                      <th className="p-4">Stock</th>
-                      <th className="p-4">Precio</th>
-                      <th className="p-4">Categoría</th>
-                      <th className="p-4 text-right">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {filteredProducts.map((p) => (
-                      <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
-                        <td className="p-4">
-                          <img
-                            src={p.images[0] || "/placeholder.jpg"}
-                            alt={p.title}
-                            className="w-12 h-12 object-cover rounded-xl border border-gray-200"
+                        <div>
+                          <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">
+                            Nombre / Título del Producto *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={editingProduct.title || ""}
+                            onChange={(e) => setEditingProduct({ ...editingProduct, title: e.target.value })}
+                            placeholder="Ej: Rack TV Escandinavo Melamina"
+                            className="w-full p-3.5 border border-gray-200 rounded-xl outline-none focus:border-black text-xs font-medium bg-gray-50/30 focus:bg-white transition-all"
                           />
-                        </td>
-                        <td className="p-4 font-semibold text-gray-900">
-                          <div className="flex flex-col">
-                            <span className="font-bold text-gray-900">{p.title}</span>
-                            <span className="text-[11px] text-gray-400 font-mono">/{p.slug}</span>
+                        </div>
+
+                        {/* Visual Selector for Linea */}
+                        <div>
+                          <label className="block font-semibold text-gray-700 mb-2 uppercase tracking-wider text-[11px]">
+                            Línea de Venta Comercial *
+                          </label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setEditingProduct({ ...editingProduct, linea: "practica" })}
+                              className={`p-4 rounded-xl border-2 text-left transition-all ${
+                                editingProduct.linea === "practica"
+                                  ? "border-[#c25e1a] bg-orange-50/40 shadow-xs"
+                                  : "border-gray-200 hover:border-gray-300 bg-white"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-xs uppercase tracking-wider text-[#c25e1a]">
+                                  Línea Práctica
+                                </span>
+                                {editingProduct.linea === "practica" && (
+                                  <span className="w-5 h-5 rounded-full bg-[#c25e1a] text-white flex items-center justify-center">
+                                    <Check size={12} />
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[11px] text-gray-600 font-medium mt-1">
+                                Compra fácil y estándar
+                              </p>
+                              <p className="text-[10px] text-gray-400 mt-0.5">
+                                Melamina, modelos definidos, entrega rápida · Sucursal Mitre
+                              </p>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setEditingProduct({ ...editingProduct, linea: "premium" })}
+                              className={`p-4 rounded-xl border-2 text-left transition-all ${
+                                editingProduct.linea === "premium"
+                                  ? "border-[#2d4332] bg-emerald-50/40 shadow-xs"
+                                  : "border-gray-200 hover:border-gray-300 bg-white"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-xs uppercase tracking-wider text-[#2d4332]">
+                                  Línea Premium
+                                </span>
+                                {editingProduct.linea === "premium" && (
+                                  <span className="w-5 h-5 rounded-full bg-[#2d4332] text-white flex items-center justify-center">
+                                    <Check size={12} />
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[11px] text-gray-600 font-medium mt-1">
+                                Compra personalizada y de diseño
+                              </p>
+                              <p className="text-[10px] text-gray-400 mt-0.5">
+                                Maderas nobles, tapizados, lustre · Sucursal Alma Gardenia
+                              </p>
+                            </button>
                           </div>
-                        </td>
-                        <td className="p-4">
-                          <span
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              p.linea === "premium"
-                                ? "bg-emerald-100 text-emerald-800"
-                                : "bg-orange-100 text-[#c25e1a]"
-                            }`}
-                          >
-                            {p.linea === "premium" ? "Premium" : "Práctica"}
-                          </span>
-                        </td>
-                        <td className="p-4 text-gray-400 font-mono">{p.sku || "-"}</td>
-                        <td className="p-4">
-                          <span
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                              p.stock > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                            }`}
-                          >
-                            {p.stock > 0 ? `Stock (${p.stock})` : "Agotado"}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex flex-col">
-                            <span className="font-bold text-gray-900 font-mono">
-                              {formatCurrency(p.salePrice ?? p.regularPrice)}
+                        </div>
+
+                        {/* Category & Subcategory */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">
+                              Categoría *
+                            </label>
+                            <select
+                              value={editingProduct.category || "comedor"}
+                              onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
+                              className="w-full p-3.5 border border-gray-200 rounded-xl outline-none text-xs bg-white font-medium"
+                            >
+                              {CATEGORIES.map((c) => (
+                                <option key={c.id} value={c.slug}>
+                                  {c.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">
+                              Subcategoría (Opcional)
+                            </label>
+                            <input
+                              type="text"
+                              value={editingProduct.subcategory || ""}
+                              onChange={(e) => setEditingProduct({ ...editingProduct, subcategory: e.target.value })}
+                              placeholder="Ej: sofas, botineros, alfombras"
+                              className="w-full p-3.5 border border-gray-200 rounded-xl outline-none text-xs font-medium bg-gray-50/30 focus:bg-white"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Descriptions */}
+                        <div>
+                          <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">
+                            Descripción Breve (Para tarjetas y listados)
+                          </label>
+                          <input
+                            type="text"
+                            value={editingProduct.shortDescription || ""}
+                            onChange={(e) => setEditingProduct({ ...editingProduct, shortDescription: e.target.value })}
+                            placeholder="Ej: Fabricado en melamina 18mm con base metálica laqueada."
+                            className="w-full p-3.5 border border-gray-200 rounded-xl outline-none text-xs bg-gray-50/30 focus:bg-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">
+                            Descripción Completa & Materiales
+                          </label>
+                          <textarea
+                            rows={4}
+                            value={editingProduct.description || ""}
+                            onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
+                            placeholder="Detalles sobre terminaciones, resistencia, tipos de lustre, medidas exactas y recomendaciones de limpieza..."
+                            className="w-full p-3.5 border border-gray-200 rounded-xl outline-none text-xs bg-gray-50/30 focus:bg-white leading-relaxed"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Card 2: Variations */}
+                      <div className="bg-white p-7 rounded-2xl border border-gray-200/80 shadow-sm space-y-4">
+                        <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider pb-3 border-b border-gray-100">
+                          2. Terminaciones y Opciones (Variaciones)
+                        </h4>
+                        <p className="text-xs text-gray-500 font-light">
+                          Opciones que el cliente podrá seleccionar antes de consultar o añadir al carrito.
+                        </p>
+                        <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-2">
+                          <p className="text-xs font-semibold text-gray-700">Maderas & Lustres activos:</p>
+                          <div className="flex flex-wrap gap-2">
+                            <span className="px-3 py-1 bg-white border rounded-lg text-xs font-mono font-medium text-gray-800">
+                              Petiribí (+ $30.000)
                             </span>
-                            {p.salePrice && (
-                              <span className="text-[10px] text-gray-400 line-through font-mono">
-                                {formatCurrency(p.regularPrice)}
-                              </span>
-                            )}
+                            <span className="px-3 py-1 bg-white border rounded-lg text-xs font-mono font-medium text-gray-800">
+                              Paraíso (Base)
+                            </span>
+                            <span className="px-3 py-1 bg-white border rounded-lg text-xs font-mono font-medium text-gray-800">
+                              Roble Americano
+                            </span>
                           </div>
-                        </td>
-                        <td className="p-4 uppercase font-bold text-gray-600 text-[11px]">{p.category}</td>
-                        <td className="p-4 text-right">
-                          <div className="flex items-center justify-end space-x-1.5">
-                            <button
-                              onClick={() => {
-                                setEditingProduct(p);
-                                setIsModalOpen(true);
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right 1 Column: Price, Stock & Image Preview */}
+                    <div className="space-y-6">
+                      {/* Price & Stock Card */}
+                      <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-4">
+                        <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider pb-3 border-b border-gray-100">
+                          3. Precio & Stock
+                        </h4>
+
+                        <div>
+                          <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">
+                            Precio Regular ($ ARS) *
+                          </label>
+                          <input
+                            type="number"
+                            required
+                            value={editingProduct.regularPrice || ""}
+                            onChange={(e) => setEditingProduct({ ...editingProduct, regularPrice: Number(e.target.value) })}
+                            placeholder="280000"
+                            className="w-full p-3.5 border border-gray-200 rounded-xl outline-none font-mono text-sm font-bold text-gray-900 bg-gray-50/50 focus:bg-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">
+                            Precio de Oferta ($ ARS)
+                          </label>
+                          <input
+                            type="number"
+                            value={editingProduct.salePrice || ""}
+                            onChange={(e) => setEditingProduct({ ...editingProduct, salePrice: e.target.value ? Number(e.target.value) : undefined })}
+                            placeholder="245000"
+                            className="w-full p-3.5 border border-gray-200 rounded-xl outline-none font-mono text-sm font-bold text-emerald-700 bg-gray-50/50 focus:bg-white"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 pt-1">
+                          <div>
+                            <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[10px]">
+                              Stock Unidades
+                            </label>
+                            <input
+                              type="number"
+                              value={editingProduct.stock ?? 10}
+                              onChange={(e) => setEditingProduct({ ...editingProduct, stock: Number(e.target.value) })}
+                              className="w-full p-3 border border-gray-200 rounded-xl outline-none font-mono text-xs"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[10px]">
+                              SKU / Código
+                            </label>
+                            <input
+                              type="text"
+                              value={editingProduct.sku || ""}
+                              onChange={(e) => setEditingProduct({ ...editingProduct, sku: e.target.value })}
+                              placeholder="SKU-201"
+                              className="w-full p-3 border border-gray-200 rounded-xl outline-none font-mono text-xs uppercase"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Image Preview & URL Card */}
+                      <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-4">
+                        <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider pb-3 border-b border-gray-100">
+                          4. Fotografía Principal
+                        </h4>
+
+                        {/* Live Image Preview */}
+                        <div className="aspect-[4/3] rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center relative group">
+                          {editingProduct.images?.[0] ? (
+                            <img
+                              src={editingProduct.images[0]}
+                              alt="Vista previa"
+                              className="w-full h-full object-cover object-center"
+                              onError={(e) => {
+                                e.currentTarget.src = "https://acasatienda.com.ar/wp-content/uploads/2026/10/Living.webp";
                               }}
-                              className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition-colors"
-                              title="Editar"
-                            >
-                              <Pencil size={15} />
-                            </button>
-                            <button
-                              onClick={() => handleDuplicateProduct(p)}
-                              className="p-2 text-gray-500 hover:text-emerald-700 hover:bg-gray-100 rounded-lg transition-colors"
-                              title="Duplicar"
-                            >
-                              <Copy size={15} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteProduct(p.id)}
-                              className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
-                              title="Eliminar"
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                            />
+                          ) : (
+                            <div className="text-center p-4 text-gray-400">
+                              <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <span className="text-[11px]">Ingresá una URL de imagen para previsualizar</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">
+                            URL de la Imagen (DonWeb / Web)
+                          </label>
+                          <input
+                            type="text"
+                            value={editingProduct.images?.[0] || ""}
+                            onChange={(e) => setEditingProduct({ ...editingProduct, images: [e.target.value] })}
+                            placeholder="https://acasatienda.com.ar/wp-content/uploads/..."
+                            className="w-full p-3 border border-gray-200 rounded-xl outline-none font-mono text-xs bg-gray-50/50 focus:bg-white"
+                          />
+                        </div>
+
+                        <div className="pt-2">
+                          <button
+                            type="submit"
+                            className="w-full bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider py-3.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center space-x-2"
+                          >
+                            <Save size={16} />
+                            <span>Guardar Mueble en Catálogo</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                /* SUBVIEW 2: CATALOGUE TABLE LIST */
+                <div className="space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-gray-200/80 shadow-sm">
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => {
+                          setEditingProduct({
+                            title: "",
+                            regularPrice: 0,
+                            stock: 10,
+                            category: "comedor",
+                            linea: "practica",
+                            images: [],
+                            variations: [
+                              {
+                                name: "Madera",
+                                options: [
+                                  { id: "opt-1", name: "Petiribí", type: "madera", inStock: true, priceAdjustment: 30000 },
+                                  { id: "opt-2", name: "Paraíso", type: "madera", inStock: true, priceAdjustment: 0 },
+                                ],
+                              },
+                            ],
+                          });
+                        }}
+                        className="bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl flex items-center space-x-2 transition-all shadow-sm"
+                      >
+                        <Plus size={16} />
+                        <span>Añadir Producto</span>
+                      </button>
+
+                      <select
+                        value={selectedCatFilter}
+                        onChange={(e) => setSelectedCatFilter(e.target.value)}
+                        className="text-xs border border-gray-300 rounded-xl px-3 py-2.5 outline-none bg-white font-medium"
+                      >
+                        <option value="all">Todas las categorías</option>
+                        {CATEGORIES.map((c) => (
+                          <option key={c.id} value={c.slug}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="relative w-full sm:w-72">
+                      <input
+                        type="text"
+                        placeholder="Buscar por título o SKU..."
+                        value={productSearch}
+                        onChange={(e) => setProductSearch(e.target.value)}
+                        className="w-full text-xs pl-9 pr-3 py-2.5 border border-gray-300 rounded-xl outline-none focus:border-black bg-white"
+                      />
+                      <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    </div>
+                  </div>
+
+                  {/* Table */}
+                  <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+                    <table className="w-full text-xs text-left">
+                      <thead className="bg-[#faf9f8] border-b text-gray-500 uppercase font-bold text-[10px] tracking-wider">
+                        <tr>
+                          <th className="p-4 w-16">Foto</th>
+                          <th className="p-4">Nombre</th>
+                          <th className="p-4">Línea</th>
+                          <th className="p-4">SKU</th>
+                          <th className="p-4">Stock</th>
+                          <th className="p-4">Precio</th>
+                          <th className="p-4">Categoría</th>
+                          <th className="p-4 text-right">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {filteredProducts.map((p) => (
+                          <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
+                            <td className="p-4">
+                              <img
+                                src={p.images[0] || "/placeholder.jpg"}
+                                alt={p.title}
+                                className="w-12 h-12 object-cover rounded-xl border border-gray-200"
+                              />
+                            </td>
+                            <td className="p-4 font-semibold text-gray-900">
+                              <div className="flex flex-col">
+                                <span className="font-bold text-gray-900">{p.title}</span>
+                                <span className="text-[11px] text-gray-400 font-mono">/{p.slug}</span>
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <span
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                  p.linea === "premium"
+                                    ? "bg-emerald-100 text-emerald-800"
+                                    : "bg-orange-100 text-[#c25e1a]"
+                                }`}
+                              >
+                                {p.linea === "premium" ? "Premium" : "Práctica"}
+                              </span>
+                            </td>
+                            <td className="p-4 text-gray-400 font-mono">{p.sku || "-"}</td>
+                            <td className="p-4">
+                              <span
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                  p.stock > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {p.stock > 0 ? `Stock (${p.stock})` : "Agotado"}
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              <div className="flex flex-col">
+                                <span className="font-bold text-gray-900 font-mono">
+                                  {formatCurrency(p.salePrice ?? p.regularPrice)}
+                                </span>
+                                {p.salePrice && (
+                                  <span className="text-[10px] text-gray-400 line-through font-mono">
+                                    {formatCurrency(p.regularPrice)}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-4 uppercase font-bold text-gray-600 text-[11px]">{p.category}</td>
+                            <td className="p-4 text-right">
+                              <div className="flex items-center justify-end space-x-1.5">
+                                <button
+                                  onClick={() => {
+                                    setEditingProduct(p);
+                                  }}
+                                  className="p-2 text-gray-500 hover:text-[#FC7D00] hover:bg-orange-50 rounded-lg transition-colors"
+                                  title="Editar Mueble"
+                                >
+                                  <Pencil size={15} />
+                                </button>
+                                <button
+                                  onClick={() => handleDuplicateProduct(p)}
+                                  className="p-2 text-gray-500 hover:text-emerald-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                  title="Duplicar"
+                                >
+                                  <Copy size={15} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteProduct(p.id)}
+                                  className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                  title="Eliminar"
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1211,7 +1589,7 @@ export default function AdminDashboardPage() {
             <div className="w-[90%] mx-auto space-y-6">
               <div className="bg-white p-7 rounded-2xl border border-gray-200/80 shadow-sm space-y-5">
                 <div className="flex items-center space-x-3.5 pb-4 border-b border-gray-100">
-                  <div className="w-10 h-10 rounded-xl bg-black text-[#C5A880] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-black text-[#FC7D00] flex items-center justify-center">
                     <UploadCloud size={22} />
                   </div>
                   <div>
@@ -1307,9 +1685,9 @@ export default function AdminDashboardPage() {
                   <div className="sm:col-span-2 pt-2">
                     <button
                       type="submit"
-                      className="bg-black hover:bg-neutral-800 text-white text-xs font-bold uppercase tracking-wider px-6 py-3 rounded-xl flex items-center space-x-2 transition-all shadow-sm"
+                      className="bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider px-6 py-3 rounded-xl flex items-center space-x-2 transition-all shadow-sm"
                     >
-                      <Save size={15} className="text-[#C5A880]" />
+                      <Save size={15} />
                       <span>Guardar Credenciales FTP</span>
                     </button>
                   </div>
@@ -1361,7 +1739,7 @@ export default function AdminDashboardPage() {
                               navigator.clipboard.writeText(url);
                               alert("¡URL copiada al portapapeles!");
                             }}
-                            className="text-black hover:text-[#c25e1a] font-bold ml-3 text-[11px] uppercase tracking-wider transition-colors"
+                            className="text-black hover:text-[#FC7D00] font-bold ml-3 text-[11px] uppercase tracking-wider transition-colors"
                           >
                             Copiar URL
                           </button>
@@ -1375,194 +1753,6 @@ export default function AdminDashboardPage() {
           )}
         </div>
       </main>
-
-      {/* PRODUCT CREATE/EDIT MODAL */}
-      {isModalOpen && editingProduct && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/20">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C5A880]">
-                  EDICIÓN DE CATÁLOGO
-                </span>
-                <h3 className="font-heading text-lg font-bold text-gray-900 uppercase tracking-wide">
-                  {editingProduct.id ? "Editar Producto" : "Nuevo Producto"}
-                </h3>
-              </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-black p-2 rounded-xl hover:bg-gray-100 transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveProduct} className="p-6 space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block font-semibold text-gray-700 mb-1 uppercase tracking-wider text-[11px]">
-                    Nombre del Mueble / Título *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editingProduct.title || ""}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, title: e.target.value })}
-                    placeholder="Ej: Rack TV Escandinavo Melamina"
-                    className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:border-black text-xs font-medium"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1 uppercase tracking-wider text-[11px]">
-                    Línea de Venta *
-                  </label>
-                  <select
-                    value={editingProduct.linea || "practica"}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, linea: e.target.value as any })}
-                    className="w-full p-3 border border-gray-200 rounded-xl outline-none font-medium text-xs bg-white"
-                  >
-                    <option value="practica">Línea Práctica (Compra fácil y estándar)</option>
-                    <option value="premium">Línea Premium (Personalizada y diseño)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1 uppercase tracking-wider text-[11px]">
-                    SKU / Código Único
-                  </label>
-                  <input
-                    type="text"
-                    value={editingProduct.sku || ""}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, sku: e.target.value })}
-                    placeholder="SKU-201"
-                    className="w-full p-3 border border-gray-200 rounded-xl outline-none font-mono text-xs"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1 uppercase tracking-wider text-[11px]">
-                    Categoría
-                  </label>
-                  <select
-                    value={editingProduct.category || "comedor"}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
-                    className="w-full p-3 border border-gray-200 rounded-xl outline-none font-medium text-xs bg-white"
-                  >
-                    {CATEGORIES.map((c) => (
-                      <option key={c.id} value={c.slug}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1 uppercase tracking-wider text-[11px]">
-                    Precio Normal ($ ARS) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={editingProduct.regularPrice || ""}
-                    onChange={(e) =>
-                      setEditingProduct({ ...editingProduct, regularPrice: Number(e.target.value) })
-                    }
-                    placeholder="280000"
-                    className="w-full p-3 border border-gray-200 rounded-xl outline-none font-mono text-xs"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1 uppercase tracking-wider text-[11px]">
-                    Precio Rebajado / Oferta ($ ARS)
-                  </label>
-                  <input
-                    type="number"
-                    value={editingProduct.salePrice || ""}
-                    onChange={(e) =>
-                      setEditingProduct({
-                        ...editingProduct,
-                        salePrice: e.target.value ? Number(e.target.value) : undefined,
-                      })
-                    }
-                    placeholder="245000"
-                    className="w-full p-3 border border-gray-200 rounded-xl outline-none font-mono text-xs"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1 uppercase tracking-wider text-[11px]">
-                    Stock Disponible
-                  </label>
-                  <input
-                    type="number"
-                    value={editingProduct.stock ?? 10}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, stock: Number(e.target.value) })}
-                    className="w-full p-3 border border-gray-200 rounded-xl outline-none font-mono text-xs"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1 uppercase tracking-wider text-[11px]">
-                    URL Imagen Principal (DonWeb)
-                  </label>
-                  <input
-                    type="text"
-                    value={editingProduct.images?.[0] || ""}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, images: [e.target.value] })}
-                    placeholder="https://acasatienda.com.ar/wp-content/uploads/..."
-                    className="w-full p-3 border border-gray-200 rounded-xl outline-none font-mono text-xs"
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <label className="block font-semibold text-gray-700 mb-1 uppercase tracking-wider text-[11px]">
-                    Descripción Breve
-                  </label>
-                  <input
-                    type="text"
-                    value={editingProduct.shortDescription || ""}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, shortDescription: e.target.value })}
-                    placeholder="Breve resumen para la ficha comercial"
-                    className="w-full p-3 border border-gray-200 rounded-xl outline-none text-xs"
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <label className="block font-semibold text-gray-700 mb-1 uppercase tracking-wider text-[11px]">
-                    Descripción Completa & Materiales
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={editingProduct.description || ""}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
-                    placeholder="Detalles sobre melamina, lustre, estructura, medidas..."
-                    className="w-full p-3 border border-gray-200 rounded-xl outline-none text-xs"
-                  />
-                </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="pt-4 border-t border-gray-100 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-100 font-semibold"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="bg-black hover:bg-neutral-800 text-white font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl shadow-md transition-all"
-                >
-                  Guardar Producto
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
