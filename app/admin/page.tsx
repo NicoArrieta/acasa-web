@@ -699,13 +699,6 @@ export default function AdminDashboardPage() {
         {/* Top bar con naranja oficial del logo #FC7D00 */}
         <header className="h-16 bg-[#FC7D00] text-white px-8 flex items-center justify-between shadow-md">
           <div className="flex items-center space-x-3">
-            <button
-              onClick={toggleSidebar}
-              className="p-2 rounded-xl bg-black/15 hover:bg-black/25 text-white transition-colors flex items-center justify-center mr-1"
-              title={sidebarCollapsed ? "Expandir menú lateral" : "Colapsar menú lateral"}
-            >
-              <Menu size={18} />
-            </button>
             <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/90">
               ACASA TIENDA
             </span>
@@ -713,23 +706,13 @@ export default function AdminDashboardPage() {
             <h2 className="font-heading text-base font-bold text-white uppercase tracking-wider">
               {activeTab === "dashboard" && "Tablero de Tráfico & Conversión en Tiempo Real"}
               {activeTab === "products" && (editingProduct ? "Configuración y Detalle del Mueble" : "Gestión y Catálogo de Muebles")}
+              {activeTab === "media" && "Biblioteca Multimedia"}
               {activeTab === "orders" && "Gestión de Pedidos & Checkout"}
               {activeTab === "donweb" && "Almacenamiento Multimedia DonWeb"}
             </h2>
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Supabase status badge */}
-            <div className="flex items-center space-x-2 bg-black/20 backdrop-blur-xs text-white border border-white/20 px-3 py-1 rounded-full text-xs font-semibold shadow-xs">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-300" />
-              </span>
-              <span className="tracking-wide text-white">Supabase Cloud Activo</span>
-            </div>
-
-            <div className="h-4 w-[1px] bg-white/30" />
-
             {/* Admin Avatar */}
             <div className="flex items-center space-x-2.5">
               <div className="w-8 h-8 rounded-full bg-white text-[#FC7D00] text-xs font-black font-heading flex items-center justify-center shadow-md">
