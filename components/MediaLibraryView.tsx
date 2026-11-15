@@ -21,6 +21,8 @@ import {
   Sparkles,
   Info,
   Maximize2,
+  ChevronLeft,
+  ChevronRight,
   Filter,
   ArrowUpDown,
   ExternalLink,
@@ -164,6 +166,45 @@ export default function MediaLibraryView() {
       // recent default
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
+
+  // Navigation helpers for preview modal
+  const previewIndex = previewItem
+    ? filteredItems.findIndex((i) => i.id === previewItem.id)
+    : -1;
+
+  const handlePrevPreview = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (filteredItems.length === 0 || previewIndex === -1) return;
+    const prevIdx = (previewIndex - 1 + filteredItems.length) % filteredItems.length;
+    setPreviewItem(filteredItems[prevIdx]);
+  };
+
+  const handleNextPreview = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (filteredItems.length === 0 || previewIndex === -1) return;
+    const nextIdx = (previewIndex + 1) % filteredItems.length;
+    setPreviewItem(filteredItems[nextIdx]);
+  };
+
+  // Keyboard navigation for image preview
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!previewItem) return;
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePrevPreview();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        handleNextPreview();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        setPreviewItem(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [previewItem, previewIndex, filteredItems]);
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return "WebP";
@@ -334,7 +375,7 @@ export default function MediaLibraryView() {
               className="bg-white rounded-2xl border border-gray-200/80 overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col group"
             >
               {/* Image Preview Area */}
-              <div className="aspect-square bg-gray-50 relative overflow-hidden flex items-center justify-center p-2 border-b border-gray-100">
+              <div onClick={() => setPreviewItem(item)} className="aspect-square bg-gray-50 relative overflow-hidden flex items-center justify-center p-2 border-b border-gray-100 cursor-pointer">
                 <img
                   src={item.url}
                   alt={item.alt || item.name}
@@ -526,37 +567,171 @@ export default function MediaLibraryView() {
         </div>
       )}
 
-      {/* 6. Preview Modal (Full image) */}
+      {/* 6. Preview Modal (Full image with arrow navigation) */}
       {previewItem && (
         <div
           onClick={() => setPreviewItem(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-6 animate-fadeIn select-none"
         >
+          {/* Main Container */}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-w-4xl max-h-[90vh] bg-white rounded-3xl p-4 shadow-2xl relative flex flex-col space-y-3"
+            className="w-full max-w-5xl max-h-[95vh] bg-[#141416] text-white rounded-3xl shadow-2xl relative flex flex-col overflow-hidden border border-white/10"
           >
-            <button
-              onClick={() => setPreviewItem(null)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-black/60 text-white hover:bg-black z-10"
-            >
-              <X size={18} />
-            </button>
-            <div className="overflow-hidden rounded-2xl flex items-center justify-center bg-gray-50 max-h-[75vh]">
-              <img
-                src={previewItem.url}
-                alt={previewItem.alt || previewItem.name}
-                className="max-h-[75vh] w-auto object-contain"
-              />
+            {/* Top Toolbar */}
+            <div className="p-4 px-6 border-b border-white/10 flex items-center justify-between bg-black/30">
+              <div className="flex items-center space-x-3">
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wider bg-white/10 text-gray-200 px-3 py-1 rounded-full">
+                  {previewIndex + 1} de {filteredItems.length}
+                </span>
+                <span className="text-xs font-semibold text-gray-300 truncate max-w-xs sm:max-w-md">
+                  {previewItem.name}
+                </span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center space-x-2">
+                {/* Quick Edit */}
+                <button
+                  onClick={() => {
+                    const itemToEdit = previewItem;
+                    setPreviewItem(null);
+                    handleStartEdit(itemToEdit);
+                  }}
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 hover:text-white transition-colors"
+                  title="Editar nombre y Alt"
+                >
+                  <Pencil size={16} />
+                </button>
+
+                {/* Copy URL */}
+                <button
+                  onClick={() => handleCopyUrl(previewItem)}
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 hover:text-white transition-colors"
+                  title="Copiar enlace"
+                >
+                  {copiedId === previewItem.id ? (
+                    <Check size={16} className="text-emerald-400" />
+                  ) : (
+                    <Copy size={16} />
+                  )}
+                </button>
+
+                {/* Open in new tab */}
+                <a
+                  href={previewItem.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 hover:text-white transition-colors"
+                  title="Ver en pestaña nueva"
+                >
+                  <ExternalLink size={16} />
+                </a>
+
+                {/* Close */}
+                <button
+                  onClick={() => setPreviewItem(null)}
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white transition-colors ml-1"
+                  title="Cerrar (Esc)"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
-            <div className="px-2 flex items-center justify-between text-xs text-gray-700">
-              <div>
-                <p className="font-bold">{previewItem.name}</p>
-                {previewItem.alt && <p className="text-gray-400 font-light text-[11px]">{previewItem.alt}</p>}
+
+            {/* Central Image Viewport with Left/Right Arrows */}
+            <div className="relative flex-1 min-h-[50vh] max-h-[68vh] flex items-center justify-center p-4 sm:p-6 bg-black/40">
+              {/* Prev Arrow */}
+              {filteredItems.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handlePrevPreview}
+                  className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/60 hover:bg-white text-white hover:text-black flex items-center justify-center shadow-xl transition-all hover:scale-110 z-20 cursor-pointer border border-white/15"
+                  title="Imagen anterior (Flecha Izquierda ←)"
+                >
+                  <ChevronLeft size={26} />
+                </button>
+              )}
+
+              {/* Main Image */}
+              <div className="w-full h-full flex items-center justify-center overflow-hidden">
+                <img
+                  src={previewItem.url}
+                  alt={previewItem.alt || previewItem.name}
+                  className="max-h-[64vh] max-w-full object-contain rounded-xl shadow-2xl transition-all duration-200"
+                />
               </div>
-              <div className="text-right font-mono text-[11px] text-gray-500">
-                {formatFileSize(previewItem.sizeBytes)} {previewItem.width && `· ${previewItem.width}×${previewItem.height}px`}
+
+              {/* Next Arrow */}
+              {filteredItems.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handleNextPreview}
+                  className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/60 hover:bg-white text-white hover:text-black flex items-center justify-center shadow-xl transition-all hover:scale-110 z-20 cursor-pointer border border-white/15"
+                  title="Imagen siguiente (Flecha Derecha →)"
+                >
+                  <ChevronRight size={26} />
+                </button>
+              )}
+            </div>
+
+            {/* Bottom Meta & Thumbnails Bar */}
+            <div className="p-4 px-6 border-t border-white/10 bg-black/60 space-y-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
+                <div>
+                  <span className="font-bold text-white text-sm block">
+                    {previewItem.name}
+                  </span>
+                  <span className="text-gray-400 text-[11px] font-light">
+                    {previewItem.alt ? (
+                      <>Alt: <span className="text-gray-200 font-medium">"{previewItem.alt}"</span></>
+                    ) : (
+                      <span className="italic text-gray-500">Sin texto alternativo</span>
+                    )}
+                  </span>
+                </div>
+
+                <div className="flex items-center space-x-3 font-mono text-[11px] text-gray-400">
+                  <span>{formatFileSize(previewItem.sizeBytes)}</span>
+                  {previewItem.width && previewItem.height && (
+                    <>
+                      <span>·</span>
+                      <span>{previewItem.width}×{previewItem.height}px</span>
+                    </>
+                  )}
+                  <span className="px-2 py-0.5 rounded bg-white/10 text-white font-bold text-[10px]">
+                    WEBP
+                  </span>
+                </div>
               </div>
+
+              {/* Quick Jump Thumbnail Strip */}
+              {filteredItems.length > 1 && (
+                <div className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-none pt-1 border-t border-white/5">
+                  {filteredItems.map((thumbItem, tIdx) => {
+                    const isCurrent = thumbItem.id === previewItem.id;
+                    return (
+                      <button
+                        key={thumbItem.id}
+                        type="button"
+                        onClick={() => setPreviewItem(thumbItem)}
+                        className={`w-12 h-12 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all ${
+                          isCurrent
+                            ? "border-[#FC7D00] scale-105 shadow-md opacity-100"
+                            : "border-transparent opacity-40 hover:opacity-90"
+                        }`}
+                        title={thumbItem.name}
+                      >
+                        <img
+                          src={thumbItem.url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>

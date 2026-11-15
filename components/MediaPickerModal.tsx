@@ -11,6 +11,9 @@ import {
   Image as ImageIcon,
   Loader2,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
 } from "lucide-react";
 
 interface MediaPickerModalProps {
@@ -101,13 +104,51 @@ export default function MediaPickerModal({
     onClose();
   };
 
-  if (!isOpen) return null;
-
   const filteredItems = items.filter(
     (item) =>
       item.name.toLowerCase().includes(search.toLowerCase()) ||
       item.alt.toLowerCase().includes(search.toLowerCase())
   );
+
+  const [inspectItem, setInspectItem] = useState<MediaItem | null>(null);
+
+  const inspectIndex = inspectItem
+    ? filteredItems.findIndex((i) => i.id === inspectItem.id)
+    : -1;
+
+  const handlePrevInspect = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (filteredItems.length === 0 || inspectIndex === -1) return;
+    const prevIdx = (inspectIndex - 1 + filteredItems.length) % filteredItems.length;
+    setInspectItem(filteredItems[prevIdx]);
+  };
+
+  const handleNextInspect = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (filteredItems.length === 0 || inspectIndex === -1) return;
+    const nextIdx = (inspectIndex + 1) % filteredItems.length;
+    setInspectItem(filteredItems[nextIdx]);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!inspectItem) return;
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePrevInspect();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        handleNextInspect();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        setInspectItem(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [inspectItem, inspectIndex, filteredItems]);
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 sm:p-6 animate-fadeIn">
@@ -237,9 +278,22 @@ export default function MediaPickerModal({
                     )}
 
                     {/* Hover Title */}
-                    <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                      <p className="text-[10px] font-semibold truncate">{item.name}</p>
-                      {item.alt && <p className="text-[9px] text-gray-300 truncate font-light">Alt: {item.alt}</p>}
+                    <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between">
+                      <div className="min-w-0 flex-1 mr-1">
+                        <p className="text-[10px] font-semibold truncate">{item.name}</p>
+                        {item.alt && <p className="text-[9px] text-gray-300 truncate font-light">Alt: {item.alt}</p>}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInspectItem(item);
+                        }}
+                        className="p-1 rounded bg-black/60 hover:bg-black text-white"
+                        title="Ver en grande con flechas"
+                      >
+                        <Maximize2 size={12} />
+                      </button>
                     </div>
                   </div>
                 );
@@ -282,6 +336,81 @@ export default function MediaPickerModal({
           </div>
         </div>
       </div>
+      {/* Inspection Lightbox with arrows */}
+      {inspectItem && (
+        <div
+          onClick={() => setInspectItem(null)}
+          className="fixed inset-0 z-60 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-fadeIn select-none"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-4xl max-h-[90vh] bg-[#141416] text-white rounded-3xl shadow-2xl relative flex flex-col overflow-hidden border border-white/10"
+          >
+            <div className="p-4 px-6 border-b border-white/10 flex items-center justify-between bg-black/40">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider bg-white/10 px-3 py-1 rounded-full">
+                {inspectIndex + 1} de {filteredItems.length}
+              </span>
+              <span className="text-xs font-semibold truncate max-w-md">{inspectItem.name}</span>
+              <button
+                onClick={() => setInspectItem(null)}
+                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="relative flex-1 min-h-[50vh] flex items-center justify-center p-4 bg-black/50">
+              {filteredItems.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handlePrevInspect}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/70 hover:bg-white text-white hover:text-black flex items-center justify-center shadow-xl transition-all z-20"
+                  title="Anterior (←)"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+              )}
+
+              <img
+                src={inspectItem.url}
+                alt={inspectItem.alt || inspectItem.name}
+                className="max-h-[65vh] max-w-full object-contain rounded-xl"
+              />
+
+              {filteredItems.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handleNextInspect}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/70 hover:bg-white text-white hover:text-black flex items-center justify-center shadow-xl transition-all z-20"
+                  title="Siguiente (→)"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              )}
+            </div>
+
+            <div className="p-4 px-6 border-t border-white/10 flex items-center justify-between text-xs bg-black/40">
+              <span className="text-gray-400 font-light truncate max-w-md">
+                {inspectItem.alt ? `Alt: "${inspectItem.alt}"` : "Sin texto alternativo"}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  toggleSelect(inspectItem.url);
+                  setInspectItem(null);
+                }}
+                className={`px-4 py-2 rounded-xl font-bold uppercase text-[11px] tracking-wider transition-all ${
+                  selected.includes(inspectItem.url)
+                    ? "bg-red-500/20 text-red-300 border border-red-500/40"
+                    : "bg-[#FC7D00] text-white hover:bg-[#e66c00]"
+                }`}
+              >
+                {selected.includes(inspectItem.url) ? "Quitar Selección" : "Seleccionar Imagen"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
