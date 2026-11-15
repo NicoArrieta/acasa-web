@@ -1800,7 +1800,6 @@ export default function AdminDashboardPage() {
                     <table className="w-full text-xs text-left">
                       <thead className="bg-[#faf9f8] border-b text-gray-500 uppercase font-bold text-[10px] tracking-wider">
                         <tr>
-                          <th className="p-4 w-16">Foto</th>
                           <th className="p-4">Nombre</th>
                           <th className="p-4">Línea</th>
                           <th className="p-4">SKU</th>
@@ -1813,13 +1812,6 @@ export default function AdminDashboardPage() {
                       <tbody className="divide-y divide-gray-100">
                         {filteredProducts.map((p) => (
                           <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
-                            <td className="p-4">
-                              <img
-                                src={p.images[0] || "/placeholder.jpg"}
-                                alt={p.title}
-                                className="w-12 h-12 object-cover rounded-xl border border-gray-200"
-                              />
-                            </td>
                             <td className="p-4 font-semibold text-gray-900">
                               <div className="flex flex-col">
                                 <span className="font-bold text-gray-900">{p.title}</span>
