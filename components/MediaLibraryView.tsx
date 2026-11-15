@@ -31,6 +31,7 @@ export default function MediaLibraryView() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "name" | "size">("recent");
+  const [visibleCount, setVisibleCount] = useState(20);
 
   // Upload state
   const [isUploading, setIsUploading] = useState(false);
@@ -125,6 +126,8 @@ export default function MediaLibraryView() {
       }
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
+
+  const visibleItems = filteredItems.slice(0, visibleCount);
 
   // Navigation helpers for Ficha modal
   const activeIndex = activeFicha
@@ -243,10 +246,15 @@ export default function MediaLibraryView() {
               <ImageIcon size={24} />
             </div>
             <div>
-              <h2 className="font-heading text-xl font-black text-gray-900 uppercase tracking-wider">
-                Biblioteca Multimedia
-              </h2>
-              <p className="text-xs text-gray-500 font-light">
+              <div className="flex items-center space-x-2.5">
+                <h2 className="font-heading text-xl font-black text-gray-900 uppercase tracking-wider">
+                  Biblioteca Multimedia
+                </h2>
+                <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#FC7D00]/10 text-[#FC7D00] border border-[#FC7D00]/20">
+                  {items.length} imágenes
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 font-light mt-0.5">
                 Hacé clic en cualquier imagen para abrir su <strong>Ficha de edición</strong>, previsualizar en grande y navegar con flechas.
               </p>
             </div>
@@ -345,7 +353,7 @@ export default function MediaLibraryView() {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setVisibleCount(20); }}
             placeholder="Buscar por nombre de archivo o texto alt..."
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:border-[#FC7D00] outline-none"
           />
@@ -359,7 +367,7 @@ export default function MediaLibraryView() {
           </span>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => { setSortBy(e.target.value as any); setVisibleCount(20); }}
             className="p-2.5 px-3 border border-gray-200 rounded-xl bg-gray-50 text-xs font-medium outline-none focus:border-[#FC7D00]"
           >
             <option value="recent">Más recientes primero</option>
@@ -388,8 +396,15 @@ export default function MediaLibraryView() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-          {filteredItems.map((item) => (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between text-xs text-gray-400 px-1 font-medium">
+            <span>
+              Mostrando {Math.min(visibleCount, filteredItems.length)} de {filteredItems.length} {filteredItems.length !== items.length ? `(filtradas de ${items.length} totales)` : "imágenes"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+            {visibleItems.map((item) => (
             <div
               key={item.id}
               onClick={() => openFicha(item)}
@@ -504,6 +519,26 @@ export default function MediaLibraryView() {
             </div>
           ))}
         </div>
+
+        {/* Load More Button: Cargar 20 más */}
+        {visibleCount < filteredItems.length && (
+          <div className="pt-4 pb-2 text-center flex flex-col items-center space-y-2">
+            <button
+              type="button"
+              onClick={() => setVisibleCount((prev) => prev + 20)}
+              className="px-8 py-3.5 rounded-2xl bg-white border border-gray-200 hover:border-[#FC7D00] text-gray-800 hover:text-[#FC7D00] text-xs font-bold uppercase tracking-wider shadow-sm hover:shadow-md transition-all flex items-center space-x-2 cursor-pointer group"
+            >
+              <span>Cargar 20 más</span>
+              <span className="text-gray-400 group-hover:text-[#FC7D00] text-[11px] font-normal font-mono">
+                (Quedan {filteredItems.length - visibleCount})
+              </span>
+            </button>
+            <p className="text-[11px] text-gray-400 font-mono">
+              Mostrando {visibleCount} de {filteredItems.length} imágenes (Total: {items.length})
+            </p>
+          </div>
+        )}
+      </div>
       )}
 
       {/* 5. FICHA DE LA IMAGEN: SPLIT MODAL (Izquierda: Foto Grande con Flechas | Derecha: Campos Editables y Guardar) */}
