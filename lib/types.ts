@@ -19,6 +19,39 @@ export interface ProductVariation {
   inStock: boolean;
 }
 
+export interface AttributeTerm {
+  id: string;
+  name: string;
+  slug: string;
+  colorHex?: string;
+}
+
+export interface GlobalAttribute {
+  id: string;
+  name: string;
+  slug: string;
+  terms: AttributeTerm[];
+}
+
+export interface ProductAttributeSelection {
+  name: string;
+  terms: string[];
+  usedForVariations: boolean;
+}
+
+export interface ProductVariationItem {
+  id: string;
+  sku?: string;
+  attributes: Record<string, string>;
+  regularPrice: number;
+  salePrice?: number;
+  stock?: number;
+  inStock: boolean;
+  image?: string;
+  description?: string;
+  enabled: boolean;
+}
+
 export interface Product {
   id: string;
   slug: string;
@@ -31,6 +64,9 @@ export interface Product {
   featured?: boolean;
   isNewArrival?: boolean;
   linea?: "practica" | "premium";
+  productType?: "simple" | "variable";
+  attributes?: ProductAttributeSelection[];
+  productVariations?: ProductVariationItem[];
   category: string;
   categories?: string[];
   subcategory?: string;
@@ -62,7 +98,11 @@ export interface Category {
 export interface CartItem {
   product: Product;
   quantity: number;
-  selectedVariations?: Record<string, string>; // e.g. { "madera": "petiribi", "tapizado": "lino" }
+  selectedVariations?: Record<string, string>;
+  variationId?: string;
+  variationPrice?: number;
+  variationImage?: string;
+  variationSku?: string;
 }
 
 export interface Order {

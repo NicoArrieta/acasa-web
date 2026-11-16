@@ -1,4 +1,4 @@
-import { Category, Product, Order } from "./types";
+import { Category, Product, Order, GlobalAttribute } from "./types";
 
 export const CATEGORIES: Category[] = [
   {
@@ -94,6 +94,53 @@ export const CATEGORIES: Category[] = [
   },
 ];
 
+export const INITIAL_ATTRIBUTES: GlobalAttribute[] = [
+  {
+    id: "attr_madera",
+    name: "Madera",
+    slug: "madera",
+    terms: [
+      { id: "term_paraiso", name: "Paraíso Natural", slug: "paraiso-natural" },
+      { id: "term_petiribi", name: "Petiribí Macizo", slug: "petiribi-macizo" },
+      { id: "term_guatambu", name: "Guatambú Lustrado", slug: "guatambu-lustrado" },
+      { id: "term_roble", name: "Roble Americano", slug: "roble-americano" },
+    ],
+  },
+  {
+    id: "attr_tapizado",
+    name: "Tapizado",
+    slug: "tapizado",
+    terms: [
+      { id: "term_lino_crudo", name: "Lino Crudo Antimancha", slug: "lino-crudo" },
+      { id: "term_lino_gris", name: "Lino Gris Nube", slug: "lino-gris" },
+      { id: "term_pana_visone", name: "Pana Visone Teflón", slug: "pana-visone" },
+      { id: "term_boucle", name: "Bouclé Off-White", slug: "boucle-off-white" },
+    ],
+  },
+  {
+    id: "attr_medida",
+    name: "Medida",
+    slug: "medida",
+    terms: [
+      { id: "term_140", name: "1.40 x 0.80 m", slug: "1-40-x-0-80" },
+      { id: "term_160", name: "1.60 x 0.90 m", slug: "1-60-x-0-90" },
+      { id: "term_180", name: "1.80 x 0.90 m", slug: "1-80-x-0-90" },
+      { id: "term_200", name: "2.00 x 1.00 m", slug: "2-00-x-1-00" },
+    ],
+  },
+  {
+    id: "attr_color",
+    name: "Color",
+    slug: "color",
+    terms: [
+      { id: "term_natural", name: "Natural Lustre", slug: "natural", colorHex: "#d4b886" },
+      { id: "term_nogal", name: "Nogal Oscuro", slug: "nogal", colorHex: "#5c4033" },
+      { id: "term_blanco", name: "Blanco Nórdico", slug: "blanco", colorHex: "#f8f9fa" },
+      { id: "term_negro", name: "Negro Mate", slug: "negro", colorHex: "#1a1a1a" },
+    ],
+  },
+];
+
 export const INITIAL_PRODUCTS: Product[] = [
   {
     id: "prod-rack-tv",
@@ -129,11 +176,63 @@ export const INITIAL_PRODUCTS: Product[] = [
     featured: true,
     isNewArrival: true,
     linea: "premium",
+    productType: "variable",
+    attributes: [
+      { name: "Madera", terms: ["Paraíso Natural", "Petiribí Macizo"], usedForVariations: true },
+      { name: "Medida", terms: ["1.80 x 0.90 m", "2.00 x 1.00 m"], usedForVariations: true },
+    ],
+    productVariations: [
+      {
+        id: "var_duna_1",
+        sku: "DUNA-PAR-180",
+        attributes: { "Madera": "Paraíso Natural", "Medida": "1.80 x 0.90 m" },
+        regularPrice: 690000,
+        salePrice: 620000,
+        stock: 6,
+        inStock: true,
+        enabled: true,
+        image: "https://acasatienda.com.ar/wp-content/uploads/2026/10/Comedor.webp",
+      },
+      {
+        id: "var_duna_2",
+        sku: "DUNA-PAR-200",
+        attributes: { "Madera": "Paraíso Natural", "Medida": "2.00 x 1.00 m" },
+        regularPrice: 760000,
+        salePrice: 680000,
+        stock: 4,
+        inStock: true,
+        enabled: true,
+        image: "https://acasatienda.com.ar/wp-content/uploads/2026/10/Comedor.webp",
+      },
+      {
+        id: "var_duna_3",
+        sku: "DUNA-PET-180",
+        attributes: { "Madera": "Petiribí Macizo", "Medida": "1.80 x 0.90 m" },
+        regularPrice: 790000,
+        salePrice: 720000,
+        stock: 5,
+        inStock: true,
+        enabled: true,
+        image: "https://acasatienda.com.ar/wp-content/uploads/2026/10/Living.webp",
+      },
+      {
+        id: "var_duna_4",
+        sku: "DUNA-PET-200",
+        attributes: { "Madera": "Petiribí Macizo", "Medida": "2.00 x 1.00 m" },
+        regularPrice: 870000,
+        salePrice: 795000,
+        stock: 3,
+        inStock: true,
+        enabled: true,
+        image: "https://acasatienda.com.ar/wp-content/uploads/2026/10/Living.webp",
+      },
+    ],
     category: "comedor",
     subcategory: "mesas",
     stock: 6,
     images: [
       "https://acasatienda.com.ar/wp-content/uploads/2026/10/Comedor.webp",
+      "https://acasatienda.com.ar/wp-content/uploads/2026/10/Living.webp",
     ],
     variations: [
       {
@@ -191,6 +290,57 @@ export const INITIAL_PRODUCTS: Product[] = [
     featured: true,
     isNewArrival: true,
     linea: "premium",
+    productType: "variable",
+    attributes: [
+      { name: "Madera", terms: ["Paraíso Natural", "Petiribí Macizo"], usedForVariations: true },
+      { name: "Tapizado", terms: ["Lino Crudo Antimancha", "Pana Visone Teflón"], usedForVariations: true },
+    ],
+    productVariations: [
+      {
+        id: "var_bali_1",
+        sku: "BALI-PAR-LCR",
+        attributes: { "Madera": "Paraíso Natural", "Tapizado": "Lino Crudo Antimancha" },
+        regularPrice: 285000,
+        salePrice: 245000,
+        stock: 14,
+        inStock: true,
+        enabled: true,
+        image: "https://acasatienda.com.ar/wp-content/uploads/2026/11/4c091274-160a-4f1a-8d16-3904ecf9b5ae.webp",
+      },
+      {
+        id: "var_bali_2",
+        sku: "BALI-PAR-PVI",
+        attributes: { "Madera": "Paraíso Natural", "Tapizado": "Pana Visone Teflón" },
+        regularPrice: 298000,
+        salePrice: 257000,
+        stock: 8,
+        inStock: true,
+        enabled: true,
+        image: "https://acasatienda.com.ar/wp-content/uploads/2026/11/4f3f64db-3e29-4a4e-90bc-85caeffb5f96.webp",
+      },
+      {
+        id: "var_bali_3",
+        sku: "BALI-PET-LCR",
+        attributes: { "Madera": "Petiribí Macizo", "Tapizado": "Lino Crudo Antimancha" },
+        regularPrice: 320000,
+        salePrice: 279000,
+        stock: 10,
+        inStock: true,
+        enabled: true,
+        image: "https://acasatienda.com.ar/wp-content/uploads/2026/11/9a5c4820-e59a-44d9-b4d8-5102e30e4aad.webp",
+      },
+      {
+        id: "var_bali_4",
+        sku: "BALI-PET-PVI",
+        attributes: { "Madera": "Petiribí Macizo", "Tapizado": "Pana Visone Teflón" },
+        regularPrice: 335000,
+        salePrice: 292000,
+        stock: 6,
+        inStock: true,
+        enabled: true,
+        image: "https://acasatienda.com.ar/wp-content/uploads/2026/11/d5665d90-473d-4cf9-9a46-fb2f01ae69df.webp",
+      },
+    ],
     category: "comedor",
     subcategory: "sillas",
     stock: 14,

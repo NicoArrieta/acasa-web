@@ -29,11 +29,17 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
   const [selectedImage, setSelectedImage] = useState<string>(initialProd?.images[0] || "");
   const [selectedVariations, setSelectedVariations] = useState<Record<string, string>>(() => {
     const initialVars: Record<string, string> = {};
-    initialProd?.variations?.forEach((v) => {
-      if (v.options.length > 0) {
-        initialVars[v.name] = v.options[0].name;
-      }
-    });
+    if (initialProd?.attributes && initialProd.attributes.length > 0) {
+      initialProd.attributes.forEach((a) => {
+        if (a.terms.length > 0) initialVars[a.name] = a.terms[0];
+      });
+    } else {
+      initialProd?.variations?.forEach((v) => {
+        if (v.options.length > 0) {
+          initialVars[v.name] = v.options[0].name;
+        }
+      });
+    }
     return initialVars;
   });
   const [quantity, setQuantity] = useState(1);
@@ -48,11 +54,17 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
       if (!selectedImage) setSelectedImage(found.images[0] || "");
 
       const initialVars: Record<string, string> = {};
-      found.variations?.forEach((v) => {
-        if (v.options.length > 0) {
-          initialVars[v.name] = v.options[0].name;
-        }
-      });
+      if (found.attributes && found.attributes.length > 0) {
+        found.attributes.forEach((a) => {
+          if (a.terms.length > 0) initialVars[a.name] = a.terms[0];
+        });
+      } else {
+        found.variations?.forEach((v) => {
+          if (v.options.length > 0) {
+            initialVars[v.name] = v.options[0].name;
+          }
+        });
+      }
       setSelectedVariations((prev) => (Object.keys(prev).length ? prev : initialVars));
     }
   }, [slug]);
@@ -76,8 +88,18 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
     );
   }
 
+  // WooCommerce Variable Product Matching
+  const hasWooVariations = !!(product.productVariations && product.productVariations.length > 0);
+  const matchedVariation = hasWooVariations
+    ? product.productVariations!.find(
+        (v) =>
+          v.enabled &&
+          Object.entries(selectedVariations).every(([k, val]) => v.attributes[k] === val)
+      ) || product.productVariations![0]
+    : null;
+
   let variationAdjustment = 0;
-  if (product.variations) {
+  if (!hasWooVariations && product.variations) {
     product.variations.forEach((vGroup) => {
       const selectedName = selectedVariations[vGroup.name];
       const opt = vGroup.options.find((o) => o.name === selectedName);
@@ -88,11 +110,28 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
   }
 
   const basePrice = product.salePrice ?? product.regularPrice;
-  const finalUnitPrice = basePrice + variationAdjustment;
+  const finalUnitPrice = matchedVariation
+    ? (matchedVariation.salePrice ?? matchedVariation.regularPrice)
+    : basePrice + variationAdjustment;
+
+  const strikePrice = matchedVariation
+    ? (matchedVariation.salePrice ? matchedVariation.regularPrice : undefined)
+    : (product.salePrice ? product.regularPrice + variationAdjustment : undefined);
+
   const transferPrice = Math.round(finalUnitPrice * 0.8); // 20% OFF transferencia
+  const activeSku = matchedVariation?.sku || product.sku;
+  const isOutOfStock = matchedVariation
+    ? (!matchedVariation.inStock || (matchedVariation.stock ?? 0) <= 0)
+    : product.stock <= 0;
 
   const handleAddToCart = () => {
-    addToCart(product, quantity, selectedVariations);
+    if (isOutOfStock) return;
+    addToCart(product, quantity, selectedVariations, {
+      id: matchedVariation?.id,
+      price: finalUnitPrice,
+      image: matchedVariation?.image || selectedImage,
+      sku: activeSku,
+    });
     setIsAddedToast(true);
     setTimeout(() => setIsAddedToast(false), 2500);
   };
@@ -231,9 +270,9 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
               <span className="text-[7.5vw] sm:text-[3.8vw] lg:text-[2.2vw] font-bold text-gray-900 tracking-tight">
                 {formatCurrency(finalUnitPrice)}
               </span>
-              {product.salePrice && (
+              {strikePrice && (
                 <span className="text-[4.5vw] sm:text-[2vw] lg:text-[1.2vw] text-gray-400 line-through">
-                  {formatCurrency(product.regularPrice + variationAdjustment)}
+                  {formatCurrency(strikePrice)}
                 </span>
               )}
             </div>
@@ -244,8 +283,67 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
             </div>
           </div>
 
-          {/* Variaciones (si el producto las tiene) */}
-          {product.variations && product.variations.length > 0 && (
+          {/* Variaciones WooCommerce (Attributes & Variations) */}
+          {hasWooVariations && product.attributes && product.attributes.length > 0 ? (
+            <div className="space-y-[2vh] pt-[1vh]">
+              {product.attributes.map((attr) => (
+                <div key={attr.name} className="space-y-[0.8vh]">
+                  <div className="flex justify-between items-center text-[3vw] sm:text-[1.2vw] lg:text-[0.78vw]">
+                    <span className="font-semibold uppercase tracking-wider text-gray-700">
+                      {attr.name}:{" "}
+                      <span className="text-black font-bold">
+                        {selectedVariations[attr.name] || attr.terms[0]}
+                      </span>
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-[2vw] sm:gap-[0.6vw]">
+                    {attr.terms.map((term) => {
+                      const currentVal = selectedVariations[attr.name] || attr.terms[0];
+                      const isSelected = currentVal === term;
+                      return (
+                        <button
+                          key={term}
+                          type="button"
+                          onClick={() => {
+                            const nextVars = { ...selectedVariations, [attr.name]: term };
+                            setSelectedVariations(nextVars);
+                            // Auto switch main photo if matching variation has image
+                            const match = product.productVariations?.find((v) =>
+                              Object.entries(nextVars).every(([k, val]) => v.attributes[k] === val)
+                            );
+                            if (match?.image) {
+                              setSelectedImage(match.image);
+                            }
+                          }}
+                          className={`text-[3.2vw] sm:text-[1.3vw] lg:text-[0.78vw] px-[3.5vw] sm:px-[1.5vw] lg:px-[1vw] py-[1vh] sm:py-[0.8vh] rounded-[0.8vw] sm:rounded-[0.3vw] border uppercase tracking-wider transition-all cursor-pointer ${
+                            isSelected
+                              ? "bg-black text-white border-black font-bold shadow-sm"
+                              : "bg-white text-gray-700 border-gray-300 hover:border-gray-500"
+                          }`}
+                        >
+                          {term}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              {/* Stock status indicator for matched variation */}
+              {matchedVariation && (
+                <div className="pt-1 text-[2.8vw] sm:text-[1.1vw] lg:text-[0.75vw]">
+                  {matchedVariation.inStock && (matchedVariation.stock ?? 0) > 0 ? (
+                    <span className="text-emerald-700 font-bold flex items-center space-x-1">
+                      <span>✓ En stock</span>
+                      <span className="font-mono text-gray-500 font-normal">({matchedVariation.stock} unidades disponibles)</span>
+                    </span>
+                  ) : (
+                    <span className="text-red-600 font-bold">✗ Sin existencias (Agotado)</span>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : product.variations && product.variations.length > 0 ? (
             <div className="space-y-[2vh] pt-[1vh]">
               {product.variations.map((vGroup) => (
                 <div key={vGroup.name} className="space-y-[0.8vh]">
@@ -287,7 +385,7 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
 
           {/* Sección de Descripción (con título 'Descripción' y viñetas como en la web original) */}
           <div className="space-y-[1.2vh] pt-[1.5vh] border-t border-gray-100">

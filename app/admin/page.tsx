@@ -5,15 +5,18 @@ import Link from "next/link";
 import {
   Product,
   Category,
+  GlobalAttribute,
   Order,
   DonWebFtpSettings,
 } from "@/lib/types";
 import { CATEGORIES } from "@/lib/data";
 import MediaLibraryView from "@/components/MediaLibraryView";
 import CategoriesManagerView from "@/components/CategoriesManagerView";
+import AttributesManagerView from "@/components/AttributesManagerView";
+import ProductVariationsManager from "@/components/ProductVariationsManager";
 import MediaPickerModal from "@/components/MediaPickerModal";
 import { uploadMediaItem } from "@/lib/media";
-import { getStoredMedia, getStoredCategories, saveStoredCategories } from "@/lib/store";
+import { getStoredMedia, getStoredCategories, saveStoredCategories, getStoredAttributes, saveStoredAttributes } from "@/lib/store";
 import {
   getStoredProducts,
   saveStoredProducts,
@@ -31,6 +34,7 @@ import {
 import {
   LayoutDashboard,
   FolderTree,
+  SlidersHorizontal,
   Package,
   ShoppingCart,
   UploadCloud,
@@ -67,7 +71,8 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "categories" | "media" | "orders" | "donweb">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "categories" | "attributes" | "media" | "orders" | "donweb">("dashboard");
+  const [attributesList, setAttributesList] = useState<GlobalAttribute[]>([]);
   const [categoriesList, setCategoriesList] = useState<Category[]>([]);
   const [selectedSubcatFilter, setSelectedSubcatFilter] = useState<string>("all");
   const [carouselPreviewIdx, setCarouselPreviewIdx] = useState(0);
@@ -129,6 +134,15 @@ export default function AdminDashboardPage() {
   }, [timeRange, activeTab]);
 
   
+  useEffect(() => {
+    setAttributesList(getStoredAttributes());
+    const handleAttrUpdate = () => {
+      setAttributesList(getStoredAttributes());
+    };
+    window.addEventListener("attributes_updated", handleAttrUpdate);
+    return () => window.removeEventListener("attributes_updated", handleAttrUpdate);
+  }, []);
+
   useEffect(() => {
     setCategoriesList(getStoredCategories());
     const handleCatUpdate = () => {
@@ -234,6 +248,9 @@ export default function AdminDashboardPage() {
       targetProduct = {
         ...(currentList[idx] as Product),
         ...(editingProduct as Product),
+        productType: editingProduct.productType || "simple",
+        attributes: editingProduct.attributes || [],
+        productVariations: editingProduct.productVariations || [],
         category: finalCats[0],
         categories: finalCats,
         subcategory: finalSubcats[0] || "",
@@ -259,6 +276,9 @@ export default function AdminDashboardPage() {
         subcategory: finalSubcats[0] || "",
         subcategories: finalSubcats,
         linea: editingProduct.linea || "practica",
+        productType: editingProduct.productType || "simple",
+        attributes: editingProduct.attributes || [],
+        productVariations: editingProduct.productVariations || [],
         stock: editingProduct.stock ? Number(editingProduct.stock) : 10,
         images:
           editingProduct.images && editingProduct.images.length > 0
@@ -615,6 +635,52 @@ export default function AdminDashboardPage() {
             )}
           </button>
 
+          {/* Attributes & Variations */}
+          <button
+            onClick={() => {
+              setActiveTab("attributes");
+              setEditingProduct(null);
+            }}
+            title={sidebarCollapsed ? "Atributos & Variaciones" : undefined}
+            className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
+              sidebarCollapsed
+                ? `justify-center py-3.5 rounded-2xl ${
+                    activeTab === "attributes"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
+                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                    activeTab === "attributes"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
+            }`}
+          >
+            <SlidersHorizontal size={20} className={activeTab === "attributes" ? "text-[#FC7D00]" : "text-white"} />
+            {!sidebarCollapsed && (
+              <div className="flex-1 flex justify-between items-center">
+                <span className="tracking-wide text-[13px]">Atributos</span>
+                <span
+                  className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
+                    activeTab === "attributes" ? "bg-[#FC7D00] text-white" : "bg-[#b85000] text-white"
+                  }`}
+                >
+                  {attributesList.length}
+                </span>
+              </div>
+            )}
+            {sidebarCollapsed && (
+              <>
+                <span className="absolute top-2 right-2 text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-[#b85000] text-white">
+                  {attributesList.length}
+                </span>
+                <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                  Atributos ({attributesList.length})
+                </span>
+              </>
+            )}
+          </button>
+
           {/* Media Library */}
           <button
             onClick={() => {
@@ -799,6 +865,7 @@ export default function AdminDashboardPage() {
               {activeTab === "dashboard" && "Tablero de Tráfico & Conversión en Tiempo Real"}
               {activeTab === "products" && (editingProduct ? "Configuración y Detalle del Mueble" : "Gestión y Catálogo de Muebles")}
               {activeTab === "categories" && "Gestión de Categorías & Subcategorías"}
+              {activeTab === "attributes" && "Atributos & Variaciones (WooCommerce)"}
               {activeTab === "media" && "Biblioteca Multimedia"}
               {activeTab === "orders" && "Gestión de Pedidos & Checkout"}
               {activeTab === "donweb" && "Almacenamiento Multimedia DonWeb"}
@@ -2072,6 +2139,9 @@ export default function AdminDashboardPage() {
 
                               {/* TAB: CATEGORIES */}
           {activeTab === "categories" && <CategoriesManagerView />}
+
+          {/* TAB: ATTRIBUTES & VARIATIONS */}
+          {activeTab === "attributes" && <AttributesManagerView />}
 
           {/* TAB: MEDIA LIBRARY */}
           {activeTab === "media" && <MediaLibraryView />}

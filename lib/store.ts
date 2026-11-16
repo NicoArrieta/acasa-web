@@ -1,10 +1,11 @@
-import { Product, Order, Category, DonWebFtpSettings, MediaItem } from "./types";
-import { INITIAL_PRODUCTS, INITIAL_ORDERS, CATEGORIES } from "./data";
+import { Product, Order, Category, DonWebFtpSettings, MediaItem, GlobalAttribute } from "./types";
+import { INITIAL_PRODUCTS, INITIAL_ORDERS, CATEGORIES, INITIAL_ATTRIBUTES } from "./data";
 
 const STORAGE_KEYS = {
   PRODUCTS: "acasa_products_v1",
   ORDERS: "acasa_orders_v1",
   CATEGORIES: "acasa_categories_v1",
+  ATTRIBUTES: "acasa_attributes_v1",
   DONWEB: "acasa_donweb_config_v1",
   MEDIA: "acasa_media_library_v1",
 };
@@ -22,12 +23,29 @@ export function getStoredProducts(): Product[] {
   try {
     const item = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
     if (!item) return INITIAL_PRODUCTS;
-    const stored = JSON.parse(item) as Product[];
+    let stored = JSON.parse(item) as Product[];
+
+    // Ensure sample products get variations if they don't have them in localStorage yet
+    let hasChanges = false;
+    stored = stored.map((p) => {
+      const initial = INITIAL_PRODUCTS.find((init) => init.id === p.id);
+      if (initial && initial.productVariations && (!p.productVariations || p.productVariations.length === 0)) {
+        hasChanges = true;
+        return {
+          ...p,
+          productType: initial.productType,
+          attributes: initial.attributes,
+          productVariations: initial.productVariations,
+        };
+      }
+      return p;
+    });
+
     // Merge any missing initial products so newly added items appear automatically
     const storedIds = new Set(stored.map((p) => p.id));
     const missing = INITIAL_PRODUCTS.filter((p) => !storedIds.has(p.id));
-    if (missing.length > 0) {
-      const merged = [...stored, ...missing];
+    if (missing.length > 0 || hasChanges) {
+      const merged = missing.length > 0 ? [...stored, ...missing] : stored;
       try {
         localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(merged));
       } catch (_) {}
@@ -179,5 +197,37 @@ export function saveStoredMedia(items: MediaItem[]): void {
     window.dispatchEvent(new Event("media_updated"));
   } catch (err) {
     console.error("Error saving media:", err);
+  }
+}
+
+export function getStoredAttributes(): GlobalAttribute[] {
+  if (typeof window === "undefined") return INITIAL_ATTRIBUTES;
+  try {
+    const item = localStorage.getItem(STORAGE_KEYS.ATTRIBUTES);
+    if (!item) {
+      saveStoredAttributes(INITIAL_ATTRIBUTES);
+      return INITIAL_ATTRIBUTES;
+    }
+    const stored = JSON.parse(item) as GlobalAttribute[];
+    const storedSlugs = new Set(stored.map((a) => a.slug));
+    const missing = INITIAL_ATTRIBUTES.filter((a) => !storedSlugs.has(a.slug));
+    if (missing.length > 0) {
+      const merged = [...stored, ...missing];
+      saveStoredAttributes(merged);
+      return merged;
+    }
+    return stored;
+  } catch {
+    return INITIAL_ATTRIBUTES;
+  }
+}
+
+export function saveStoredAttributes(attributes: GlobalAttribute[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEYS.ATTRIBUTES, JSON.stringify(attributes));
+    window.dispatchEvent(new Event("attributes_updated"));
+  } catch (err) {
+    console.error("Error saving attributes:", err);
   }
 }

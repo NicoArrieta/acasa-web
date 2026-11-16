@@ -3,9 +3,21 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { CartItem, Product } from "@/lib/types";
 
+export interface VariationExtra {
+  id?: string;
+  price?: number;
+  image?: string;
+  sku?: string;
+}
+
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product, quantity?: number, variations?: Record<string, string>) => void;
+  addToCart: (
+    product: Product,
+    quantity?: number,
+    variations?: Record<string, string>,
+    extra?: VariationExtra
+  ) => void;
   removeFromCart: (productId: string, variations?: Record<string, string>) => void;
   updateQuantity: (productId: string, quantity: number, variations?: Record<string, string>) => void;
   clearCart: () => void;
@@ -47,7 +59,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return keys1.every((k) => v1[k] === v2[k]);
   };
 
-  const addToCart = (product: Product, quantity = 1, variations?: Record<string, string>) => {
+  const addToCart = (
+    product: Product,
+    quantity = 1,
+    variations?: Record<string, string>,
+    extra?: VariationExtra
+  ) => {
     setCart((prev) => {
       const existingIndex = prev.findIndex(
         (item) => item.product.id === product.id && areVariationsEqual(item.selectedVariations, variations)
@@ -56,10 +73,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (existingIndex > -1) {
         const updated = [...prev];
         updated[existingIndex].quantity += quantity;
+        if (extra?.price) updated[existingIndex].variationPrice = extra.price;
+        if (extra?.id) updated[existingIndex].variationId = extra.id;
+        if (extra?.image) updated[existingIndex].variationImage = extra.image;
+        if (extra?.sku) updated[existingIndex].variationSku = extra.sku;
         return updated;
       }
 
-      return [...prev, { product, quantity, selectedVariations: variations }];
+      return [
+        ...prev,
+        {
+          product,
+          quantity,
+          selectedVariations: variations,
+          variationId: extra?.id,
+          variationPrice: extra?.price,
+          variationImage: extra?.image,
+          variationSku: extra?.sku,
+        },
+      ];
     });
     setIsCartOpen(true);
   };
@@ -92,7 +124,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   const subtotal = cart.reduce((acc, item) => {
-    const price = item.product.salePrice ?? item.product.regularPrice;
+    let price = item.variationPrice;
+    if (price === undefined) {
+      let adj = 0;
+      if (item.selectedVariations && item.product.variations) {
+        item.product.variations.forEach((vg) => {
+          const sel = item.selectedVariations?.[vg.name];
+          const opt = vg.options.find((o) => o.name === sel);
+          if (opt?.priceAdjustment) adj += opt.priceAdjustment;
+        });
+      }
+      price = (item.product.salePrice ?? item.product.regularPrice) + adj;
+    }
     return acc + price * item.quantity;
   }, 0);
 
