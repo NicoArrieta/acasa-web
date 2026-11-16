@@ -24,6 +24,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Save,
+  Download,
 } from "lucide-react";
 
 export default function MediaLibraryView() {
@@ -227,6 +228,34 @@ export default function MediaLibraryView() {
     navigator.clipboard.writeText(item.url);
     setCopiedId(item.id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async (url: string, filename: string) => {
+    setIsDownloading(true);
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename || "imagen.webp";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (e) {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename || "imagen.webp";
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const formatFileSize = (bytes?: number) => {
@@ -564,10 +593,22 @@ export default function MediaLibraryView() {
                   </span>
                 </div>
 
-                <span className="text-xs text-gray-400 font-mono hidden sm:inline">
-                  {activeFicha.width && activeFicha.height ? `${activeFicha.width}×${activeFicha.height}px · ` : ""}
-                  {formatFileSize(activeFicha.sizeBytes)}
-                </span>
+                <div className="flex items-center space-x-3">
+                  <span className="text-xs text-gray-400 font-mono hidden sm:inline">
+                    {activeFicha.width && activeFicha.height ? `${activeFicha.width}×${activeFicha.height}px · ` : ""}
+                    {formatFileSize(activeFicha.sizeBytes)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleDownload(activeFicha.url, activeFicha.name)}
+                    disabled={isDownloading}
+                    className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all hover:scale-105"
+                    title="Descargar archivo .webp"
+                  >
+                    <Download size={14} />
+                    <span>Descargar</span>
+                  </button>
+                </div>
               </div>
 
               {/* Center Viewport: Image + Nav Arrows */}
@@ -765,21 +806,42 @@ export default function MediaLibraryView() {
                     >
                       <ExternalLink size={14} />
                     </a>
+                    <button
+                      type="button"
+                      onClick={() => handleDownload(activeFicha.url, activeFicha.name)}
+                      className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+                      title="Descargar archivo en tu equipo"
+                    >
+                      <Download size={14} />
+                    </button>
                   </div>
                 </div>
               </div>
 
               {/* Bottom Action Footer */}
               <div className="p-5 px-6 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={handleDeleteActiveFicha}
-                  className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center space-x-1.5 text-xs font-semibold"
-                  title="Eliminar imagen permanentemente"
-                >
-                  <Trash2 size={16} />
-                  <span className="hidden sm:inline">Eliminar</span>
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={handleDeleteActiveFicha}
+                    className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center space-x-1.5 text-xs font-semibold"
+                    title="Eliminar imagen permanentemente"
+                  >
+                    <Trash2 size={16} />
+                    <span className="hidden sm:inline">Eliminar</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDownload(activeFicha.url, activeFicha.name)}
+                    disabled={isDownloading}
+                    className="p-2.5 px-3.5 text-gray-700 hover:text-black hover:bg-gray-100 border border-gray-200 rounded-xl transition-colors flex items-center space-x-1.5 text-xs font-semibold"
+                    title="Descargar imagen en tu equipo"
+                  >
+                    <Download size={15} />
+                    <span>Descargar</span>
+                  </button>
+                </div>
 
                 <button
                   type="button"
