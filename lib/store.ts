@@ -31,11 +31,18 @@ export function getStoredProducts(): Product[] {
       const initial = INITIAL_PRODUCTS.find((init) => init.id === p.id);
       if (initial && initial.productVariations && (!p.productVariations || p.productVariations.length === 0)) {
         hasChanges = true;
-        return {
+        p = {
           ...p,
           productType: initial.productType,
           attributes: initial.attributes,
           productVariations: initial.productVariations,
+        };
+      }
+      if (initial && p.entrega48hs === undefined && initial.entrega48hs !== undefined) {
+        hasChanges = true;
+        p = {
+          ...p,
+          entrega48hs: initial.entrega48hs,
         };
       }
       return p;

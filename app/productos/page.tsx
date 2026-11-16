@@ -7,7 +7,7 @@ import { CATEGORIES } from "@/lib/data";
 import { Product } from "@/lib/types";
 import ProductCard from "@/components/ProductCard";
 import PriceRangeFilter from "@/components/PriceRangeFilter";
-import { Search, X, RotateCcw } from "lucide-react";
+import { Search, X, RotateCcw, Zap } from "lucide-react";
 
 interface ProductsCatalogProps {
   initialCategory?: string;
@@ -26,6 +26,7 @@ export function ProductsCatalog({ initialCategory }: ProductsCatalogProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>(subcategoryParam);
   const [selectedLinea, setSelectedLinea] = useState<string>(lineaParam);
+  const [only48hs, setOnly48hs] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>(queryParam);
   const [sortBy, setSortBy] = useState<string>("featured");
 
@@ -104,6 +105,10 @@ export function ProductsCatalog({ initialCategory }: ProductsCatalogProps) {
         if (selectedLinea && p.linea && p.linea !== selectedLinea) {
           return false;
         }
+        // Only 48hs delivery filter
+        if (only48hs && !p.entrega48hs) {
+          return false;
+        }
         // Search query filter
         if (searchTerm.trim()) {
           const term = searchTerm.toLowerCase();
@@ -135,6 +140,7 @@ export function ProductsCatalog({ initialCategory }: ProductsCatalogProps) {
     selectedCategory,
     selectedSubcategory,
     selectedLinea,
+    only48hs,
     searchTerm,
     sortBy,
     isPriceFilterActive,
@@ -225,7 +231,21 @@ export function ProductsCatalog({ initialCategory }: ProductsCatalogProps) {
           </div>
 
           {/* Sort & Price Filter Controls */}
-          <div className="flex items-center space-x-[2vw] sm:space-x-[0.8vw]">
+          <div className="flex flex-wrap items-center gap-[2vw] sm:gap-[0.8vw]">
+            {/* 48hs Fast Delivery Toggle */}
+            <button
+              type="button"
+              onClick={() => setOnly48hs(!only48hs)}
+              className={`inline-flex items-center space-x-[1.2vw] sm:space-x-[0.4vw] text-[3.2vw] sm:text-[1.3vw] lg:text-[0.78vw] uppercase tracking-wider px-[3.5vw] sm:px-[1.6vw] lg:px-[0.9vw] py-[1vh] sm:py-[0.8vh] rounded-md transition-all border whitespace-nowrap cursor-pointer ${
+                only48hs
+                  ? "bg-[#c25e1a] border-[#c25e1a] text-white font-bold shadow-xs"
+                  : "bg-white border-gray-300 text-gray-700 hover:border-gray-400"
+              }`}
+            >
+              <Zap className={`w-[3.4vw] sm:w-[1.4vw] lg:w-[0.8vw] h-[3.4vw] sm:h-[1.4vw] lg:h-[0.8vw] ${only48hs ? "fill-white text-white" : "fill-[#c25e1a] text-[#c25e1a]"}`} />
+              <span>Entrega 48hs</span>
+            </button>
+
             {/* Sort Dropdown */}
             <select
               value={sortBy}

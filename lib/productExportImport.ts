@@ -97,6 +97,7 @@ export function exportProductsToCSV(products: Product[]): string {
     "Subcategorías",
     "Destacado",
     "Nuevo ingreso",
+    "Entrega 48hs",
     "Descripción corta",
     "Descripción completa",
     "Imágenes",
@@ -129,6 +130,7 @@ export function exportProductsToCSV(products: Product[]): string {
       Array.isArray(p.subcategories) ? p.subcategories.join(" | ") : (p.subcategory || ""),
       p.featured ? "1" : "0",
       p.isNewArrival ? "1" : "0",
+      p.entrega48hs ? "1" : "0",
       p.shortDescription || "",
       p.description || "",
       Array.isArray(p.images) ? p.images.join(" | ") : "",
@@ -277,6 +279,7 @@ function normalizeHeader(h: string): string {
   if (clean === "subcategorias" || clean === "subcategories") return "subcategories";
   if (clean === "destacado" || clean === "featured") return "featured";
   if (clean === "nuevoingreso" || clean === "nuevo" || clean === "isnewarrival") return "isNewArrival";
+  if (clean.includes("entrega48") || clean.includes("48hs") || clean.includes("48h")) return "entrega48hs";
   if (clean.includes("descripcioncorta") || clean === "shortdescription") return "shortDescription";
   if (clean.includes("descripcion") || clean === "description") return "description";
   if (clean === "imagenes" || clean === "fotos" || clean === "images" || clean === "fotosurls") return "images";
@@ -398,6 +401,7 @@ export function parseProductsCSV(csvText: string): { products: Product[]; errors
       images: images.length > 0 ? images : ["https://acasatienda.com.ar/wp-content/uploads/2026/10/Living.webp"],
       featured: item["featured"] === "1" || item["featured"]?.toLowerCase() === "true" || item["featured"]?.toLowerCase() === "si",
       isNewArrival: item["isNewArrival"] === "1" || item["isNewArrival"]?.toLowerCase() === "true" || item["isNewArrival"]?.toLowerCase() === "si",
+      entrega48hs: item["entrega48hs"] === "1" || item["entrega48hs"]?.toLowerCase() === "true" || item["entrega48hs"]?.toLowerCase() === "si",
       dimensions: {
         weightKg: parseFloat(item["weightKg"] || "5") || 5,
         widthCm: parseFloat(item["widthCm"] || "50") || 50,

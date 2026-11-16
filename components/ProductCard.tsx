@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Product } from "@/lib/types";
 import { formatCurrency } from "@/lib/store";
 import { useCart } from "@/context/CartContext";
-import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Zap } from "lucide-react";
 
 interface ProductCardProps {
   product: Product;
@@ -60,8 +60,16 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Badge if new */}
         {product.isNewArrival && (
-          <span className="absolute top-[2vw] sm:top-[1vw] lg:top-[0.8vw] left-[2vw] sm:left-[1vw] lg:left-[0.8vw] bg-black text-white text-[2.6vw] sm:text-[1.2vw] lg:text-[0.65vw] font-bold uppercase tracking-wider px-[2vw] sm:px-[1.2vw] lg:px-[0.7vw] py-[0.4vh] sm:py-[0.3vh] rounded-full shadow-md">
+          <span className="absolute top-[2vw] sm:top-[1vw] lg:top-[0.8vw] left-[2vw] sm:left-[1vw] lg:left-[0.8vw] bg-black text-white text-[2.6vw] sm:text-[1.2vw] lg:text-[0.65vw] font-bold uppercase tracking-wider px-[2vw] sm:px-[1.2vw] lg:px-[0.7vw] py-[0.4vh] sm:py-[0.3vh] rounded-full shadow-md z-10">
             Nuevo
+          </span>
+        )}
+
+        {/* Badge if entrega en 48 hs */}
+        {product.entrega48hs && (
+          <span className="absolute top-[2vw] sm:top-[1vw] lg:top-[0.8vw] right-[2vw] sm:right-[1vw] lg:right-[0.8vw] bg-[#c25e1a] text-white text-[2.4vw] sm:text-[1.1vw] lg:text-[0.62vw] font-bold uppercase tracking-wider px-[2.4vw] sm:px-[1.2vw] lg:px-[0.7vw] py-[0.4vh] sm:py-[0.3vh] rounded-full shadow-md flex items-center space-x-[0.8vw] sm:space-x-[0.3vw] z-10">
+            <Zap className="w-[3vw] sm:w-[1.2vw] lg:w-[0.68vw] h-[3vw] sm:h-[1.2vw] lg:h-[0.68vw] fill-white" />
+            <span>Entrega en 48 hs</span>
           </span>
         )}
       </Link>
@@ -69,12 +77,18 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* 2. Card Content (Padding applies to text & actions only) */}
       <div className="p-[3.5vw] sm:p-[2vw] lg:p-[1.2vw] flex-1 flex flex-col justify-between">
         {/* Product Title (Centered, uppercase, bold) */}
-        <div className="min-h-[4vh] sm:min-h-[4.5vh] flex items-center justify-center text-center px-[0.5vw]">
+        <div className="min-h-[4vh] sm:min-h-[4.5vh] flex flex-col items-center justify-center text-center px-[0.5vw]">
           <Link href={`/producto/${product.slug}`}>
             <h3 className="font-heading font-bold text-[3.4vw] sm:text-[1.8vw] lg:text-[1.15vw] uppercase tracking-wider text-black group-hover:text-[#c25e1a] transition-colors leading-snug line-clamp-2">
               {product.title}
             </h3>
           </Link>
+          {product.entrega48hs && (
+            <span className="mt-[0.6vh] inline-flex items-center space-x-[0.8vw] sm:space-x-[0.3vw] text-[#c25e1a] font-bold text-[2.4vw] sm:text-[1vw] lg:text-[0.68vw] uppercase tracking-wider bg-orange-50 px-[2.2vw] sm:px-[0.8vw] py-[0.3vh] rounded-full border border-orange-200/80">
+              <Zap className="w-[2.6vw] sm:w-[1vw] lg:w-[0.62vw] h-[2.6vw] sm:h-[1vw] lg:h-[0.62vw] fill-[#c25e1a]" />
+              <span>Entrega en 48 hs</span>
+            </span>
+          )}
         </div>
 
         {/* Pricing Breakdown */}

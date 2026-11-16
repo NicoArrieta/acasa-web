@@ -305,6 +305,7 @@ export default function AdminDashboardPage() {
         targetProduct = {
           ...(currentList[idx] as Product),
           ...(editingProduct as Product),
+          entrega48hs: Boolean(editingProduct.entrega48hs),
           productType: editingProduct.productType || "simple",
           attributes: editingProduct.attributes || [],
           productVariations: editingProduct.productVariations || [],
@@ -333,6 +334,7 @@ export default function AdminDashboardPage() {
           subcategory: finalSubcats[0] || "",
           subcategories: finalSubcats,
           linea: editingProduct.linea || "practica",
+          entrega48hs: Boolean(editingProduct.entrega48hs),
           productType: editingProduct.productType || "simple",
           attributes: editingProduct.attributes || [],
           productVariations: editingProduct.productVariations || [],
@@ -1727,6 +1729,73 @@ export default function AdminDashboardPage() {
                           </div>
                         </div>
 
+                        {/* Visual Selector for Entrega en 48hs */}
+                        <div>
+                          <label className="block font-semibold text-gray-700 mb-2 uppercase tracking-wider text-[11px]">
+                            Disponibilidad y Plazo de Entrega
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setEditingProduct({
+                                ...editingProduct,
+                                entrega48hs: !editingProduct.entrega48hs,
+                              })
+                            }
+                            className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
+                              editingProduct.entrega48hs
+                                ? "border-[#c25e1a] bg-orange-50/60 shadow-xs"
+                                : "border-gray-200 hover:border-gray-300 bg-white"
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3.5">
+                              <div
+                                className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shadow-xs transition-colors ${
+                                  editingProduct.entrega48hs
+                                    ? "bg-[#c25e1a] text-white"
+                                    : "bg-gray-100 text-gray-400"
+                                }`}
+                              >
+                                <Zap size={20} className={editingProduct.entrega48hs ? "fill-white" : ""} />
+                              </div>
+                              <div>
+                                <div className="flex items-center space-x-2">
+                                  <span
+                                    className={`font-bold text-xs uppercase tracking-wider ${
+                                      editingProduct.entrega48hs
+                                        ? "text-[#c25e1a]"
+                                        : "text-gray-800"
+                                    }`}
+                                  >
+                                    ⚡ Entrega en 48 hs
+                                  </span>
+                                  {editingProduct.entrega48hs ? (
+                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-orange-100 text-[#c25e1a] border border-orange-200">
+                                      Habilitado
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-medium uppercase tracking-wider bg-gray-100 text-gray-500">
+                                      Estándar / A pedido
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[11px] text-gray-500 mt-0.5">
+                                  Al activar esta opción, el producto mostrará el distintivo de entrega rápida en 48 horas en toda la tienda.
+                                </p>
+                              </div>
+                            </div>
+                            <div
+                              className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+                                editingProduct.entrega48hs
+                                  ? "bg-[#c25e1a] border-[#c25e1a] text-white"
+                                  : "border-gray-300 bg-white"
+                              }`}
+                            >
+                              {editingProduct.entrega48hs && <Check size={14} strokeWidth={3} />}
+                            </div>
+                          </button>
+                        </div>
+
                         {/* Categorías y Subcategorías Múltiples */}
                         <div className="space-y-4 pt-1">
                           <div>
@@ -2179,6 +2248,7 @@ export default function AdminDashboardPage() {
                             category: "comedor",
                             categories: ["comedor"],
                             linea: "practica",
+                            entrega48hs: false,
                             productType: "simple",
                             attributes: [],
                             productVariations: [],
@@ -2334,15 +2404,23 @@ export default function AdminDashboardPage() {
                               </div>
                             </td>
                             <td className="p-4">
-                              <span
-                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                                  p.linea === "premium"
-                                    ? "bg-emerald-100 text-emerald-800"
-                                    : "bg-orange-100 text-[#c25e1a]"
-                                }`}
-                              >
-                                {p.linea === "premium" ? "Premium" : "Práctica"}
-                              </span>
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span
+                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                    p.linea === "premium"
+                                      ? "bg-emerald-100 text-emerald-800"
+                                      : "bg-orange-100 text-[#c25e1a]"
+                                  }`}
+                                >
+                                  {p.linea === "premium" ? "Premium" : "Práctica"}
+                                </span>
+                                {p.entrega48hs && (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-100 text-[#c25e1a] border border-orange-200 inline-flex items-center gap-1">
+                                    <Zap size={10} className="fill-[#c25e1a]" />
+                                    <span>48hs</span>
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className="p-4 text-gray-400 font-mono">{p.sku || "-"}</td>
                             <td className="p-4">

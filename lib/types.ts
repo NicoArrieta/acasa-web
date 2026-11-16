@@ -63,6 +63,7 @@ export interface Product {
   salePrice?: number;
   featured?: boolean;
   isNewArrival?: boolean;
+  entrega48hs?: boolean;
   linea?: "practica" | "premium";
   productType?: "simple" | "variable";
   attributes?: ProductAttributeSelection[];

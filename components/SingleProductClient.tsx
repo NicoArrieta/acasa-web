@@ -16,6 +16,7 @@ import {
   Minus,
   ShoppingBag,
   Check,
+  Zap,
 } from "lucide-react";
 
 export default function SingleProductClient({ slug: propSlug }: { slug?: string }) {
@@ -186,11 +187,19 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
             />
 
             {/* Badges */}
-            {product.salePrice && (
-              <span className="absolute top-[3vw] sm:top-[1.2vw] left-[3vw] sm:left-[1.2vw] bg-[#c25e1a] text-white text-[2.6vw] sm:text-[1vw] lg:text-[0.72vw] font-bold uppercase tracking-wider px-[3vw] sm:px-[1.2vw] py-[0.5vh] rounded-full shadow-md z-10">
-                Oferta
-              </span>
-            )}
+            <div className="absolute top-[3vw] sm:top-[1.2vw] left-[3vw] sm:left-[1.2vw] flex flex-col gap-[0.5vh] z-10">
+              {product.salePrice && (
+                <span className="bg-[#c25e1a] text-white text-[2.6vw] sm:text-[1vw] lg:text-[0.72vw] font-bold uppercase tracking-wider px-[3vw] sm:px-[1.2vw] py-[0.5vh] rounded-full shadow-md">
+                  Oferta
+                </span>
+              )}
+              {product.entrega48hs && (
+                <span className="bg-black text-white text-[2.6vw] sm:text-[1vw] lg:text-[0.72vw] font-bold uppercase tracking-wider px-[3vw] sm:px-[1.2vw] py-[0.5vh] rounded-full shadow-md flex items-center space-x-[0.4vw]">
+                  <Zap className="w-[3vw] sm:w-[1vw] lg:w-[0.72vw] h-[3vw] sm:h-[1vw] lg:h-[0.72vw] fill-[#f6ad55] text-[#f6ad55]" />
+                  <span>Entrega en 48 hs</span>
+                </span>
+              )}
+            </div>
 
             {/* Carrusel: Botones Prev / Next (visibles en hover o móvil) */}
             {product.images.length > 1 && (
@@ -281,6 +290,23 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
             <div className="inline-flex items-center space-x-[1.5vw] sm:space-x-[0.5vw] bg-[#ecfdf5] border border-[#a7f3d0] text-[#065f46] px-[3vw] sm:px-[1.2vw] py-[0.6vh] rounded-full text-[2.8vw] sm:text-[1.1vw] lg:text-[0.78vw] font-bold uppercase tracking-wider">
               <span>Transferencia bancaria 20% OFF: {formatCurrency(transferPrice)}</span>
             </div>
+
+            {/* Banner de Entrega en 48 hs */}
+            {product.entrega48hs && (
+              <div className="flex items-center space-x-[2.5vw] sm:space-x-[1vw] bg-amber-50/90 border border-amber-300/80 rounded-[1.2vw] sm:rounded-[0.6vw] p-[3vw] sm:p-[1.2vw] text-amber-950 shadow-xs mt-[1vh]">
+                <div className="w-[8vw] sm:w-[3.2vw] lg:w-[2.2vw] h-[8vw] sm:h-[3.2vw] lg:h-[2.2vw] rounded-full bg-[#c25e1a] text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                  <Zap className="w-[4.2vw] sm:w-[1.6vw] lg:w-[1.1vw] h-[4.2vw] sm:h-[1.6vw] lg:h-[1.1vw] fill-white" />
+                </div>
+                <div>
+                  <p className="font-heading font-bold text-[3.2vw] sm:text-[1.3vw] lg:text-[0.88vw] uppercase tracking-wider text-[#9e460e]">
+                    ⚡ Entrega en 48 hs
+                  </p>
+                  <p className="text-[2.7vw] sm:text-[1.1vw] lg:text-[0.78vw] text-gray-700 leading-snug">
+                    Producto disponible con entrega rápida o retiro inmediato en 48 horas hábiles.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Variaciones WooCommerce (Attributes & Variations) */}
