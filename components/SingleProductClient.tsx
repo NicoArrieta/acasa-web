@@ -187,19 +187,11 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
             />
 
             {/* Badges */}
-            <div className="absolute top-[3vw] sm:top-[1.2vw] left-[3vw] sm:left-[1.2vw] flex flex-col gap-[0.5vh] z-10">
-              {product.salePrice && (
-                <span className="bg-[#c25e1a] text-white text-[2.6vw] sm:text-[1vw] lg:text-[0.72vw] font-bold uppercase tracking-wider px-[3vw] sm:px-[1.2vw] py-[0.5vh] rounded-full shadow-md">
-                  Oferta
-                </span>
-              )}
-              {product.entrega48hs && (
-                <span className="bg-black text-white text-[2.6vw] sm:text-[1vw] lg:text-[0.72vw] font-bold uppercase tracking-wider px-[3vw] sm:px-[1.2vw] py-[0.5vh] rounded-full shadow-md flex items-center space-x-[0.4vw]">
-                  <Zap className="w-[3vw] sm:w-[1vw] lg:w-[0.72vw] h-[3vw] sm:h-[1vw] lg:h-[0.72vw] fill-[#f6ad55] text-[#f6ad55]" />
-                  <span>Entrega en 48 hs</span>
-                </span>
-              )}
-            </div>
+            {product.salePrice && (
+              <span className="absolute top-[3vw] sm:top-[1.2vw] left-[3vw] sm:left-[1.2vw] bg-[#c25e1a] text-white text-[2.6vw] sm:text-[1vw] lg:text-[0.72vw] font-bold uppercase tracking-wider px-[3vw] sm:px-[1.2vw] py-[0.5vh] rounded-full shadow-md z-10">
+                Oferta
+              </span>
+            )}
 
             {/* Carrusel: Botones Prev / Next (visibles en hover o móvil) */}
             {product.images.length > 1 && (
