@@ -223,255 +223,267 @@ export default function CategoriesManagerView() {
         </button>
       </div>
 
-      {/* 2. Form View: Create / Edit Category */}
-      {editingCategory ? (
-        <div className="bg-white p-8 rounded-3xl border border-gray-200/80 shadow-md space-y-6 animate-fadeIn">
-          <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-            <div className="flex items-center space-x-3">
-              <div className="w-9 h-9 rounded-xl bg-black text-[#FC7D00] flex items-center justify-center font-bold">
-                <Layers size={18} />
-              </div>
-              <div>
-                <h3 className="font-heading text-base font-bold text-gray-900 uppercase tracking-wide">
-                  {editingCategory.id && categories.some((c) => c.id === editingCategory.id)
-                    ? `Editar Categoría: ${editingCategory.name || ""}`
-                    : "Crear Nueva Categoría"}
-                </h3>
-                <p className="text-xs text-gray-400 font-light">
-                  Configurá el nombre, la imagen destacada y agregá sus subcategorías.
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setEditingCategory(null)}
-              className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              <X size={18} />
-            </button>
-          </div>
-
-          <form onSubmit={handleSaveCategory} className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* Left Column: Name, Slug & Subcategories (7 cols) */}
-              <div className="lg:col-span-7 space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Category Name */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                      Nombre de la Categoría *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={editingCategory.name || ""}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        const autoSlug = val
-                          .toLowerCase()
-                          .normalize("NFD")
-                          .replace(/[\u0300-\u036f]/g, "")
-                          .replace(/[^a-z0-9]+/g, "-")
-                          .replace(/^-+|-+$/g, "");
-                        setEditingCategory({
-                          ...editingCategory,
-                          name: val,
-                          slug: editingCategory.slug ? editingCategory.slug : autoSlug,
-                        });
-                      }}
-                      placeholder="Ej: DORMITORIO, LIVING, COMEDOR..."
-                      className="w-full p-3.5 border border-gray-200 rounded-xl text-xs font-semibold uppercase outline-none focus:border-[#FC7D00] focus:ring-2 focus:ring-[#FC7D00]/10 bg-gray-50/40 focus:bg-white"
-                    />
-                  </div>
-
-                  {/* Category Slug */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                      Identificador URL (Slug) *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={editingCategory.slug || ""}
-                      onChange={(e) =>
-                        setEditingCategory({
-                          ...editingCategory,
-                          slug: e.target.value
-                            .toLowerCase()
-                            .replace(/[^a-z0-9-]/g, "-"),
-                        })
-                      }
-                      placeholder="ej: dormitorio"
-                      className="w-full p-3.5 border border-gray-200 rounded-xl text-xs font-mono outline-none focus:border-[#FC7D00] focus:ring-2 focus:ring-[#FC7D00]/10 bg-gray-50/40 focus:bg-white"
-                    />
-                    <p className="text-[10px] text-gray-400 mt-1 font-mono">
-                      URL: /categoria/{editingCategory.slug || "..."}
-                    </p>
-                  </div>
+      {/* 2. Modal Dialog: Create / Edit Category */}
+      {editingCategory && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 sm:p-6 animate-fadeIn"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setEditingCategory(null);
+          }}
+        >
+          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-gray-100 animate-scaleUp">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/60">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#FC7D00]/10 text-[#FC7D00] flex items-center justify-center font-bold">
+                  <Layers size={20} />
                 </div>
-
-                {/* Subcategories Management */}
-                <div className="p-6 rounded-2xl bg-gray-50 border border-gray-200/80 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900">
-                        Subcategorías de esta Categoría
-                      </h4>
-                      <p className="text-[11px] text-gray-500 font-light mt-0.5">
-                        Agregá todas las subcategorías que correspondan (ej: camas, respaldos, botineros).
-                      </p>
-                    </div>
-                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-white border text-gray-700">
-                      {editingCategory.subcategories?.length || 0}
-                    </span>
-                  </div>
-
-                  {/* Add Subcategory input row */}
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newSubcategoryName}
-                      onChange={(e) => setNewSubcategoryName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddSubcategory();
-                        }
-                      }}
-                      placeholder="Escribí el nombre: ej. Mesas de Luz, Sillones..."
-                      className="flex-1 p-3 rounded-xl border border-gray-200 text-xs outline-none bg-white focus:border-[#FC7D00]"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddSubcategory}
-                      className="px-4 py-3 bg-black hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 shadow-sm"
-                    >
-                      <Plus size={14} />
-                      <span>Agregar</span>
-                    </button>
-                  </div>
-
-                  {/* List of Subcategories */}
-                  {editingCategory.subcategories && editingCategory.subcategories.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
-                      {editingCategory.subcategories.map((sub) => (
-                        <div
-                          key={sub.slug}
-                          className="flex items-center justify-between p-3 rounded-xl bg-white border border-gray-200/80 text-xs shadow-2xs group"
-                        >
-                          <div>
-                            <span className="font-semibold text-gray-800">{sub.name}</span>
-                            <span className="text-[10px] text-gray-400 font-mono block">
-                              /{sub.slug}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveSubcategory(sub.slug)}
-                            className="p-1 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                            title="Quitar subcategoría"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-gray-400 italic py-2 text-center">
-                      No hay subcategorías añadidas aún. Podés agregar una arriba.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Right Column: Featured Image (5 cols) */}
-              <div className="lg:col-span-5 space-y-4">
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700">
-                  Fotografía Destacada de la Categoría
-                </label>
-
-                {/* Image Preview Box */}
-                <div className="aspect-[4/3] rounded-2xl bg-gray-50 border border-gray-200 overflow-hidden relative flex items-center justify-center group p-2">
-                  {editingCategory.image ? (
-                    <img
-                      src={editingCategory.image}
-                      alt={editingCategory.name || "Categoría"}
-                      className="w-full h-full object-contain rounded-xl"
-                    />
-                  ) : (
-                    <div className="text-center p-6 text-gray-400 space-y-2">
-                      <ImageIcon className="w-10 h-10 mx-auto opacity-40 text-[#FC7D00]" />
-                      <span className="text-xs font-medium block">Sin imagen asignada</span>
-                      <span className="text-[10px] text-gray-400">
-                        Seleccioná de la biblioteca o subí una foto
-                      </span>
-                    </div>
-                  )}
-
-                  {editingCategory.image && (
-                    <span className="absolute top-3 left-3 bg-[#FC7D00] text-white text-[9px] font-bold uppercase px-2 py-0.5 rounded-md shadow-xs">
-                      Destacada
-                    </span>
-                  )}
-                </div>
-
-                {/* Image Actions */}
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsMediaPickerOpen(true)}
-                    className="p-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 transition-colors flex items-center justify-center space-x-1.5"
-                  >
-                    <Images size={15} className="text-[#FC7D00]" />
-                    <span>Desde Biblioteca</span>
-                  </button>
-
-                  <label className="p-3 bg-black hover:bg-gray-800 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center space-x-1.5 cursor-pointer shadow-xs">
-                    <UploadCloud size={15} />
-                    <span>Subir (Auto WebP)</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleUploadImage}
-                      className="hidden"
-                      disabled={isUploading}
-                    />
-                  </label>
-                </div>
-
-                {/* Direct URL input */}
                 <div>
-                  <input
-                    type="text"
-                    value={editingCategory.image || ""}
-                    onChange={(e) => setEditingCategory({ ...editingCategory, image: e.target.value })}
-                    placeholder="O pegar URL directa de imagen..."
-                    className="w-full p-2.5 rounded-xl border border-gray-200 text-[11px] font-mono bg-gray-50/50 focus:bg-white outline-none"
-                  />
+                  <h3 className="font-heading text-base font-bold text-gray-900 uppercase tracking-wide">
+                    {editingCategory.id && categories.some((c) => c.id === editingCategory.id)
+                      ? `Editar Categoría: ${editingCategory.name || ""}`
+                      : "Crear Nueva Categoría"}
+                  </h3>
+                  <p className="text-xs text-gray-400 font-light">
+                    Configurá el nombre, la imagen destacada y agregá sus subcategorías.
+                  </p>
                 </div>
               </div>
-            </div>
 
-            {/* Bottom Actions */}
-            <div className="pt-4 border-t border-gray-100 flex items-center justify-end space-x-3">
               <button
                 type="button"
                 onClick={() => setEditingCategory(null)}
-                className="px-6 py-3 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
               >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="px-8 py-3 rounded-xl bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider shadow-md transition-all flex items-center space-x-2"
-              >
-                <Check size={16} />
-                <span>Guardar Categoría</span>
+                <X size={20} />
               </button>
             </div>
-          </form>
+
+            {/* Modal Scrollable Body */}
+            <form onSubmit={handleSaveCategory} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 sm:p-8 overflow-y-auto space-y-6 flex-1">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                  {/* Left Column: Name, Slug & Subcategories (7 cols) */}
+                  <div className="lg:col-span-7 space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Category Name */}
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
+                          Nombre de la Categoría *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={editingCategory.name || ""}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const autoSlug = val
+                              .toLowerCase()
+                              .normalize("NFD")
+                              .replace(/[\u0300-\u036f]/g, "")
+                              .replace(/[^a-z0-9]+/g, "-")
+                              .replace(/^-+|-+$/g, "");
+                            setEditingCategory({
+                              ...editingCategory,
+                              name: val,
+                              slug: editingCategory.slug ? editingCategory.slug : autoSlug,
+                            });
+                          }}
+                          placeholder="Ej: DORMITORIO, LIVING, COMEDOR..."
+                          className="w-full p-3.5 border border-gray-200 rounded-xl text-xs font-semibold uppercase outline-none focus:border-[#FC7D00] focus:ring-2 focus:ring-[#FC7D00]/10 bg-gray-50/40 focus:bg-white"
+                        />
+                      </div>
+
+                      {/* Category Slug */}
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
+                          Identificador URL (Slug) *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={editingCategory.slug || ""}
+                          onChange={(e) =>
+                            setEditingCategory({
+                              ...editingCategory,
+                              slug: e.target.value
+                                .toLowerCase()
+                                .replace(/[^a-z0-9-]/g, "-"),
+                            })
+                          }
+                          placeholder="ej: dormitorio"
+                          className="w-full p-3.5 border border-gray-200 rounded-xl text-xs font-mono outline-none focus:border-[#FC7D00] focus:ring-2 focus:ring-[#FC7D00]/10 bg-gray-50/40 focus:bg-white"
+                        />
+                        <p className="text-[10px] text-gray-400 mt-1 font-mono">
+                          URL: /categoria/{editingCategory.slug || "..."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Subcategories Management */}
+                    <div className="p-6 rounded-2xl bg-gray-50 border border-gray-200/80 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900">
+                            Subcategorías de esta Categoría
+                          </h4>
+                          <p className="text-[11px] text-gray-500 font-light mt-0.5">
+                            Agregá todas las subcategorías que correspondan (ej: camas, respaldos, botineros).
+                          </p>
+                        </div>
+                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-white border text-gray-700">
+                          {editingCategory.subcategories?.length || 0}
+                        </span>
+                      </div>
+
+                      {/* Add Subcategory input row */}
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newSubcategoryName}
+                          onChange={(e) => setNewSubcategoryName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleAddSubcategory();
+                            }
+                          }}
+                          placeholder="Escribí el nombre: ej. Mesas de Luz, Sillones..."
+                          className="flex-1 p-3 rounded-xl border border-gray-200 text-xs outline-none bg-white focus:border-[#FC7D00]"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddSubcategory}
+                          className="px-4 py-3 bg-black hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 shadow-sm cursor-pointer"
+                        >
+                          <Plus size={14} />
+                          <span>Agregar</span>
+                        </button>
+                      </div>
+
+                      {/* List of Subcategories */}
+                      {editingCategory.subcategories && editingCategory.subcategories.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+                          {editingCategory.subcategories.map((sub) => (
+                            <div
+                              key={sub.slug}
+                              className="flex items-center justify-between p-3 rounded-xl bg-white border border-gray-200/80 text-xs shadow-2xs group"
+                            >
+                              <div>
+                                <span className="font-semibold text-gray-800">{sub.name}</span>
+                                <span className="text-[10px] text-gray-400 font-mono block">
+                                  /{sub.slug}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveSubcategory(sub.slug)}
+                                className="p-1 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                                title="Quitar subcategoría"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-gray-400 italic py-2 text-center">
+                          No hay subcategorías añadidas aún. Podés agregar una arriba.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right Column: Featured Image (5 cols) */}
+                  <div className="lg:col-span-5 space-y-4">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700">
+                      Fotografía Destacada de la Categoría
+                    </label>
+
+                    {/* Image Preview Box */}
+                    <div className="aspect-[4/3] rounded-2xl bg-gray-50 border border-gray-200 overflow-hidden relative flex items-center justify-center group p-2">
+                      {editingCategory.image ? (
+                        <img
+                          src={editingCategory.image}
+                          alt={editingCategory.name || "Categoría"}
+                          className="w-full h-full object-contain rounded-xl"
+                        />
+                      ) : (
+                        <div className="text-center p-6 text-gray-400 space-y-2">
+                          <ImageIcon className="w-10 h-10 mx-auto opacity-40 text-[#FC7D00]" />
+                          <span className="text-xs font-medium block">Sin imagen asignada</span>
+                          <span className="text-[10px] text-gray-400">
+                            Seleccioná de la biblioteca o subí una foto
+                          </span>
+                        </div>
+                      )}
+
+                      {editingCategory.image && (
+                        <span className="absolute top-3 left-3 bg-[#FC7D00] text-white text-[9px] font-bold uppercase px-2 py-0.5 rounded-md shadow-xs">
+                          Destacada
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Image Actions */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsMediaPickerOpen(true)}
+                        className="p-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 transition-colors flex items-center justify-center space-x-1.5 cursor-pointer"
+                      >
+                        <Images size={15} className="text-[#FC7D00]" />
+                        <span>Desde Biblioteca</span>
+                      </button>
+
+                      <label className="p-3 bg-black hover:bg-gray-800 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center space-x-1.5 cursor-pointer shadow-xs">
+                        <UploadCloud size={15} />
+                        <span>{isUploading ? "Subiendo..." : "Subir (Auto WebP)"}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleUploadImage}
+                          className="hidden"
+                          disabled={isUploading}
+                        />
+                      </label>
+                    </div>
+
+                    {/* Direct URL input */}
+                    <div>
+                      <input
+                        type="text"
+                        value={editingCategory.image || ""}
+                        onChange={(e) => setEditingCategory({ ...editingCategory, image: e.target.value })}
+                        placeholder="O pegar URL directa de imagen..."
+                        className="w-full p-2.5 rounded-xl border border-gray-200 text-[11px] font-mono bg-gray-50/50 focus:bg-white outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Sticky Footer */}
+              <div className="p-4 px-6 border-t border-gray-100 flex items-center justify-end space-x-3 bg-gray-50/60">
+                <button
+                  type="button"
+                  onClick={() => setEditingCategory(null)}
+                  className="px-6 py-3 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-8 py-3 rounded-xl bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider shadow-md transition-all flex items-center space-x-2 cursor-pointer"
+                >
+                  <Check size={16} />
+                  <span>Guardar Categoría</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      ) : null}
+      )}
 
       {/* 3. Categories List (Grid View) */}
       <div className="space-y-4">
@@ -588,16 +600,18 @@ export default function CategoriesManagerView() {
 
                   <div className="flex items-center space-x-2">
                     <button
+                      type="button"
                       onClick={() => handleStartEdit(cat)}
-                      className="px-3.5 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 hover:text-black hover:border-gray-300 text-xs font-semibold flex items-center space-x-1.5 shadow-2xs transition-colors"
+                      className="px-3.5 py-2 rounded-xl bg-white border border-gray-200 text-gray-700 hover:text-black hover:border-gray-300 text-xs font-semibold flex items-center space-x-1.5 shadow-2xs transition-colors cursor-pointer"
                     >
                       <Pencil size={13} className="text-[#FC7D00]" />
                       <span>Editar</span>
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => handleDeleteCategory(cat)}
-                      className="p-2 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                      className="p-2 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                       title="Eliminar categoría"
                     >
                       <Trash2 size={15} />
