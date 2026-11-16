@@ -141,7 +141,7 @@ export default function Navbar() {
             {/* 1. Logo with Subtle Brand Indicator */}
             <div className="flex-shrink-0 flex items-center space-x-[1.2vw] sm:space-x-[0.8vw]">
               <Link
-                href={isCompraFacil ? "/compra-facil" : "/interiorismo"}
+                href="/"
                 className="flex items-center"
               >
                 <img
@@ -179,7 +179,7 @@ export default function Navbar() {
               <nav className="flex items-center space-x-[1.6vw]">
                 {/* Inicio Link */}
                 <Link
-                  href={isCompraFacil ? "/compra-facil" : "/interiorismo"}
+                  href="/"
                   className={`transition-colors font-medium text-[0.9vw] ${
                     isWhiteHeader
                       ? "text-black hover:text-[#c25e1a]"
@@ -539,7 +539,7 @@ export default function Navbar() {
               }`}
             >
               <Link
-                href={isCompraFacil ? "/compra-facil" : "/interiorismo"}
+                href="/"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`block text-[3.8vw] font-semibold uppercase tracking-wider py-[0.8vh] ${
                   isWhiteHeader ? "text-black" : "text-white"
