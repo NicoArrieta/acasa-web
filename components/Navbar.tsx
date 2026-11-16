@@ -177,9 +177,9 @@ export default function Navbar() {
             {/* 2. Desktop Navigation + Search */}
             <div className="hidden lg:flex items-center space-x-[1.8vw]">
               <nav className="flex items-center space-x-[1.6vw]">
-                {/* Inicio Link */}
+                {/* Inicio Link (Lleva al inicio de la línea correspondiente) */}
                 <Link
-                  href="/"
+                  href={isCompraFacil ? "/compra-facil" : "/interiorismo"}
                   className={`transition-colors font-medium text-[0.9vw] ${
                     isWhiteHeader
                       ? "text-black hover:text-[#c25e1a]"
@@ -539,7 +539,7 @@ export default function Navbar() {
               }`}
             >
               <Link
-                href="/"
+                href={isCompraFacil ? "/compra-facil" : "/interiorismo"}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`block text-[3.8vw] font-semibold uppercase tracking-wider py-[0.8vh] ${
                   isWhiteHeader ? "text-black" : "text-white"
