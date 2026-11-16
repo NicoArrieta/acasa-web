@@ -11,6 +11,7 @@ import { uploadMediaItem } from "@/lib/media";
 import { formatCurrency, saveStoredAttributes, getStoredAttributes } from "@/lib/store";
 import {
   SlidersHorizontal,
+  Camera,
   Plus,
   Trash2,
   ChevronDown,
@@ -800,18 +801,36 @@ export default function ProductVariationsManager({
                           className="p-4 flex items-center justify-between gap-4 cursor-pointer select-none bg-gray-50/40 hover:bg-gray-50 transition-colors"
                         >
                           <div className="flex items-center space-x-3.5 min-w-0">
-                            {/* Thumbnail photo */}
-                            <div className="w-11 h-11 rounded-xl bg-white border border-gray-200 overflow-hidden flex-shrink-0 flex items-center justify-center shadow-2xs">
+                            {/* Thumbnail photo button (WooCommerce exact UX: direct click to set/change photo) */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setMediaPickerVarIndex(vIdx);
+                              }}
+                              className="w-12 h-12 rounded-xl bg-gray-50 hover:bg-orange-50/60 border-2 border-dashed border-gray-300 hover:border-[#FC7D00] overflow-hidden flex-shrink-0 flex flex-col items-center justify-center shadow-2xs group/thumb transition-all cursor-pointer relative"
+                              title="Hacé clic para añadir o cambiar la foto de esta variación"
+                            >
                               {v.image ? (
-                                <img
-                                  src={v.image}
-                                  alt={v.sku || "Variación"}
-                                  className="w-full h-full object-cover"
-                                />
+                                <>
+                                  <img
+                                    src={v.image}
+                                    alt={v.sku || "Variación"}
+                                    className="w-full h-full object-cover group-hover/thumb:opacity-75 transition-opacity"
+                                  />
+                                  <span className="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center text-white transition-opacity">
+                                    <Camera size={15} />
+                                  </span>
+                                </>
                               ) : (
-                                <ImageIcon size={18} className="text-gray-300" />
+                                <div className="text-center p-0.5 text-gray-400 group-hover/thumb:text-[#FC7D00] transition-colors">
+                                  <Camera size={15} className="mx-auto" />
+                                  <span className="text-[8px] font-bold uppercase tracking-wider block mt-0.5 leading-none">
+                                    + Foto
+                                  </span>
+                                </div>
                               )}
-                            </div>
+                            </button>
 
                             {/* Attribute selectors or badges */}
                             <div className="min-w-0">
@@ -916,47 +935,96 @@ export default function ProductVariationsManager({
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                              {/* Left: Image Box */}
-                              <div className="md:col-span-3 space-y-2">
-                                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-600">
-                                  Foto de la variación
-                                </label>
-                                <div className="aspect-square rounded-2xl bg-gray-50 border border-gray-200 overflow-hidden relative flex items-center justify-center p-1 group">
-                                  {v.image ? (
-                                    <img
-                                      src={v.image}
-                                      alt={v.sku || "Variación"}
-                                      className="w-full h-full object-contain rounded-xl"
-                                    />
-                                  ) : (
-                                    <div className="text-center p-3 text-gray-400">
-                                      <ImageIcon className="w-8 h-8 mx-auto opacity-40 text-[#FC7D00]" />
-                                      <span className="text-[10px] block mt-1">Sin foto</span>
-                                    </div>
+                              {/* Left: Enhanced Image Box with direct click */}
+                              <div className="md:col-span-3 space-y-2.5">
+                                <div className="flex items-center justify-between">
+                                  <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-700">
+                                    Foto de la variación
+                                  </label>
+                                  {v.image && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleUpdateVariation(vIdx, { image: "" })}
+                                      className="text-[10px] font-bold text-red-500 hover:underline cursor-pointer"
+                                      title="Quitar foto de esta variación"
+                                    >
+                                      Quitar
+                                    </button>
                                   )}
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-1.5 pt-1">
+                                {/* Clickable Big Image Box */}
+                                <div
+                                  onClick={() => setMediaPickerVarIndex(vIdx)}
+                                  className="aspect-square rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 hover:border-[#FC7D00] hover:bg-orange-50/30 overflow-hidden relative flex flex-col items-center justify-center p-2 group cursor-pointer transition-all shadow-xs"
+                                  title="Hacé clic para elegir o cambiar la foto desde la biblioteca"
+                                >
+                                  {v.image ? (
+                                    <>
+                                      <img
+                                        src={v.image}
+                                        alt={v.sku || "Variación"}
+                                        className="w-full h-full object-contain rounded-xl"
+                                      />
+                                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-2 text-center rounded-2xl backdrop-blur-xs">
+                                        <Camera size={22} className="text-[#FC7D00] mb-1" />
+                                        <span className="text-xs font-bold">Cambiar Foto</span>
+                                        <span className="text-[9px] text-gray-200">Clic para abrir biblioteca</span>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <div className="text-center p-3 text-gray-400 group-hover:text-[#FC7D00] transition-colors space-y-1">
+                                      <Camera className="w-8 h-8 mx-auto opacity-70" />
+                                      <span className="text-xs font-bold block text-gray-700 group-hover:text-[#FC7D00]">
+                                        + Añadir Foto
+                                      </span>
+                                      <span className="text-[10px] text-gray-400 block font-light leading-tight">
+                                        Clic para elegir de la biblioteca o subir
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {v.image && (
+                                    <span className="absolute top-2 left-2 bg-black/70 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded-md uppercase">
+                                      Foto activa
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Direct Action Buttons */}
+                                <div className="grid grid-cols-2 gap-2 pt-0.5">
                                   <button
                                     type="button"
                                     onClick={() => setMediaPickerVarIndex(vIdx)}
-                                    className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[10px] font-bold rounded-xl transition-all flex items-center justify-center space-x-1 cursor-pointer"
-                                    title="Elegir de la biblioteca"
+                                    className="p-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-[11px] font-bold rounded-xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-2xs"
+                                    title="Elegir de la biblioteca multimedia"
                                   >
-                                    <Images size={12} className="text-[#FC7D00]" />
+                                    <Images size={13} className="text-[#FC7D00]" />
                                     <span>Biblioteca</span>
                                   </button>
 
-                                  <label className="p-2 bg-black hover:bg-gray-800 text-white text-[10px] font-bold rounded-xl transition-all flex items-center justify-center space-x-1 cursor-pointer">
-                                    <UploadCloud size={12} />
-                                    <span>{isUploadingVarImage === vIdx ? "..." : "Subir"}</span>
+                                  <label className="p-2.5 bg-black hover:bg-gray-800 text-white text-[11px] font-bold rounded-xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-2xs">
+                                    <UploadCloud size={13} />
+                                    <span>{isUploadingVarImage === vIdx ? "Subiendo..." : "Subir (WebP)"}</span>
                                     <input
                                       type="file"
                                       accept="image/*"
                                       onChange={(e) => handleUploadVariationImage(vIdx, e)}
                                       className="hidden"
+                                      disabled={isUploadingVarImage === vIdx}
                                     />
                                   </label>
+                                </div>
+
+                                {/* Direct Image URL field */}
+                                <div>
+                                  <input
+                                    type="text"
+                                    value={v.image || ""}
+                                    onChange={(e) => handleUpdateVariation(vIdx, { image: e.target.value })}
+                                    placeholder="O pegar URL de imagen..."
+                                    className="w-full p-2 rounded-xl border border-gray-200 text-[10px] font-mono bg-gray-50/50 focus:bg-white outline-none focus:border-[#FC7D00]"
+                                  />
                                 </div>
                               </div>
 
@@ -1095,6 +1163,7 @@ export default function ProductVariationsManager({
       <MediaPickerModal
         isOpen={mediaPickerVarIndex !== null}
         onClose={() => setMediaPickerVarIndex(null)}
+        selectedUrls={mediaPickerVarIndex !== null && variations[mediaPickerVarIndex]?.image ? [variations[mediaPickerVarIndex].image!] : []}
         multiple={false}
         onSelectImages={(urls) => {
           if (urls.length > 0 && mediaPickerVarIndex !== null) {
