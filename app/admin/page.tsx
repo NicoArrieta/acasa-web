@@ -113,6 +113,7 @@ export default function AdminDashboardPage() {
   const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null);
   const initialProductSnapshotRef = useRef<string>("");
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
 
   // DonWeb upload state
   const [isUploading, setIsUploading] = useState(false);
@@ -272,106 +273,122 @@ export default function AdminDashboardPage() {
       return;
     }
 
-    const currentList = [...products];
-    const slug =
-      editingProduct.slug ||
-      editingProduct.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
+    setIsSavingProduct(true);
+    setSaveSuccessMessage(null);
 
-    let targetProduct: Product;
-
-    const finalCats =
-      editingProduct.categories && editingProduct.categories.length > 0
-        ? editingProduct.categories
-        : [editingProduct.category || "comedor"];
-
-    const finalSubcats =
-      editingProduct.subcategories && editingProduct.subcategories.length > 0
-        ? editingProduct.subcategories
-        : editingProduct.subcategory
-        ? [editingProduct.subcategory]
-        : [];
-
-    if (editingProduct.id) {
-      // Update
-      const idx = currentList.findIndex((p) => p.id === editingProduct.id);
-      targetProduct = {
-        ...(currentList[idx] as Product),
-        ...(editingProduct as Product),
-        productType: editingProduct.productType || "simple",
-        attributes: editingProduct.attributes || [],
-        productVariations: editingProduct.productVariations || [],
-        category: finalCats[0],
-        categories: finalCats,
-        subcategory: finalSubcats[0] || "",
-        subcategories: finalSubcats,
-        updatedAt: new Date().toISOString().split("T")[0],
-      };
-      if (idx > -1) {
-        currentList[idx] = targetProduct;
-      }
-    } else {
-      // Create new
-      targetProduct = {
-        id: `prod-${Date.now()}`,
-        slug,
-        title: editingProduct.title,
-        sku: editingProduct.sku || `SKU-${Math.floor(100 + Math.random() * 900)}`,
-        shortDescription: editingProduct.shortDescription || "",
-        description: editingProduct.description || "",
-        regularPrice: Number(editingProduct.regularPrice || effectivePrice),
-        salePrice: editingProduct.salePrice ? Number(editingProduct.salePrice) : editingProduct.productVariations?.[0]?.salePrice,
-        category: finalCats[0],
-        categories: finalCats,
-        subcategory: finalSubcats[0] || "",
-        subcategories: finalSubcats,
-        linea: editingProduct.linea || "practica",
-        productType: editingProduct.productType || "simple",
-        attributes: editingProduct.attributes || [],
-        productVariations: editingProduct.productVariations || [],
-        stock: editingProduct.stock ? Number(editingProduct.stock) : 10,
-        images:
-          editingProduct.images && editingProduct.images.length > 0
-            ? editingProduct.images
-            : ["https://acasatienda.com.ar/wp-content/uploads/2026/10/Living.webp"],
-        variations: editingProduct.variations || [],
-        dimensions: editingProduct.dimensions || { weightKg: 5, widthCm: 50, heightCm: 80, depthCm: 50 },
-        createdAt: new Date().toISOString().split("T")[0],
-        updatedAt: new Date().toISOString().split("T")[0],
-      };
-      currentList.unshift(targetProduct);
-    }
-
-    setProducts(currentList);
-    saveStoredProducts(currentList);
-
-    // Sync to Supabase in background
     try {
-      await supabase.from("products").upsert({
-        id: targetProduct.id,
-        slug: targetProduct.slug,
-        title: targetProduct.title,
-        sku: targetProduct.sku,
-        short_description: targetProduct.shortDescription,
-        description: targetProduct.description,
-        regular_price: targetProduct.regularPrice,
-        sale_price: targetProduct.salePrice,
-        category: targetProduct.category,
-        subcategory: targetProduct.subcategory,
-        linea: targetProduct.linea,
-        stock: targetProduct.stock,
-        images: targetProduct.images,
-        variations: targetProduct.variations,
-        dimensions: targetProduct.dimensions,
-        updated_at: new Date().toISOString(),
-      });
-    } catch (err) {
-      console.debug("Supabase product sync:", err);
-    }
+      const currentList = [...products];
+      const slug =
+        editingProduct.slug ||
+        editingProduct.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
 
-    setEditingProduct(null);
+      let targetProduct: Product;
+
+      const finalCats =
+        editingProduct.categories && editingProduct.categories.length > 0
+          ? editingProduct.categories
+          : [editingProduct.category || "comedor"];
+
+      const finalSubcats =
+        editingProduct.subcategories && editingProduct.subcategories.length > 0
+          ? editingProduct.subcategories
+          : editingProduct.subcategory
+          ? [editingProduct.subcategory]
+          : [];
+
+      if (editingProduct.id) {
+        // Update
+        const idx = currentList.findIndex((p) => p.id === editingProduct.id);
+        targetProduct = {
+          ...(currentList[idx] as Product),
+          ...(editingProduct as Product),
+          productType: editingProduct.productType || "simple",
+          attributes: editingProduct.attributes || [],
+          productVariations: editingProduct.productVariations || [],
+          category: finalCats[0],
+          categories: finalCats,
+          subcategory: finalSubcats[0] || "",
+          subcategories: finalSubcats,
+          updatedAt: new Date().toISOString().split("T")[0],
+        };
+        if (idx > -1) {
+          currentList[idx] = targetProduct;
+        }
+      } else {
+        // Create new
+        targetProduct = {
+          id: `prod-${Date.now()}`,
+          slug,
+          title: editingProduct.title,
+          sku: editingProduct.sku || `SKU-${Math.floor(100 + Math.random() * 900)}`,
+          shortDescription: editingProduct.shortDescription || "",
+          description: editingProduct.description || "",
+          regularPrice: Number(editingProduct.regularPrice || effectivePrice),
+          salePrice: editingProduct.salePrice ? Number(editingProduct.salePrice) : editingProduct.productVariations?.[0]?.salePrice,
+          category: finalCats[0],
+          categories: finalCats,
+          subcategory: finalSubcats[0] || "",
+          subcategories: finalSubcats,
+          linea: editingProduct.linea || "practica",
+          productType: editingProduct.productType || "simple",
+          attributes: editingProduct.attributes || [],
+          productVariations: editingProduct.productVariations || [],
+          stock: editingProduct.stock ? Number(editingProduct.stock) : 10,
+          images:
+            editingProduct.images && editingProduct.images.length > 0
+              ? editingProduct.images
+              : ["https://acasatienda.com.ar/wp-content/uploads/2026/10/Living.webp"],
+          variations: editingProduct.variations || [],
+          dimensions: editingProduct.dimensions || { weightKg: 5, widthCm: 50, heightCm: 80, depthCm: 50 },
+          createdAt: new Date().toISOString().split("T")[0],
+          updatedAt: new Date().toISOString().split("T")[0],
+        };
+        currentList.unshift(targetProduct);
+      }
+
+      setProducts(currentList);
+      saveStoredProducts(currentList);
+
+      // Sync to Supabase in background
+      try {
+        await supabase.from("products").upsert({
+          id: targetProduct.id,
+          slug: targetProduct.slug,
+          title: targetProduct.title,
+          sku: targetProduct.sku,
+          short_description: targetProduct.shortDescription,
+          description: targetProduct.description,
+          regular_price: targetProduct.regularPrice,
+          sale_price: targetProduct.salePrice,
+          category: targetProduct.category,
+          subcategory: targetProduct.subcategory,
+          linea: targetProduct.linea,
+          stock: targetProduct.stock,
+          images: targetProduct.images,
+          variations: targetProduct.variations,
+          dimensions: targetProduct.dimensions,
+          updated_at: new Date().toISOString(),
+        });
+      } catch (err) {
+        console.debug("Supabase product sync:", err);
+      }
+
+      // Keep user on the product edit screen and update clean snapshot
+      setEditingProduct(targetProduct);
+      initialProductSnapshotRef.current = JSON.stringify(targetProduct);
+
+      setSaveSuccessMessage(`¡"${targetProduct.title}" guardado con éxito!`);
+      setTimeout(() => {
+        setSaveSuccessMessage(null);
+      }, 4000);
+    } catch (err: any) {
+      alert("Error al guardar: " + err.message);
+    } finally {
+      setIsSavingProduct(false);
+    }
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -1597,11 +1614,19 @@ export default function AdminDashboardPage() {
                       <button
                         type="button"
                         onClick={handleSaveProduct}
-                        className={`text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center space-x-2 cursor-pointer ${
-                          saveSuccessMessage ? "bg-[#065f46]" : "bg-[#FC7D00] hover:bg-[#e66c00]"
+                        disabled={isSavingProduct}
+                        className={`text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center space-x-2 cursor-pointer disabled:opacity-75 ${
+                          saveSuccessMessage
+                            ? "bg-[#065f46] hover:bg-[#065f46]"
+                            : "bg-[#FC7D00] hover:bg-[#e66c00]"
                         }`}
                       >
-                        {saveSuccessMessage ? (
+                        {isSavingProduct ? (
+                          <>
+                            <RefreshCw size={15} className="animate-spin" />
+                            <span>Guardando...</span>
+                          </>
+                        ) : saveSuccessMessage ? (
                           <>
                             <Check size={16} />
                             <span>¡Guardado!</span>
@@ -2111,11 +2136,19 @@ export default function AdminDashboardPage() {
                         <div className="pt-2">
                           <button
                             type="submit"
-                            className={`w-full text-white text-xs font-bold uppercase tracking-wider py-3.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer ${
-                              saveSuccessMessage ? "bg-[#065f46]" : "bg-[#FC7D00] hover:bg-[#e66c00]"
+                            disabled={isSavingProduct}
+                            className={`w-full text-white text-xs font-bold uppercase tracking-wider py-3.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-75 ${
+                              saveSuccessMessage
+                                ? "bg-[#065f46] hover:bg-[#065f46]"
+                                : "bg-[#FC7D00] hover:bg-[#e66c00]"
                             }`}
                           >
-                            {saveSuccessMessage ? (
+                            {isSavingProduct ? (
+                              <>
+                                <RefreshCw size={16} className="animate-spin" />
+                                <span>Guardando Cambios en Catálogo...</span>
+                              </>
+                            ) : saveSuccessMessage ? (
                               <>
                                 <Check size={16} />
                                 <span>¡Mueble Guardado con Éxito!</span>
@@ -2654,11 +2687,22 @@ export default function AdminDashboardPage() {
 
       {/* Toast de éxito al guardar sin salir */}
       {saveSuccessMessage && (
-        <div className="fixed top-6 right-6 z-[80] bg-[#065f46] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-2.5 animate-fadeIn border border-emerald-400/30">
-          <span className="w-6 h-6 rounded-full bg-emerald-400 text-emerald-950 flex items-center justify-center font-bold text-xs">
-            ✓
-          </span>
-          <span className="text-xs font-bold">{saveSuccessMessage}</span>
+        <div className="fixed bottom-6 right-6 z-[95] bg-gray-900/95 text-white pl-4 pr-3 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3.5 border border-emerald-500/40 backdrop-blur-md animate-slideUp">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 border border-emerald-500/30">
+            <Check size={18} />
+          </div>
+          <div className="pr-2">
+            <p className="text-xs font-bold text-white leading-tight">Mueble guardado con éxito</p>
+            <p className="text-[11px] text-gray-300 mt-0.5 leading-tight">{saveSuccessMessage}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSaveSuccessMessage(null)}
+            className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            title="Cerrar notificación"
+          >
+            <X size={14} />
+          </button>
         </div>
       )}
 
