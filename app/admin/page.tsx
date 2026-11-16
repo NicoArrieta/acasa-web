@@ -4,14 +4,16 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Product,
+  Category,
   Order,
   DonWebFtpSettings,
 } from "@/lib/types";
 import { CATEGORIES } from "@/lib/data";
 import MediaLibraryView from "@/components/MediaLibraryView";
+import CategoriesManagerView from "@/components/CategoriesManagerView";
 import MediaPickerModal from "@/components/MediaPickerModal";
 import { uploadMediaItem } from "@/lib/media";
-import { getStoredMedia } from "@/lib/store";
+import { getStoredMedia, getStoredCategories, saveStoredCategories } from "@/lib/store";
 import {
   getStoredProducts,
   saveStoredProducts,
@@ -28,6 +30,7 @@ import {
 } from "@/lib/supabase";
 import {
   LayoutDashboard,
+  FolderTree,
   Package,
   ShoppingCart,
   UploadCloud,
@@ -64,7 +67,9 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "media" | "orders" | "donweb">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "categories" | "media" | "orders" | "donweb">("dashboard");
+  const [categoriesList, setCategoriesList] = useState<Category[]>([]);
+  const [selectedSubcatFilter, setSelectedSubcatFilter] = useState<string>("all");
   const [carouselPreviewIdx, setCarouselPreviewIdx] = useState(0);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [manualImageUrl, setManualImageUrl] = useState("");
@@ -124,6 +129,15 @@ export default function AdminDashboardPage() {
   }, [timeRange, activeTab]);
 
   
+  useEffect(() => {
+    setCategoriesList(getStoredCategories());
+    const handleCatUpdate = () => {
+      setCategoriesList(getStoredCategories());
+    };
+    window.addEventListener("categories_updated", handleCatUpdate);
+    return () => window.removeEventListener("categories_updated", handleCatUpdate);
+  }, []);
+
   useEffect(() => {
     const m = getStoredMedia();
     setMediaLibraryCount(m.length);
@@ -202,12 +216,28 @@ export default function AdminDashboardPage() {
 
     let targetProduct: Product;
 
+    const finalCats =
+      editingProduct.categories && editingProduct.categories.length > 0
+        ? editingProduct.categories
+        : [editingProduct.category || "comedor"];
+
+    const finalSubcats =
+      editingProduct.subcategories && editingProduct.subcategories.length > 0
+        ? editingProduct.subcategories
+        : editingProduct.subcategory
+        ? [editingProduct.subcategory]
+        : [];
+
     if (editingProduct.id) {
       // Update
       const idx = currentList.findIndex((p) => p.id === editingProduct.id);
       targetProduct = {
         ...(currentList[idx] as Product),
         ...(editingProduct as Product),
+        category: finalCats[0],
+        categories: finalCats,
+        subcategory: finalSubcats[0] || "",
+        subcategories: finalSubcats,
         updatedAt: new Date().toISOString().split("T")[0],
       };
       if (idx > -1) {
@@ -224,8 +254,10 @@ export default function AdminDashboardPage() {
         description: editingProduct.description || "",
         regularPrice: Number(editingProduct.regularPrice),
         salePrice: editingProduct.salePrice ? Number(editingProduct.salePrice) : undefined,
-        category: editingProduct.category || "comedor",
-        subcategory: editingProduct.subcategory || "",
+        category: finalCats[0],
+        categories: finalCats,
+        subcategory: finalSubcats[0] || "",
+        subcategories: finalSubcats,
         linea: editingProduct.linea || "practica",
         stock: editingProduct.stock ? Number(editingProduct.stock) : 10,
         images:
@@ -348,13 +380,27 @@ export default function AdminDashboardPage() {
   const activeOrdersCount = orders.filter((o) => o.status === "processing" || o.status === "pending").length;
 
   const filteredProducts = products.filter((p) => {
-    if (selectedCatFilter !== "all" && p.category !== selectedCatFilter) return false;
+    if (selectedCatFilter !== "all") {
+      const matchCat =
+        p.category === selectedCatFilter || (p.categories && p.categories.includes(selectedCatFilter));
+      if (!matchCat) return false;
+    }
+    if (selectedSubcatFilter !== "all") {
+      const matchSub =
+        p.subcategory === selectedSubcatFilter || (p.subcategories && p.subcategories.includes(selectedSubcatFilter));
+      if (!matchSub) return false;
+    }
     if (productSearch.trim()) {
       const q = productSearch.toLowerCase();
       return p.title.toLowerCase().includes(q) || p.sku?.toLowerCase().includes(q);
     }
     return true;
   });
+
+  const availableFilterSubcategories =
+    selectedCatFilter !== "all"
+      ? categoriesList.find((c) => c.slug === selectedCatFilter)?.subcategories || []
+      : [];
 
   // Analytics totals & ratios
   const totalLineInteractions =
@@ -523,7 +569,53 @@ export default function AdminDashboardPage() {
             )}
           </button>
 
-                    {/* Media Library */}
+                              {/* Categories */}
+          <button
+            onClick={() => {
+              setActiveTab("categories");
+              setEditingProduct(null);
+            }}
+            title={sidebarCollapsed ? "Gestión de Categorías" : undefined}
+            className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
+              sidebarCollapsed
+                ? `justify-center py-3.5 rounded-2xl ${
+                    activeTab === "categories"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
+                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                    activeTab === "categories"
+                      ? "bg-white text-[#FC7D00] shadow-md"
+                      : "text-white hover:bg-black/10"
+                  }`
+            }`}
+          >
+            <FolderTree size={20} className={activeTab === "categories" ? "text-[#FC7D00]" : "text-white"} />
+            {!sidebarCollapsed && (
+              <div className="flex-1 flex justify-between items-center">
+                <span className="tracking-wide text-[13px]">Categorías</span>
+                <span
+                  className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
+                    activeTab === "categories" ? "bg-[#FC7D00] text-white" : "bg-[#b85000] text-white"
+                  }`}
+                >
+                  {categoriesList.length}
+                </span>
+              </div>
+            )}
+            {sidebarCollapsed && (
+              <>
+                <span className="absolute top-2 right-2 text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-[#b85000] text-white">
+                  {categoriesList.length}
+                </span>
+                <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                  Categorías ({categoriesList.length})
+                </span>
+              </>
+            )}
+          </button>
+
+          {/* Media Library */}
           <button
             onClick={() => {
               setActiveTab("media");
@@ -706,6 +798,7 @@ export default function AdminDashboardPage() {
             <h2 className="font-heading text-base font-bold text-white uppercase tracking-wider">
               {activeTab === "dashboard" && "Tablero de Tráfico & Conversión en Tiempo Real"}
               {activeTab === "products" && (editingProduct ? "Configuración y Detalle del Mueble" : "Gestión y Catálogo de Muebles")}
+              {activeTab === "categories" && "Gestión de Categorías & Subcategorías"}
               {activeTab === "media" && "Biblioteca Multimedia"}
               {activeTab === "orders" && "Gestión de Pedidos & Checkout"}
               {activeTab === "donweb" && "Almacenamiento Multimedia DonWeb"}
@@ -1388,37 +1481,122 @@ export default function AdminDashboardPage() {
                           </div>
                         </div>
 
-                        {/* Category & Subcategory */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Categorías y Subcategorías Múltiples */}
+                        <div className="space-y-4 pt-1">
                           <div>
-                            <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">
-                              Categoría *
-                            </label>
-                            <select
-                              value={editingProduct.category || "comedor"}
-                              onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
-                              className="w-full p-3.5 border border-gray-200 rounded-xl outline-none text-xs bg-white font-medium"
-                            >
-                              {CATEGORIES.map((c) => (
-                                <option key={c.id} value={c.slug}>
-                                  {c.name}
-                                </option>
-                              ))}
-                            </select>
+                            <div className="flex items-center justify-between mb-2">
+                              <label className="block font-semibold text-gray-700 uppercase tracking-wider text-[11px]">
+                                Categorías del Producto (Podés elegir más de una) *
+                              </label>
+                              <span className="text-[10px] text-gray-400 font-mono">
+                                {(editingProduct.categories?.length || (editingProduct.category ? 1 : 0))} seleccionada(s)
+                              </span>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
+                              {categoriesList.map((cat) => {
+                                const isChecked =
+                                  editingProduct.categories?.includes(cat.slug) ||
+                                  (!editingProduct.categories && editingProduct.category === cat.slug);
+
+                                return (
+                                  <button
+                                    key={cat.slug}
+                                    type="button"
+                                    onClick={() => {
+                                      const current = editingProduct.categories || (editingProduct.category ? [editingProduct.category] : []);
+                                      let updated: string[];
+                                      if (current.includes(cat.slug)) {
+                                        updated = current.filter((c) => c !== cat.slug);
+                                      } else {
+                                        updated = [...current, cat.slug];
+                                      }
+                                      setEditingProduct({
+                                        ...editingProduct,
+                                        category: updated[0] || cat.slug,
+                                        categories: updated,
+                                      });
+                                    }}
+                                    className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center space-x-1.5 border ${
+                                      isChecked
+                                        ? "bg-black text-white border-black shadow-xs"
+                                        : "bg-gray-50 hover:bg-gray-100 text-gray-600 border-gray-200"
+                                    }`}
+                                  >
+                                    <span>{cat.name}</span>
+                                    {isChecked && <Check size={13} className="text-[#FC7D00]" />}
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </div>
 
-                          <div>
-                            <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">
-                              Subcategoría (Opcional)
-                            </label>
-                            <input
-                              type="text"
-                              value={editingProduct.subcategory || ""}
-                              onChange={(e) => setEditingProduct({ ...editingProduct, subcategory: e.target.value })}
-                              placeholder="Ej: sofas, botineros, alfombras"
-                              className="w-full p-3.5 border border-gray-200 rounded-xl outline-none text-xs font-medium bg-gray-50/30 focus:bg-white"
-                            />
-                          </div>
+                          {/* Subcategorías disponibles según categorías marcadas */}
+                          {(() => {
+                            const selectedCatSlugs = editingProduct.categories || (editingProduct.category ? [editingProduct.category] : []);
+                            const relevantSubs: { catName: string; name: string; slug: string }[] = [];
+                            categoriesList
+                              .filter((c) => selectedCatSlugs.includes(c.slug))
+                              .forEach((c) => {
+                                c.subcategories?.forEach((s) => {
+                                  if (!relevantSubs.some((r) => r.slug === s.slug)) {
+                                    relevantSubs.push({ catName: c.name, name: s.name, slug: s.slug });
+                                  }
+                                });
+                              });
+
+                            if (relevantSubs.length === 0) return null;
+
+                            return (
+                              <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">
+                                    Subcategorías (Podés elegir más de una):
+                                  </span>
+                                  <span className="text-[10px] text-gray-400 font-mono">
+                                    {(editingProduct.subcategories?.length || (editingProduct.subcategory ? 1 : 0))} seleccionada(s)
+                                  </span>
+                                </div>
+
+                                <div className="flex flex-wrap gap-1.5 pt-1">
+                                  {relevantSubs.map((sub) => {
+                                    const isSubChecked =
+                                      editingProduct.subcategories?.includes(sub.slug) ||
+                                      (!editingProduct.subcategories && editingProduct.subcategory === sub.slug);
+
+                                    return (
+                                      <button
+                                        key={sub.slug}
+                                        type="button"
+                                        onClick={() => {
+                                          const current = editingProduct.subcategories || (editingProduct.subcategory ? [editingProduct.subcategory] : []);
+                                          let updated: string[];
+                                          if (current.includes(sub.slug)) {
+                                            updated = current.filter((s) => s !== sub.slug);
+                                          } else {
+                                            updated = [...current, sub.slug];
+                                          }
+                                          setEditingProduct({
+                                            ...editingProduct,
+                                            subcategory: updated[0] || "",
+                                            subcategories: updated,
+                                          });
+                                        }}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center space-x-1.5 border ${
+                                          isSubChecked
+                                            ? "bg-[#FC7D00] text-white border-[#FC7D00] font-bold shadow-xs"
+                                            : "bg-white hover:bg-gray-100 text-gray-700 border-gray-200"
+                                        }`}
+                                      >
+                                        <span>{sub.name}</span>
+                                        {isSubChecked && <Check size={12} className="text-white" />}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </div>
 
                         {/* Descriptions */}
@@ -1752,18 +1930,38 @@ export default function AdminDashboardPage() {
                         <span>Añadir Producto</span>
                       </button>
 
+                      {/* Category Filter */}
                       <select
                         value={selectedCatFilter}
-                        onChange={(e) => setSelectedCatFilter(e.target.value)}
+                        onChange={(e) => {
+                          setSelectedCatFilter(e.target.value);
+                          setSelectedSubcatFilter("all");
+                        }}
                         className="text-xs border border-gray-300 rounded-xl px-3 py-2.5 outline-none bg-white font-medium"
                       >
                         <option value="all">Todas las categorías</option>
-                        {CATEGORIES.map((c) => (
-                          <option key={c.id} value={c.slug}>
+                        {categoriesList.map((c) => (
+                          <option key={c.slug} value={c.slug}>
                             {c.name}
                           </option>
                         ))}
                       </select>
+
+                      {/* Subcategory Filter */}
+                      {availableFilterSubcategories.length > 0 && (
+                        <select
+                          value={selectedSubcatFilter}
+                          onChange={(e) => setSelectedSubcatFilter(e.target.value)}
+                          className="text-xs border border-gray-300 rounded-xl px-3 py-2.5 outline-none bg-white font-medium"
+                        >
+                          <option value="all">Todas las subcategorías</option>
+                          {availableFilterSubcategories.map((s) => (
+                            <option key={s.slug} value={s.slug}>
+                              {s.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </div>
 
                     <div className="relative w-full sm:w-72">
@@ -1872,7 +2070,10 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-                    {/* TAB: MEDIA LIBRARY */}
+                              {/* TAB: CATEGORIES */}
+          {activeTab === "categories" && <CategoriesManagerView />}
+
+          {/* TAB: MEDIA LIBRARY */}
           {activeTab === "media" && <MediaLibraryView />}
 
           {/* TAB 3: ORDERS */}

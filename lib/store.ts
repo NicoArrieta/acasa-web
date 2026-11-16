@@ -88,6 +88,39 @@ export function saveStoredDonWebConfig(cfg: DonWebFtpSettings): void {
   }
 }
 
+
+export function getStoredCategories(): Category[] {
+  if (typeof window === "undefined") return CATEGORIES;
+  try {
+    const item = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
+    if (!item) {
+      saveStoredCategories(CATEGORIES);
+      return CATEGORIES;
+    }
+    const stored = JSON.parse(item) as Category[];
+    const storedSlugs = new Set(stored.map((c) => c.slug));
+    const missing = CATEGORIES.filter((c) => !storedSlugs.has(c.slug));
+    if (missing.length > 0) {
+      const merged = [...stored, ...missing];
+      saveStoredCategories(merged);
+      return merged;
+    }
+    return stored;
+  } catch {
+    return CATEGORIES;
+  }
+}
+
+export function saveStoredCategories(categories: Category[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+    window.dispatchEvent(new Event("categories_updated"));
+  } catch (err) {
+    console.error("Error saving categories:", err);
+  }
+}
+
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("es-AR", {
     style: "currency",

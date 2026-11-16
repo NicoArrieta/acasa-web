@@ -31,8 +31,10 @@ export interface Product {
   featured?: boolean;
   isNewArrival?: boolean;
   linea?: "practica" | "premium";
-  category: string; // category slug
+  category: string;
+  categories?: string[];
   subcategory?: string;
+  subcategories?: string[];
   images: string[];
   stock: number;
   variations?: {
