@@ -48,6 +48,7 @@ import {
   Clock,
   Save,
   X,
+  FilterX,
   Upload,
   Download,
   MessageCircle,
@@ -537,6 +538,17 @@ export default function AdminDashboardPage() {
     selectedCatFilter !== "all"
       ? categoriesList.find((c) => c.slug === selectedCatFilter)?.subcategories || []
       : [];
+
+  const hasActiveFilters =
+    selectedCatFilter !== "all" ||
+    selectedSubcatFilter !== "all" ||
+    productSearch.trim() !== "";
+
+  const handleClearFilters = () => {
+    setSelectedCatFilter("all");
+    setSelectedSubcatFilter("all");
+    setProductSearch("");
+  };
 
   // Analytics totals & ratios
   const totalLineInteractions =
@@ -2202,6 +2214,19 @@ export default function AdminDashboardPage() {
                           ))}
                         </select>
                       )}
+
+                      {/* Clear Filters Button */}
+                      {hasActiveFilters && (
+                        <button
+                          type="button"
+                          onClick={handleClearFilters}
+                          className="bg-amber-50 hover:bg-amber-100 text-[#FC7D00] text-xs font-bold px-3 py-2.5 rounded-xl border border-amber-200/80 flex items-center space-x-1.5 transition-all shadow-sm"
+                          title="Limpiar todos los filtros"
+                        >
+                          <FilterX size={14} />
+                          <span>Limpiar filtros</span>
+                        </button>
+                      )}
                     </div>
 
                     <div className="relative w-full sm:w-72">
@@ -2210,9 +2235,19 @@ export default function AdminDashboardPage() {
                         placeholder="Buscar por título o SKU..."
                         value={productSearch}
                         onChange={(e) => setProductSearch(e.target.value)}
-                        className="w-full text-xs pl-9 pr-3 py-2.5 border border-gray-300 rounded-xl outline-none focus:border-black bg-white"
+                        className="w-full text-xs pl-9 pr-8 py-2.5 border border-gray-300 rounded-xl outline-none focus:border-black bg-white"
                       />
                       <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      {productSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setProductSearch("")}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-0.5 rounded-full"
+                          title="Limpiar búsqueda"
+                        >
+                          <X size={13} />
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -2231,7 +2266,33 @@ export default function AdminDashboardPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {filteredProducts.map((p) => (
+                        {filteredProducts.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="p-12 text-center text-gray-500">
+                              <div className="flex flex-col items-center justify-center space-y-3">
+                                <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400">
+                                  <FilterX size={22} />
+                                </div>
+                                <p className="font-bold text-sm text-gray-800">
+                                  No se encontraron muebles con los filtros seleccionados
+                                </p>
+                                <p className="text-xs text-gray-400 max-w-sm">
+                                  Probá cambiando el término de búsqueda o la categoría seleccionada.
+                                </p>
+                                {hasActiveFilters && (
+                                  <button
+                                    type="button"
+                                    onClick={handleClearFilters}
+                                    className="mt-2 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+                                  >
+                                    Limpiar todos los filtros
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredProducts.map((p) => (
                           <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
                             <td className="p-4 font-semibold text-gray-900">
                               <div className="flex flex-col">
@@ -2301,7 +2362,8 @@ export default function AdminDashboardPage() {
                               </div>
                             </td>
                           </tr>
-                        ))}
+                        ))
+                      )}
                       </tbody>
                     </table>
                   </div>
