@@ -601,12 +601,12 @@ export default function AdminDashboardPage() {
     <div className="flex h-screen bg-[#fcfbfa] font-sans antialiased text-[#1a1a1a]">
       {/* 1. ACASA LUXURY ORANGE SIDEBAR */}
       <aside
-        className={`bg-[#FC7D00] text-white flex flex-col flex-shrink-0 select-none shadow-xl transition-all duration-300 ease-in-out relative ${
+        className={`bg-[#FC7D00] text-white flex flex-col flex-shrink-0 select-none shadow-xl transition-all duration-300 ease-in-out relative h-full max-h-screen overflow-hidden ${
           sidebarCollapsed ? "w-20" : "w-72"
         }`}
       >
         {/* Brand identity header */}
-        <div className={`border-b border-[#c45600] transition-all duration-300 ${sidebarCollapsed ? "p-3 py-4" : "p-6"}`}>
+        <div className={`border-b border-[#c45600] transition-all duration-300 flex-shrink-0 ${sidebarCollapsed ? "p-3 py-3.5" : "p-4 sm:p-5 pb-3.5"}`}>
           {sidebarCollapsed ? (
             <div className="flex flex-col items-center space-y-3">
               <Link href="/" target="_blank" className="group" title="Acasa Calidad y Diseño">
@@ -659,7 +659,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Navigation items */}
-        <nav className={`flex-1 py-6 space-y-2 text-xs ${sidebarCollapsed ? "px-2" : "px-4"}`}>
+        <nav className={`flex-1 min-h-0 overflow-y-auto py-2.5 space-y-1 text-xs scrollbar-none ${sidebarCollapsed ? "px-2" : "px-3"}`}>
           {/* Dashboard */}
           <button
             onClick={() => {
@@ -671,12 +671,12 @@ export default function AdminDashboardPage() {
             title={sidebarCollapsed ? "Escritorio & Tablero" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
               sidebarCollapsed
-                ? `justify-center py-3.5 rounded-2xl ${
+                ? `justify-center py-2.5 rounded-xl ${
                     activeTab === "dashboard"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
                   }`
-                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                : `space-x-3 px-3.5 py-2.5 rounded-xl ${
                     activeTab === "dashboard"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
@@ -704,12 +704,12 @@ export default function AdminDashboardPage() {
             title={sidebarCollapsed ? "Catálogo de Productos" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
               sidebarCollapsed
-                ? `justify-center py-3.5 rounded-2xl ${
+                ? `justify-center py-2.5 rounded-xl ${
                     activeTab === "products"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
                   }`
-                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                : `space-x-3 px-3.5 py-2.5 rounded-xl ${
                     activeTab === "products"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
@@ -752,12 +752,12 @@ export default function AdminDashboardPage() {
             title={sidebarCollapsed ? "Gestión de Categorías" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
               sidebarCollapsed
-                ? `justify-center py-3.5 rounded-2xl ${
+                ? `justify-center py-2.5 rounded-xl ${
                     activeTab === "categories"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
                   }`
-                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                : `space-x-3 px-3.5 py-2.5 rounded-xl ${
                     activeTab === "categories"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
@@ -800,12 +800,12 @@ export default function AdminDashboardPage() {
             title={sidebarCollapsed ? "Atributos & Variaciones" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
               sidebarCollapsed
-                ? `justify-center py-3.5 rounded-2xl ${
+                ? `justify-center py-2.5 rounded-xl ${
                     activeTab === "attributes"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
                   }`
-                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                : `space-x-3 px-3.5 py-2.5 rounded-xl ${
                     activeTab === "attributes"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
@@ -848,12 +848,12 @@ export default function AdminDashboardPage() {
             title={sidebarCollapsed ? "Biblioteca Multimedia" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
               sidebarCollapsed
-                ? `justify-center py-3.5 rounded-2xl ${
+                ? `justify-center py-2.5 rounded-xl ${
                     activeTab === "media"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
                   }`
-                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                : `space-x-3 px-3.5 py-2.5 rounded-xl ${
                     activeTab === "media"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
@@ -896,12 +896,12 @@ export default function AdminDashboardPage() {
             title={sidebarCollapsed ? "Gestión de Pedidos" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
               sidebarCollapsed
-                ? `justify-center py-3.5 rounded-2xl ${
+                ? `justify-center py-2.5 rounded-xl ${
                     activeTab === "orders"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
                   }`
-                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                : `space-x-3 px-3.5 py-2.5 rounded-xl ${
                     activeTab === "orders"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
@@ -944,12 +944,12 @@ export default function AdminDashboardPage() {
             title={sidebarCollapsed ? "Multimedia DonWeb" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
               sidebarCollapsed
-                ? `justify-center py-3.5 rounded-2xl ${
+                ? `justify-center py-2.5 rounded-xl ${
                     activeTab === "donweb"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
                   }`
-                : `space-x-3 px-4 py-3.5 rounded-2xl ${
+                : `space-x-3 px-3.5 py-2.5 rounded-xl ${
                     activeTab === "donweb"
                       ? "bg-white text-[#FC7D00] shadow-md"
                       : "text-white hover:bg-black/10"
@@ -966,51 +966,54 @@ export default function AdminDashboardPage() {
           </button>
         </nav>
 
-        {/* Quick Branch & Store Info Box */}
-        {sidebarCollapsed ? (
-          <div
-            className="p-2 mx-2 mb-4 rounded-2xl bg-[#c45600] text-white flex justify-center py-3 relative group cursor-pointer"
-            title="Sucursales Activas"
-          >
-            <MapPin size={18} className="text-white" />
-            <span className="absolute left-full ml-3 px-3 py-2 bg-[#0e0e10] text-white text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 leading-relaxed">
-              <strong>Sucursales:</strong><br />
-              Ciudad: Av. Mitre 1398<br />
-              Luján: Alma Gardenia
-            </span>
-          </div>
-        ) : (
-          <div className="p-4 mx-4 mb-4 rounded-2xl bg-[#c45600] text-white space-y-2.5">
-            <div className="flex items-center space-x-2 text-[10px] uppercase font-bold tracking-widest text-white">
-              <MapPin size={13} className="text-white" />
-              <span>SUCURSALES ACTIVAS</span>
+        {/* Sidebar Footer: Info Box & Store Link */}
+        <div className={`flex-shrink-0 border-t border-[#c45600]/60 pt-2.5 pb-3 ${sidebarCollapsed ? "px-2" : "px-3"} space-y-2`}>
+          {/* Quick Branch & Store Info Box */}
+          {sidebarCollapsed ? (
+            <div
+              className="p-2 rounded-xl bg-[#c45600] text-white flex justify-center py-2.5 relative group cursor-pointer"
+              title="Sucursales Activas"
+            >
+              <MapPin size={16} className="text-white" />
+              <span className="absolute left-full ml-3 px-3 py-2 bg-[#0e0e10] text-white text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 leading-relaxed">
+                <strong>Sucursales:</strong><br />
+                Ciudad: Av. Mitre 1398<br />
+                Luján: Alma Gardenia
+              </span>
             </div>
-            <div className="text-[12px] space-y-1.5">
-              <p className="flex justify-between items-center">
-                <span className="text-white/80">Ciudad:</span>
-                <span className="font-bold text-white">Av. Mitre 1398</span>
-              </p>
-              <p className="flex justify-between items-center">
-                <span className="text-white/80">Luján:</span>
-                <span className="font-bold text-white">Alma Gardenia</span>
-              </p>
+          ) : (
+            <div className="p-3 rounded-xl bg-[#c45600] text-white space-y-1.5 shadow-xs">
+              <div className="flex items-center space-x-1.5 text-[10px] uppercase font-bold tracking-widest text-white">
+                <MapPin size={12} className="text-white" />
+                <span>SUCURSALES ACTIVAS</span>
+              </div>
+              <div className="text-[11px] space-y-1">
+                <p className="flex justify-between items-center">
+                  <span className="text-white/80">Ciudad:</span>
+                  <span className="font-bold text-white">Av. Mitre 1398</span>
+                </p>
+                <p className="flex justify-between items-center">
+                  <span className="text-white/80">Luján:</span>
+                  <span className="font-bold text-white">Alma Gardenia</span>
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Store Link at bottom */}
-        <div className={`border-t border-[#c45600] ${sidebarCollapsed ? "p-2" : "p-4"}`}>
-          <Link
-            href="/"
-            target="_blank"
-            title="Abrir Tienda Pública"
-            className={`flex items-center justify-between text-xs text-white bg-[#b85000] hover:bg-[#a64800] rounded-2xl transition-all duration-200 group font-bold shadow-sm ${
-              sidebarCollapsed ? "p-3 justify-center" : "p-4"
-            }`}
-          >
-            {!sidebarCollapsed && <span className="text-[13px]">Abrir Tienda Pública</span>}
-            <ArrowUpRight size={16} className="text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </Link>
+          {/* Store Link at bottom */}
+          <div>
+            <Link
+              href="/"
+              target="_blank"
+              title="Abrir Tienda Pública"
+              className={`flex items-center justify-between text-xs text-white bg-[#b85000] hover:bg-[#a64800] rounded-xl transition-all duration-200 group font-bold shadow-xs ${
+                sidebarCollapsed ? "p-2.5 justify-center" : "py-2.5 px-3.5"
+              }`}
+            >
+              {!sidebarCollapsed && <span className="text-[12px]">Abrir Tienda Pública</span>}
+              <ArrowUpRight size={15} className="text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </Link>
+          </div>
         </div>
       </aside>
 
