@@ -15,6 +15,7 @@ import CategoriesManagerView from "@/components/CategoriesManagerView";
 import AttributesManagerView from "@/components/AttributesManagerView";
 import ProductVariationsManager from "@/components/ProductVariationsManager";
 import MediaPickerModal from "@/components/MediaPickerModal";
+import ProductImportExportModal from "@/components/ProductImportExportModal";
 import { uploadMediaItem } from "@/lib/media";
 import { getStoredMedia, getStoredCategories, saveStoredCategories, getStoredAttributes, saveStoredAttributes } from "@/lib/store";
 import {
@@ -48,6 +49,7 @@ import {
   Save,
   X,
   Upload,
+  Download,
   MessageCircle,
   Users,
   Globe,
@@ -78,6 +80,8 @@ export default function AdminDashboardPage() {
   const [selectedSubcatFilter, setSelectedSubcatFilter] = useState<string>("all");
   const [carouselPreviewIdx, setCarouselPreviewIdx] = useState(0);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [isImportExportModalOpen, setIsImportExportModalOpen] = useState(false);
+  const [importExportModalTab, setImportExportModalTab] = useState<"export" | "import">("export");
   const [manualImageUrl, setManualImageUrl] = useState("");
   const [mediaLibraryCount, setMediaLibraryCount] = useState(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -392,6 +396,71 @@ export default function AdminDashboardPage() {
     const updated = [duplicated, ...products];
     setProducts(updated);
     saveStoredProducts(updated);
+  };
+
+  const handleImportProducts = async (importedList: Product[], overwrite: boolean) => {
+    const current = [...products];
+    const currentMap = new Map<string, number>();
+    current.forEach((p, idx) => {
+      if (p.id) currentMap.set(p.id.toLowerCase(), idx);
+      if (p.sku) currentMap.set(p.sku.toLowerCase(), idx);
+      if (p.slug) currentMap.set(p.slug.toLowerCase(), idx);
+    });
+
+    const toAdd: Product[] = [];
+    const toUpsertSupabase: Product[] = [];
+
+    for (const item of importedList) {
+      const matchedIdx =
+        (item.id && currentMap.has(item.id.toLowerCase()) ? currentMap.get(item.id.toLowerCase()) : undefined) ??
+        (item.sku && currentMap.has(item.sku.toLowerCase()) ? currentMap.get(item.sku.toLowerCase()) : undefined) ??
+        (item.slug && currentMap.has(item.slug.toLowerCase()) ? currentMap.get(item.slug.toLowerCase()) : undefined);
+
+      if (matchedIdx !== undefined) {
+        if (overwrite) {
+          const updatedProd: Product = {
+            ...current[matchedIdx],
+            ...item,
+            updatedAt: new Date().toISOString().split("T")[0],
+          };
+          current[matchedIdx] = updatedProd;
+          toUpsertSupabase.push(updatedProd);
+        }
+      } else {
+        toAdd.push(item);
+        toUpsertSupabase.push(item);
+      }
+    }
+
+    const finalProducts = [...toAdd, ...current];
+    setProducts(finalProducts);
+    saveStoredProducts(finalProducts);
+
+    // Sync to Supabase in background
+    try {
+      for (const prod of toUpsertSupabase) {
+        await supabase.from("products").upsert({
+          id: prod.id,
+          slug: prod.slug,
+          title: prod.title,
+          sku: prod.sku,
+          short_description: prod.shortDescription,
+          description: prod.description,
+          regular_price: prod.regularPrice,
+          sale_price: prod.salePrice,
+          category: prod.category,
+          subcategory: prod.subcategory,
+          linea: prod.linea,
+          stock: prod.stock,
+          images: prod.images,
+          variations: prod.variations,
+          dimensions: prod.dimensions,
+          updated_at: new Date().toISOString(),
+        });
+      }
+    } catch (err) {
+      console.debug("Supabase batch import sync error:", err);
+    }
   };
 
   const handleUpdateOrderStatus = (orderId: string, status: Order["status"]) => {
@@ -2055,7 +2124,7 @@ export default function AdminDashboardPage() {
                 /* SUBVIEW 2: CATALOGUE TABLE LIST */
                 <div className="space-y-5">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-gray-200/80 shadow-sm">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex flex-wrap items-center gap-2.5">
                       <button
                         onClick={() => {
                           startEditingProduct({
@@ -2071,10 +2140,34 @@ export default function AdminDashboardPage() {
                             images: [],
                           });
                         }}
-                        className="bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl flex items-center space-x-2 transition-all shadow-sm"
+                        className="bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-xl flex items-center space-x-2 transition-all shadow-sm"
                       >
                         <Plus size={16} />
                         <span>Añadir Producto</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setImportExportModalTab("export");
+                          setIsImportExportModalOpen(true);
+                        }}
+                        className="bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold uppercase tracking-wider px-3.5 py-2.5 rounded-xl border border-gray-200 flex items-center space-x-1.5 transition-all shadow-sm"
+                        title="Exportar catálogo a CSV o JSON"
+                      >
+                        <Download size={14} className="text-[#FC7D00]" />
+                        <span>Exportar</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setImportExportModalTab("import");
+                          setIsImportExportModalOpen(true);
+                        }}
+                        className="bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold uppercase tracking-wider px-3.5 py-2.5 rounded-xl border border-gray-200 flex items-center space-x-1.5 transition-all shadow-sm"
+                        title="Importar productos desde CSV o JSON"
+                      >
+                        <Upload size={14} className="text-[#FC7D00]" />
+                        <span>Importar</span>
                       </button>
 
                       {/* Category Filter */}
@@ -2559,6 +2652,15 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
+      {/* Product Import / Export Modal */}
+      <ProductImportExportModal
+        isOpen={isImportExportModalOpen}
+        onClose={() => setIsImportExportModalOpen(false)}
+        products={products}
+        filteredProducts={filteredProducts}
+        initialTab={importExportModalTab}
+        onImportComplete={handleImportProducts}
+      />
     </div>
   );
 }
