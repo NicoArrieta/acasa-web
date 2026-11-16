@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Product,
@@ -63,6 +63,7 @@ import {
   Images,
   ArrowLeft,
   ChevronLeft,
+  AlertTriangle,
   ChevronRight,
   Menu,
   MapPin,
@@ -102,6 +103,11 @@ export default function AdminDashboardPage() {
 
   // Product Form state (Inline Section, NOT Modal)
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
+  // Unsaved changes & navigation guard state
+  const [isUnsavedModalOpen, setIsUnsavedModalOpen] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null);
+  const initialProductSnapshotRef = useRef<string>("");
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
 
   // DonWeb upload state
   const [isUploading, setIsUploading] = useState(false);
@@ -212,6 +218,41 @@ export default function AdminDashboardPage() {
       setCarouselPreviewIdx(Math.max(0, list.length - 1));
     }
   };
+
+  // Helper to start editing a product and record initial snapshot
+  const startEditingProduct = (prod: Partial<Product>) => {
+    setEditingProduct(prod);
+    initialProductSnapshotRef.current = JSON.stringify(prod);
+  };
+
+  // Helper to check if current editing product has unsaved changes
+  const hasUnsavedChanges = () => {
+    if (!editingProduct) return false;
+    return JSON.stringify(editingProduct) !== initialProductSnapshotRef.current;
+  };
+
+  // Navigation guard helper
+  const safelyNavigate = (action: () => void) => {
+    if (hasUnsavedChanges()) {
+      setPendingNavigation(() => action);
+      setIsUnsavedModalOpen(true);
+    } else {
+      action();
+    }
+  };
+
+  // Browser reload / close tab warning
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (editingProduct && JSON.stringify(editingProduct) !== initialProductSnapshotRef.current) {
+        e.preventDefault();
+        e.returnValue = "";
+        return "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [editingProduct]);
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -522,8 +563,10 @@ export default function AdminDashboardPage() {
           {/* Dashboard */}
           <button
             onClick={() => {
-              setActiveTab("dashboard");
-              setEditingProduct(null);
+              safelyNavigate(() => {
+                setActiveTab("dashboard");
+                setEditingProduct(null);
+              });
             }}
             title={sidebarCollapsed ? "Escritorio & Tablero" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
@@ -553,7 +596,10 @@ export default function AdminDashboardPage() {
           {/* Products */}
           <button
             onClick={() => {
-              setActiveTab("products");
+              safelyNavigate(() => {
+                setActiveTab("products");
+                setEditingProduct(null);
+              });
             }}
             title={sidebarCollapsed ? "Catálogo de Productos" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
@@ -598,8 +644,10 @@ export default function AdminDashboardPage() {
                               {/* Categories */}
           <button
             onClick={() => {
-              setActiveTab("categories");
-              setEditingProduct(null);
+              safelyNavigate(() => {
+                setActiveTab("categories");
+                setEditingProduct(null);
+              });
             }}
             title={sidebarCollapsed ? "Gestión de Categorías" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
@@ -644,8 +692,10 @@ export default function AdminDashboardPage() {
           {/* Attributes & Variations */}
           <button
             onClick={() => {
-              setActiveTab("attributes");
-              setEditingProduct(null);
+              safelyNavigate(() => {
+                setActiveTab("attributes");
+                setEditingProduct(null);
+              });
             }}
             title={sidebarCollapsed ? "Atributos & Variaciones" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
@@ -690,8 +740,10 @@ export default function AdminDashboardPage() {
           {/* Media Library */}
           <button
             onClick={() => {
-              setActiveTab("media");
-              setEditingProduct(null);
+              safelyNavigate(() => {
+                setActiveTab("media");
+                setEditingProduct(null);
+              });
             }}
             title={sidebarCollapsed ? "Biblioteca Multimedia" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
@@ -736,8 +788,10 @@ export default function AdminDashboardPage() {
           {/* Orders */}
           <button
             onClick={() => {
-              setActiveTab("orders");
-              setEditingProduct(null);
+              safelyNavigate(() => {
+                setActiveTab("orders");
+                setEditingProduct(null);
+              });
             }}
             title={sidebarCollapsed ? "Gestión de Pedidos" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
@@ -782,8 +836,10 @@ export default function AdminDashboardPage() {
           {/* DonWeb */}
           <button
             onClick={() => {
-              setActiveTab("donweb");
-              setEditingProduct(null);
+              safelyNavigate(() => {
+                setActiveTab("donweb");
+                setEditingProduct(null);
+              });
             }}
             title={sidebarCollapsed ? "Multimedia DonWeb" : undefined}
             className={`w-full flex items-center transition-all duration-200 text-left font-bold relative group ${
@@ -1431,8 +1487,8 @@ export default function AdminDashboardPage() {
                     <div className="flex items-center space-x-3.5">
                       <button
                         type="button"
-                        onClick={() => setEditingProduct(null)}
-                        className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:text-black hover:bg-gray-100 transition-colors flex items-center justify-center"
+                        onClick={() => safelyNavigate(() => setEditingProduct(null))}
+                        className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:text-black hover:bg-gray-100 transition-colors flex items-center justify-center cursor-pointer"
                         title="Volver al Catálogo"
                       >
                         <ArrowLeft size={18} />
@@ -1452,18 +1508,29 @@ export default function AdminDashboardPage() {
                     <div className="flex items-center space-x-3 self-end sm:self-auto">
                       <button
                         type="button"
-                        onClick={() => setEditingProduct(null)}
-                        className="px-4 py-2.5 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+                        onClick={() => safelyNavigate(() => setEditingProduct(null))}
+                        className="px-4 py-2.5 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
                       >
                         Cancelar
                       </button>
                       <button
                         type="button"
                         onClick={handleSaveProduct}
-                        className="bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center space-x-2"
+                        className={`text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center space-x-2 cursor-pointer ${
+                          saveSuccessMessage ? "bg-[#065f46]" : "bg-[#FC7D00] hover:bg-[#e66c00]"
+                        }`}
                       >
-                        <Save size={15} />
-                        <span>Guardar Producto</span>
+                        {saveSuccessMessage ? (
+                          <>
+                            <Check size={16} />
+                            <span>¡Guardado!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Save size={15} />
+                            <span>Guardar Producto</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -1963,10 +2030,21 @@ export default function AdminDashboardPage() {
                         <div className="pt-2">
                           <button
                             type="submit"
-                            className="w-full bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider py-3.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center space-x-2"
+                            className={`w-full text-white text-xs font-bold uppercase tracking-wider py-3.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer ${
+                              saveSuccessMessage ? "bg-[#065f46]" : "bg-[#FC7D00] hover:bg-[#e66c00]"
+                            }`}
                           >
-                            <Save size={16} />
-                            <span>Guardar Mueble en Catálogo</span>
+                            {saveSuccessMessage ? (
+                              <>
+                                <Check size={16} />
+                                <span>¡Mueble Guardado con Éxito!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Save size={16} />
+                                <span>Guardar Mueble en Catálogo</span>
+                              </>
+                            )}
                           </button>
                         </div>
                       </div>
@@ -1980,7 +2058,7 @@ export default function AdminDashboardPage() {
                     <div className="flex items-center space-x-3">
                       <button
                         onClick={() => {
-                          setEditingProduct({
+                          startEditingProduct({
                             title: "",
                             regularPrice: 0,
                             stock: 10,
@@ -2106,7 +2184,7 @@ export default function AdminDashboardPage() {
                               <div className="flex items-center justify-end space-x-1.5">
                                 <button
                                   onClick={() => {
-                                    setEditingProduct(p);
+                                    startEditingProduct(p);
                                   }}
                                   className="p-2 text-gray-500 hover:text-[#FC7D00] hover:bg-orange-50 rounded-lg transition-colors"
                                   title="Editar Mueble"
@@ -2418,6 +2496,69 @@ export default function AdminDashboardPage() {
           });
         }}
       />
+
+      {/* Toast de éxito al guardar sin salir */}
+      {saveSuccessMessage && (
+        <div className="fixed top-6 right-6 z-[80] bg-[#065f46] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-2.5 animate-fadeIn border border-emerald-400/30">
+          <span className="w-6 h-6 rounded-full bg-emerald-400 text-emerald-950 flex items-center justify-center font-bold text-xs">
+            ✓
+          </span>
+          <span className="text-xs font-bold">{saveSuccessMessage}</span>
+        </div>
+      )}
+
+      {/* Modal de Advertencia de Cambios sin Guardar */}
+      {isUnsavedModalOpen && (
+        <div className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full p-7 shadow-2xl border border-gray-100 space-y-5 animate-scaleUp">
+            <div className="flex items-center space-x-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle size={26} />
+              </div>
+              <div>
+                <h3 className="font-heading text-base font-bold text-gray-900 uppercase tracking-wide">
+                  ¿Descartar cambios sin guardar?
+                </h3>
+                <p className="text-xs text-gray-400 font-light mt-0.5">
+                  Hay modificaciones pendientes en este mueble
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-600 leading-relaxed bg-gray-50 p-4 rounded-2xl border border-gray-100">
+              Tenés cambios sin guardar en <strong className="text-gray-900">{editingProduct?.title || "este mueble"}</strong>. Si salís ahora, se perderán todas las modificaciones realizadas.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsUnsavedModalOpen(false);
+                  setPendingNavigation(null);
+                }}
+                className="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors text-center cursor-pointer"
+              >
+                Continuar editando
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsUnsavedModalOpen(false);
+                  initialProductSnapshotRef.current = "";
+                  const nav = pendingNavigation;
+                  setPendingNavigation(null);
+                  nav?.();
+                }}
+                className="flex-1 py-3 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-md text-center cursor-pointer"
+              >
+                Descartar y salir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
