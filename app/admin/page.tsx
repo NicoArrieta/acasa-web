@@ -215,8 +215,14 @@ export default function AdminDashboardPage() {
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingProduct?.title || !editingProduct?.regularPrice) {
-      alert("Por favor completá el nombre y precio del producto.");
+    const effectivePrice =
+      editingProduct?.regularPrice ||
+      (editingProduct?.productVariations && editingProduct.productVariations.length > 0
+        ? editingProduct.productVariations[0].regularPrice
+        : 0);
+
+    if (!editingProduct?.title || !effectivePrice) {
+      alert("Por favor completá el nombre y precio del producto (o definí precios en las variaciones).");
       return;
     }
 
@@ -269,8 +275,8 @@ export default function AdminDashboardPage() {
         sku: editingProduct.sku || `SKU-${Math.floor(100 + Math.random() * 900)}`,
         shortDescription: editingProduct.shortDescription || "",
         description: editingProduct.description || "",
-        regularPrice: Number(editingProduct.regularPrice),
-        salePrice: editingProduct.salePrice ? Number(editingProduct.salePrice) : undefined,
+        regularPrice: Number(editingProduct.regularPrice || effectivePrice),
+        salePrice: editingProduct.salePrice ? Number(editingProduct.salePrice) : editingProduct.productVariations?.[0]?.salePrice,
         category: finalCats[0],
         categories: finalCats,
         subcategory: finalSubcats[0] || "",
@@ -1694,29 +1700,19 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
 
-                      {/* Card 2: Variations */}
-                      <div className="bg-white p-7 rounded-2xl border border-gray-200/80 shadow-sm space-y-4">
-                        <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider pb-3 border-b border-gray-100">
-                          2. Terminaciones y Opciones (Variaciones)
-                        </h4>
-                        <p className="text-xs text-gray-500 font-light">
-                          Opciones que el cliente podrá seleccionar antes de consultar o añadir al carrito.
-                        </p>
-                        <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-2">
-                          <p className="text-xs font-semibold text-gray-700">Maderas & Lustres activos:</p>
-                          <div className="flex flex-wrap gap-2">
-                            <span className="px-3 py-1 bg-white border rounded-lg text-xs font-mono font-medium text-gray-800">
-                              Petiribí (+ $30.000)
-                            </span>
-                            <span className="px-3 py-1 bg-white border rounded-lg text-xs font-mono font-medium text-gray-800">
-                              Paraíso (Base)
-                            </span>
-                            <span className="px-3 py-1 bg-white border rounded-lg text-xs font-mono font-medium text-gray-800">
-                              Roble Americano
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                      {/* Card 2: WooCommerce Product Variations & Attributes */}
+                      <ProductVariationsManager
+                        productType={editingProduct.productType || (editingProduct.productVariations && editingProduct.productVariations.length > 0 ? "variable" : "simple")}
+                        onChangeProductType={(type) => setEditingProduct({ ...editingProduct, productType: type })}
+                        attributes={editingProduct.attributes || []}
+                        onChangeAttributes={(attrs) => setEditingProduct({ ...editingProduct, attributes: attrs })}
+                        variations={editingProduct.productVariations || []}
+                        onChangeVariations={(vars) => setEditingProduct({ ...editingProduct, productVariations: vars })}
+                        availableGlobalAttributes={attributesList}
+                        baseProductPrice={editingProduct.regularPrice}
+                        baseProductSku={editingProduct.sku}
+                        defaultImages={editingProduct.images || []}
+                      />
                     </div>
 
                     {/* Right 1 Column: Price, Stock & Image Preview */}
@@ -1726,6 +1722,17 @@ export default function AdminDashboardPage() {
                         <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider pb-3 border-b border-gray-100">
                           3. Precio & Stock
                         </h4>
+
+                        {editingProduct.productType === "variable" && (
+                          <div className="p-3.5 rounded-xl bg-orange-50/80 border border-[#FC7D00]/25 text-xs text-gray-700 space-y-1">
+                            <p className="font-bold text-[#FC7D00] uppercase tracking-wider text-[10px]">
+                              ⚡ Modo Producto Variable (WooCommerce)
+                            </p>
+                            <p className="text-[11px] text-gray-500 leading-relaxed">
+                              Cada variación tiene sus propios precios, ofertas y stock en el panel de Variaciones. Los valores de abajo funcionan como precio y stock base referenciales.
+                            </p>
+                          </div>
+                        )}
 
                         <div>
                           <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">
@@ -1978,17 +1985,12 @@ export default function AdminDashboardPage() {
                             regularPrice: 0,
                             stock: 10,
                             category: "comedor",
+                            categories: ["comedor"],
                             linea: "practica",
+                            productType: "simple",
+                            attributes: [],
+                            productVariations: [],
                             images: [],
-                            variations: [
-                              {
-                                name: "Madera",
-                                options: [
-                                  { id: "opt-1", name: "Petiribí", type: "madera", inStock: true, priceAdjustment: 30000 },
-                                  { id: "opt-2", name: "Paraíso", type: "madera", inStock: true, priceAdjustment: 0 },
-                                ],
-                              },
-                            ],
                           });
                         }}
                         className="bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl flex items-center space-x-2 transition-all shadow-sm"

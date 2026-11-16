@@ -8,7 +8,7 @@ import {
 } from "@/lib/types";
 import MediaPickerModal from "@/components/MediaPickerModal";
 import { uploadMediaItem } from "@/lib/media";
-import { formatCurrency } from "@/lib/store";
+import { formatCurrency, saveStoredAttributes, getStoredAttributes } from "@/lib/store";
 import {
   SlidersHorizontal,
   Plus,
@@ -26,6 +26,9 @@ import {
   Layers,
   Tag,
   AlertCircle,
+  ArrowRight,
+  Eye,
+  Info,
 } from "lucide-react";
 
 interface ProductVariationsManagerProps {
@@ -53,9 +56,14 @@ export default function ProductVariationsManager({
   baseProductSku = "",
   defaultImages = [],
 }: ProductVariationsManagerProps) {
-  const [activeSubTab, setActiveSubTab] = useState<"attributes" | "variations">("attributes");
+  const [activeSubTab, setActiveSubTab] = useState<"attributes" | "variations">(
+    variations.length > 0 ? "variations" : "attributes"
+  );
   const [selectedGlobalAttrId, setSelectedGlobalAttrId] = useState<string>("");
   const [expandedVariationId, setExpandedVariationId] = useState<string | null>(null);
+
+  // Quick inline term adder per attribute
+  const [newTermInputs, setNewTermInputs] = useState<Record<string, string>>({});
 
   // Bulk actions state
   const [bulkPriceInput, setBulkPriceInput] = useState<string>("");
@@ -93,7 +101,7 @@ export default function ProductVariationsManager({
     if (!customAttrName.trim()) return;
     const clean = customAttrName.trim();
     if (attributes.some((a) => a.name.toLowerCase() === clean.toLowerCase())) {
-      alert("Ya existe un atributo con ese nombre.");
+      alert("Ya existe un atributo con ese nombre en este mueble.");
       return;
     }
     const newAttr: ProductAttributeSelection = {
@@ -143,6 +151,50 @@ export default function ProductVariationsManager({
     onChangeAttributes(updated);
   };
 
+  const handleAddCustomTermToAttribute = (attrIdx: number) => {
+    const attr = attributes[attrIdx];
+    const inputVal = (newTermInputs[attr.name] || "").trim();
+    if (!inputVal) return;
+
+    if (attr.terms.includes(inputVal)) {
+      alert("Ese valor ya está seleccionado en este atributo.");
+      return;
+    }
+
+    const updated = [...attributes];
+    updated[attrIdx] = {
+      ...attr,
+      terms: [...attr.terms, inputVal],
+    };
+    onChangeAttributes(updated);
+    setNewTermInputs({ ...newTermInputs, [attr.name]: "" });
+
+    // Also persist into global attributes if it matches a global attribute
+    const globalAttr = availableGlobalAttributes.find(
+      (g) => g.name.toLowerCase() === attr.name.toLowerCase()
+    );
+    if (globalAttr && !globalAttr.terms.some((t) => t.name.toLowerCase() === inputVal.toLowerCase())) {
+      const cleanSlug = inputVal
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const updatedGlobal = availableGlobalAttributes.map((g) =>
+        g.id === globalAttr.id
+          ? {
+              ...g,
+              terms: [
+                ...g.terms,
+                { id: `term_${Date.now()}`, name: inputVal, slug: cleanSlug },
+              ],
+            }
+          : g
+      );
+      saveStoredAttributes(updatedGlobal);
+    }
+  };
+
   // --- VARIATION GENERATOR (Cartesian Product) ---
   const handleGenerateAllVariations = () => {
     const usableAttributes = attributes.filter(
@@ -182,14 +234,12 @@ export default function ProductVariationsManager({
     }
 
     const newVariations: ProductVariationItem[] = combinations.map((comb, i) => {
-      // Check if existing variation already matches this combination
       const existing = variations.find((v) =>
         Object.entries(comb).every(([k, val]) => v.attributes[k] === val)
       );
 
       if (existing) return existing;
 
-      // Create new variation item
       const shortAttrs = Object.values(comb)
         .map((v) => v.substring(0, 3).toUpperCase())
         .join("-");
@@ -209,6 +259,33 @@ export default function ProductVariationsManager({
     });
 
     onChangeVariations(newVariations);
+    setActiveSubTab("variations");
+  };
+
+  const handleAddSingleVariation = () => {
+    const usableAttributes = attributes.filter((a) => a.usedForVariations && a.terms.length > 0);
+    if (usableAttributes.length === 0) {
+      alert("Primero añadí atributos con valores en la pestaña Atributos.");
+      return;
+    }
+    const defaultComb: Record<string, string> = {};
+    usableAttributes.forEach((a) => {
+      defaultComb[a.name] = a.terms[0] || "";
+    });
+
+    const newVar: ProductVariationItem = {
+      id: `var_${Date.now()}`,
+      sku: baseProductSku ? `${baseProductSku}-V${variations.length + 1}` : `VAR-${variations.length + 1}`,
+      attributes: defaultComb,
+      regularPrice: baseProductPrice || 100000,
+      stock: 5,
+      inStock: true,
+      enabled: true,
+      image: defaultImages[0] || "",
+    };
+
+    onChangeVariations([...variations, newVar]);
+    setExpandedVariationId(newVar.id);
     setActiveSubTab("variations");
   };
 
@@ -234,6 +311,15 @@ export default function ProductVariationsManager({
     }));
     onChangeVariations(updated);
     setBulkStockInput("");
+  };
+
+  const handleToggleAllStockStatus = () => {
+    const allInStock = variations.every((v) => v.inStock);
+    const updated = variations.map((v) => ({
+      ...v,
+      inStock: !allInStock,
+    }));
+    onChangeVariations(updated);
   };
 
   // --- INDIVIDUAL VARIATION ACTIONS ---
@@ -266,31 +352,36 @@ export default function ProductVariationsManager({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200/90 shadow-sm overflow-hidden space-y-0">
-      {/* 1. Header & Product Type Selector */}
-      <div className="p-5 border-b border-gray-100 bg-gray-50/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-black text-[#FC7D00] flex items-center justify-center font-bold">
-            <SlidersHorizontal size={20} />
+    <div className="bg-white rounded-3xl border border-gray-200/90 shadow-md overflow-hidden space-y-0">
+      {/* 1. Header & WooCommerce Product Type Selector */}
+      <div className="p-6 border-b border-gray-100 bg-gray-50/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center space-x-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-black text-[#FC7D00] flex items-center justify-center font-bold shadow-xs">
+            <SlidersHorizontal size={22} />
           </div>
           <div>
-            <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wide flex items-center space-x-2">
-              <span>Atributos & Variaciones (WooCommerce)</span>
+            <div className="flex items-center space-x-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#FC7D00]">
+                DATOS DEL PRODUCTO
+              </span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/5 text-gray-600 font-bold">
+                ESTILO WOOCOMMERCE
+              </span>
+            </div>
+            <h4 className="font-heading text-base font-bold text-gray-900 uppercase tracking-wide">
+              Atributos y Variaciones del Mueble
             </h4>
-            <p className="text-xs text-gray-400 font-light">
-              Configurá atributos (Madera, Medida, etc.) y generá variaciones con precios, fotos y stock propios.
-            </p>
           </div>
         </div>
 
-        {/* Product Type Toggle */}
-        <div className="flex items-center bg-gray-200/70 p-1 rounded-xl text-xs font-bold">
+        {/* Product Type Toggle (Simple vs Variable) */}
+        <div className="flex items-center bg-gray-200/80 p-1.5 rounded-2xl text-xs font-bold self-stretch sm:self-auto">
           <button
             type="button"
             onClick={() => onChangeProductType("simple")}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none px-4 py-2 rounded-xl transition-all cursor-pointer text-center ${
               productType === "simple"
-                ? "bg-white text-black shadow-xs font-black"
+                ? "bg-white text-gray-900 shadow-sm font-black"
                 : "text-gray-600 hover:text-black"
             }`}
           >
@@ -298,78 +389,91 @@ export default function ProductVariationsManager({
           </button>
           <button
             type="button"
-            onClick={() => onChangeProductType("variable")}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center space-x-1.5 ${
+            onClick={() => {
+              onChangeProductType("variable");
+              if (activeSubTab === "variations" && variations.length === 0) {
+                setActiveSubTab("attributes");
+              }
+            }}
+            className={`flex-1 sm:flex-none px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5 ${
               productType === "variable"
-                ? "bg-[#FC7D00] text-white shadow-xs font-black"
+                ? "bg-[#FC7D00] text-white shadow-sm font-black"
                 : "text-gray-600 hover:text-black"
             }`}
           >
-            <Sparkles size={12} />
+            <Sparkles size={13} />
             <span>Producto Variable</span>
           </button>
         </div>
       </div>
 
       {productType === "simple" ? (
-        <div className="p-6 text-center space-y-2 bg-gray-50/30">
-          <p className="text-xs text-gray-500 font-medium">
-            Este producto está configurado como <strong className="text-gray-800">Producto Simple</strong> (precio único y stock general).
-          </p>
+        <div className="p-8 text-center space-y-3 bg-white">
+          <div className="w-12 h-12 mx-auto rounded-full bg-orange-50 text-[#FC7D00] flex items-center justify-center">
+            <Info size={22} />
+          </div>
+          <div>
+            <h5 className="font-heading text-sm font-bold text-gray-900 uppercase">
+              Producto Simple Seleccionado
+            </h5>
+            <p className="text-xs text-gray-500 max-w-md mx-auto mt-1">
+              Un producto simple tiene un único precio regular y un stock general definidos en el panel lateral. Si este mueble viene en distintas <strong>maderas</strong>, <strong>medidas</strong> o <strong>tapizados</strong> con sus propios precios y fotos, activá <strong>Producto Variable</strong>.
+            </p>
+          </div>
           <button
             type="button"
             onClick={() => onChangeProductType("variable")}
-            className="text-xs font-bold text-[#FC7D00] hover:underline cursor-pointer"
+            className="px-5 py-2.5 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
           >
-            Convertir a Producto Variable con combinaciones tipo WooCommerce →
+            Cambiar a Producto Variable con combinaciones →
           </button>
         </div>
       ) : (
-        <div className="space-y-0">
-          {/* 2. Sub Tabs: Atributos / Variaciones */}
-          <div className="flex border-b border-gray-100 bg-white px-6 pt-3 gap-6">
+        <div>
+          {/* 2. WooCommerce Navigation Tabs: [ Atributos ] | [ Variaciones ] */}
+          <div className="flex border-b border-gray-100 bg-white px-8 pt-4 gap-8">
             <button
               type="button"
               onClick={() => setActiveSubTab("attributes")}
-              className={`pb-3 text-xs font-bold uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-all cursor-pointer ${
+              className={`pb-3.5 text-xs font-bold uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-all cursor-pointer ${
                 activeSubTab === "attributes"
                   ? "border-[#FC7D00] text-[#FC7D00]"
                   : "border-transparent text-gray-400 hover:text-gray-700"
               }`}
             >
-              <Tag size={15} />
+              <Tag size={16} />
               <span>1. Atributos ({attributes.length})</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveSubTab("variations")}
-              className={`pb-3 text-xs font-bold uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-all cursor-pointer ${
+              className={`pb-3.5 text-xs font-bold uppercase tracking-wider flex items-center space-x-2 border-b-2 transition-all cursor-pointer ${
                 activeSubTab === "variations"
                   ? "border-[#FC7D00] text-[#FC7D00]"
                   : "border-transparent text-gray-400 hover:text-gray-700"
               }`}
             >
-              <Layers size={15} />
+              <Layers size={16} />
               <span>2. Variaciones ({variations.length})</span>
             </button>
           </div>
 
-          {/* TAB 1: ATTRIBUTES */}
+          {/* TAB 1: ATRIBUTOS (COMO EN WOOCOMMERCE) */}
           {activeSubTab === "attributes" && (
-            <div className="p-6 space-y-6">
-              {/* Add Attribute Row */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-4 rounded-2xl bg-gray-50 border border-gray-200/80">
+            <div className="p-8 space-y-6">
+              {/* Add Attribute Toolbar */}
+              <div className="p-5 rounded-2xl bg-gray-50 border border-gray-200/90 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
                 <div className="flex-1 flex gap-2">
                   <select
                     value={selectedGlobalAttrId}
                     onChange={(e) => setSelectedGlobalAttrId(e.target.value)}
-                    className="flex-1 p-2.5 rounded-xl border border-gray-200 text-xs bg-white font-medium outline-none focus:border-[#FC7D00]"
+                    className="flex-1 p-3 rounded-xl border border-gray-200 text-xs bg-white font-medium outline-none focus:border-[#FC7D00]"
                   >
-                    <option value="">-- Seleccionar Atributo Global --</option>
+                    <option value="">-- Añadir Atributo Global (Madera, Medida, etc.) --</option>
                     {availableGlobalAttributes.map((g) => (
                       <option key={g.id} value={g.id}>
-                        {g.name} ({g.terms.length} valores)
+                        {g.name} ({g.terms.length} valores configurados)
                       </option>
                     ))}
                   </select>
@@ -378,9 +482,9 @@ export default function ProductVariationsManager({
                     type="button"
                     onClick={handleAddGlobalAttribute}
                     disabled={!selectedGlobalAttrId}
-                    className="px-4 py-2.5 bg-black hover:bg-gray-800 disabled:opacity-40 text-white text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-xs"
+                    className="px-5 py-3 bg-[#FC7D00] hover:bg-[#e66c00] disabled:opacity-40 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-xs"
                   >
-                    <Plus size={14} />
+                    <Plus size={15} />
                     <span>Añadir</span>
                   </button>
                 </div>
@@ -392,56 +496,62 @@ export default function ProductVariationsManager({
                     type="text"
                     value={customAttrName}
                     onChange={(e) => setCustomAttrName(e.target.value)}
-                    placeholder="O crear atributo nuevo..."
-                    className="p-2.5 rounded-xl border border-gray-200 text-xs bg-white outline-none focus:border-[#FC7D00]"
+                    placeholder="O crear atributo personalizado..."
+                    className="p-3 rounded-xl border border-gray-200 text-xs bg-white outline-none focus:border-[#FC7D00]"
                   />
                   <button
                     type="button"
                     onClick={handleAddCustomAttribute}
                     disabled={!customAttrName.trim()}
-                    className="px-3.5 py-2.5 bg-gray-200 hover:bg-gray-300 disabled:opacity-40 text-gray-800 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                    className="px-4 py-3 bg-black hover:bg-gray-800 disabled:opacity-40 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
                   >
                     + Personalizado
                   </button>
                 </div>
               </div>
 
-              {/* Attributes List */}
+              {/* Attributes Cards List */}
               {attributes.length === 0 ? (
-                <div className="p-8 text-center text-gray-400 border border-dashed border-gray-200 rounded-2xl space-y-2">
-                  <Tag className="w-8 h-8 mx-auto opacity-30 text-[#FC7D00]" />
-                  <p className="text-xs">
-                    No has añadido ningún atributo todavía. Seleccioná uno arriba (ej: Madera, Medida, Tapizado).
-                  </p>
+                <div className="p-10 text-center border-2 border-dashed border-gray-200 rounded-3xl space-y-3 bg-gray-50/40">
+                  <Tag className="w-10 h-10 mx-auto text-[#FC7D00] opacity-40" />
+                  <div>
+                    <h5 className="font-heading text-sm font-bold text-gray-800 uppercase">
+                      No hay atributos añadidos a este producto
+                    </h5>
+                    <p className="text-xs text-gray-500 max-w-sm mx-auto mt-1">
+                      Seleccioná un atributo arriba (como <strong>Madera</strong>, <strong>Medida</strong> o <strong>Tapizado</strong>) y hacé clic en "Añadir".
+                    </p>
+                  </div>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {attributes.map((attr, attrIdx) => {
                     const globalAttr = availableGlobalAttributes.find(
                       (g) => g.name.toLowerCase() === attr.name.toLowerCase()
                     );
                     const allAvailableTerms = globalAttr
-                      ? globalAttr.terms.map((t) => t.name)
+                      ? Array.from(new Set([...globalAttr.terms.map((t) => t.name), ...attr.terms]))
                       : attr.terms;
 
                     return (
                       <div
                         key={attr.name}
-                        className="p-5 rounded-2xl bg-white border border-gray-200 shadow-2xs space-y-4"
+                        className="p-6 rounded-2xl bg-white border border-gray-200 shadow-xs space-y-4"
                       >
-                        {/* Attribute Top Header */}
+                        {/* Attribute Header */}
                         <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                           <div className="flex items-center space-x-3">
-                            <span className="font-heading text-sm font-bold text-gray-900 uppercase">
+                            <span className="font-heading text-sm font-black text-gray-900 uppercase tracking-wide">
                               {attr.name}
                             </span>
-                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                            <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-orange-100/70 text-[#c25e1a]">
                               {attr.terms.length} seleccionados
                             </span>
                           </div>
 
-                          <div className="flex items-center space-x-3">
-                            <label className="flex items-center space-x-2 text-xs font-bold text-gray-700 cursor-pointer select-none">
+                          <div className="flex items-center space-x-4">
+                            {/* Checkbox: Usado para variaciones (WooCommerce essential) */}
+                            <label className="flex items-center space-x-2 text-xs font-bold text-gray-800 cursor-pointer select-none bg-orange-50/70 border border-[#FC7D00]/20 px-3 py-1.5 rounded-xl hover:bg-orange-100/70 transition-colors">
                               <input
                                 type="checkbox"
                                 checked={attr.usedForVariations}
@@ -455,30 +565,30 @@ export default function ProductVariationsManager({
                                 }}
                                 className="w-4 h-4 text-[#FC7D00] rounded focus:ring-0 cursor-pointer"
                               />
-                              <span>Usado para variaciones</span>
+                              <span className="text-[#FC7D00] font-black">✓ Usado para variaciones</span>
                             </label>
 
                             <button
                               type="button"
                               onClick={() => handleRemoveAttribute(attrIdx)}
-                              className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                              className="p-2 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                               title="Quitar atributo"
                             >
-                              <Trash2 size={15} />
+                              <Trash2 size={16} />
                             </button>
                           </div>
                         </div>
 
                         {/* Terms Quick Selection Toolbar */}
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
                             Valores aplicables a este mueble:
                           </span>
-                          <div className="flex items-center space-x-2 text-[11px]">
+                          <div className="flex items-center space-x-3 text-xs">
                             <button
                               type="button"
                               onClick={() => handleSelectAllTerms(attrIdx)}
-                              className="text-xs font-semibold text-gray-600 hover:text-black underline cursor-pointer"
+                              className="font-bold text-[#FC7D00] hover:underline cursor-pointer"
                             >
                               Seleccionar todos
                             </button>
@@ -486,7 +596,7 @@ export default function ProductVariationsManager({
                             <button
                               type="button"
                               onClick={() => handleDeselectAllTerms(attrIdx)}
-                              className="text-xs font-semibold text-gray-600 hover:text-black underline cursor-pointer"
+                              className="font-semibold text-gray-500 hover:text-black underline cursor-pointer"
                             >
                               Desmarcar todos
                             </button>
@@ -502,17 +612,46 @@ export default function ProductVariationsManager({
                                 key={termName}
                                 type="button"
                                 onClick={() => handleToggleTerm(attrIdx, termName)}
-                                className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all cursor-pointer flex items-center space-x-1.5 ${
+                                className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center space-x-1.5 ${
                                   isSelected
-                                    ? "bg-black text-white border-black font-bold shadow-xs"
-                                    : "bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-400"
+                                    ? "bg-black text-white border-black font-bold shadow-xs scale-102"
+                                    : "bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-400 hover:bg-white"
                                 }`}
                               >
-                                {isSelected && <Check size={12} className="text-[#FC7D00]" />}
+                                {isSelected && <Check size={13} className="text-[#FC7D00]" />}
                                 <span>{termName}</span>
                               </button>
                             );
                           })}
+                        </div>
+
+                        {/* Add Custom Term Inline Field */}
+                        <div className="pt-2 flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={newTermInputs[attr.name] || ""}
+                            onChange={(e) =>
+                              setNewTermInputs({
+                                ...newTermInputs,
+                                [attr.name]: e.target.value,
+                              })
+                            }
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleAddCustomTermToAttribute(attrIdx);
+                              }
+                            }}
+                            placeholder={`+ Añadir nuevo valor a ${attr.name} (ej. Cedro, 1.50 x 0.80 m)...`}
+                            className="flex-1 p-2.5 rounded-xl border border-gray-200 text-xs bg-gray-50/50 outline-none focus:bg-white focus:border-[#FC7D00]"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleAddCustomTermToAttribute(attrIdx)}
+                            className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                          >
+                            + Añadir valor
+                          </button>
                         </div>
                       </div>
                     );
@@ -520,93 +659,121 @@ export default function ProductVariationsManager({
                 </div>
               )}
 
-              {/* Next Step Button */}
+              {/* Step Navigation Button */}
               {attributes.length > 0 && (
-                <div className="pt-2 flex justify-end">
+                <div className="pt-4 flex justify-between items-center border-t border-gray-100">
+                  <span className="text-xs text-gray-400">
+                    Paso 1 completado. Ahora pasá a la pestaña Variaciones para generar o configurar las combinaciones.
+                  </span>
                   <button
                     type="button"
                     onClick={handleGenerateAllVariations}
-                    className="px-6 py-3 rounded-xl bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider shadow-md transition-all flex items-center space-x-2 cursor-pointer"
+                    className="px-6 py-3.5 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider rounded-2xl shadow-md transition-all flex items-center space-x-2 cursor-pointer hover:scale-102"
                   >
                     <Zap size={15} />
-                    <span>Generar variaciones para estos atributos →</span>
+                    <span>Generar Variaciones para estos atributos →</span>
                   </button>
                 </div>
               )}
             </div>
           )}
 
-          {/* TAB 2: VARIATIONS */}
+          {/* TAB 2: VARIACIONES (COMO EN WOOCOMMERCE) */}
           {activeSubTab === "variations" && (
-            <div className="p-6 space-y-6">
+            <div className="p-8 space-y-6">
               {/* Variations Generator & Bulk Actions Toolbar */}
-              <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200/80 space-y-3">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                  <div className="flex items-center space-x-2">
+              <div className="p-5 rounded-2xl bg-gray-50 border border-gray-200/90 space-y-4">
+                <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-2.5">
                     <button
                       type="button"
                       onClick={handleGenerateAllVariations}
-                      className="px-4 py-2.5 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center space-x-1.5 cursor-pointer"
+                      className="px-5 py-3 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center space-x-2 cursor-pointer hover:scale-102"
                     >
-                      <Zap size={14} />
-                      <span>⚡ Regenerar todas las variaciones</span>
+                      <Zap size={15} />
+                      <span>⚡ Generar variaciones automáticas</span>
                     </button>
 
-                    <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-white border text-gray-700">
+                    <button
+                      type="button"
+                      onClick={handleAddSingleVariation}
+                      className="px-4 py-3 bg-black hover:bg-gray-800 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-xs"
+                    >
+                      <Plus size={14} />
+                      <span>+ Añadir individual</span>
+                    </button>
+
+                    <span className="text-xs font-mono font-bold px-3 py-1.5 rounded-xl bg-white border text-gray-800 shadow-2xs">
                       {variations.length} variaciones
                     </span>
                   </div>
 
-                  {/* Mass Price & Stock shortcuts */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden px-2">
-                      <span className="text-xs text-gray-400">$</span>
+                  {/* Mass Bulk Actions */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Mass Price */}
+                    <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden px-2 shadow-2xs">
+                      <span className="text-xs text-gray-400 font-bold">$</span>
                       <input
                         type="number"
                         value={bulkPriceInput}
                         onChange={(e) => setBulkPriceInput(e.target.value)}
-                        placeholder="Precio masivo..."
-                        className="w-24 p-2 text-xs outline-none"
+                        placeholder="Precio a todas..."
+                        className="w-28 p-2 text-xs outline-none font-mono"
                       />
                       <button
                         type="button"
                         onClick={handleApplyBulkPrice}
                         disabled={!bulkPriceInput}
-                        className="text-[10px] uppercase font-bold text-[#FC7D00] hover:underline disabled:opacity-40"
+                        className="text-[10px] uppercase font-bold text-[#FC7D00] hover:underline disabled:opacity-40 cursor-pointer"
                       >
-                        Aplicar
+                        Fijar
                       </button>
                     </div>
 
-                    <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden px-2">
+                    {/* Mass Stock */}
+                    <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden px-2 shadow-2xs">
                       <Package size={13} className="text-gray-400 mr-1" />
                       <input
                         type="number"
                         value={bulkStockInput}
                         onChange={(e) => setBulkStockInput(e.target.value)}
                         placeholder="Stock..."
-                        className="w-16 p-2 text-xs outline-none"
+                        className="w-18 p-2 text-xs outline-none font-mono"
                       />
                       <button
                         type="button"
                         onClick={handleApplyBulkStock}
                         disabled={!bulkStockInput}
-                        className="text-[10px] uppercase font-bold text-[#FC7D00] hover:underline disabled:opacity-40"
+                        className="text-[10px] uppercase font-bold text-[#FC7D00] hover:underline disabled:opacity-40 cursor-pointer"
                       >
                         Fijar
                       </button>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={handleToggleAllStockStatus}
+                      className="p-2 px-3 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 text-xs font-bold rounded-xl shadow-2xs cursor-pointer"
+                      title="Alternar estado de stock para todas las variaciones"
+                    >
+                      Alternar En Stock
+                    </button>
                   </div>
                 </div>
               </div>
 
               {/* Variations Accordion List */}
               {variations.length === 0 ? (
-                <div className="p-8 text-center text-gray-400 border border-dashed border-gray-200 rounded-2xl space-y-2">
-                  <Layers className="w-8 h-8 mx-auto opacity-30 text-[#FC7D00]" />
-                  <p className="text-xs">
-                    No hay variaciones generadas. Hacé clic en "⚡ Regenerar todas las variaciones" para crearlas automáticamente a partir de tus atributos.
-                  </p>
+                <div className="p-10 text-center border-2 border-dashed border-gray-200 rounded-3xl space-y-3 bg-gray-50/40">
+                  <Layers className="w-10 h-10 mx-auto text-[#FC7D00] opacity-40" />
+                  <div>
+                    <h5 className="font-heading text-sm font-bold text-gray-800 uppercase">
+                      No hay variaciones creadas aún
+                    </h5>
+                    <p className="text-xs text-gray-500 max-w-sm mx-auto mt-1">
+                      Hacé clic en <strong>"⚡ Generar variaciones automáticas"</strong> para combinar todos los atributos configurados o en <strong>"+ Añadir individual"</strong>.
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -621,20 +788,20 @@ export default function ProductVariationsManager({
                         key={v.id}
                         className={`rounded-2xl border transition-all overflow-hidden ${
                           isExpanded
-                            ? "bg-white border-[#FC7D00]/40 shadow-md ring-2 ring-[#FC7D00]/10"
+                            ? "bg-white border-[#FC7D00]/50 shadow-md ring-2 ring-[#FC7D00]/10"
                             : "bg-white border-gray-200/90 hover:border-gray-300 shadow-2xs"
                         }`}
                       >
-                        {/* Accordion Row Header */}
+                        {/* Accordion Row Header (WooCommerce style) */}
                         <div
                           onClick={() =>
                             setExpandedVariationId(isExpanded ? null : v.id)
                           }
                           className="p-4 flex items-center justify-between gap-4 cursor-pointer select-none bg-gray-50/40 hover:bg-gray-50 transition-colors"
                         >
-                          <div className="flex items-center space-x-3 min-w-0">
+                          <div className="flex items-center space-x-3.5 min-w-0">
                             {/* Thumbnail photo */}
-                            <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                            <div className="w-11 h-11 rounded-xl bg-white border border-gray-200 overflow-hidden flex-shrink-0 flex items-center justify-center shadow-2xs">
                               {v.image ? (
                                 <img
                                   src={v.image}
@@ -642,13 +809,14 @@ export default function ProductVariationsManager({
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <ImageIcon size={16} className="text-gray-400" />
+                                <ImageIcon size={18} className="text-gray-300" />
                               )}
                             </div>
 
+                            {/* Attribute selectors or badges */}
                             <div className="min-w-0">
                               <span className="font-heading text-xs font-bold text-gray-900 block truncate">
-                                #{vIdx + 1}: {attrSummary}
+                                #{vIdx + 1}: {attrSummary || "Variación sin atributos"}
                               </span>
                               <span className="text-[10px] text-gray-400 font-mono block">
                                 SKU: {v.sku || "Sin SKU"}
@@ -656,13 +824,22 @@ export default function ProductVariationsManager({
                             </div>
                           </div>
 
-                          <div className="flex items-center space-x-3 flex-shrink-0">
-                            <span className="text-xs font-bold font-mono text-gray-900">
-                              {formatCurrency(v.salePrice ?? v.regularPrice)}
-                            </span>
+                          <div className="flex items-center space-x-3.5 flex-shrink-0">
+                            {/* Price display */}
+                            <div className="text-right">
+                              <span className="text-xs font-extrabold font-mono text-gray-900 block">
+                                {formatCurrency(v.salePrice ?? v.regularPrice)}
+                              </span>
+                              {v.salePrice && (
+                                <span className="text-[10px] text-gray-400 line-through font-mono block">
+                                  {formatCurrency(v.regularPrice)}
+                                </span>
+                              )}
+                            </div>
 
+                            {/* Stock Badge */}
                             <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                              className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
                                 v.inStock && (v.stock ?? 0) > 0
                                   ? "bg-emerald-100 text-emerald-800"
                                   : "bg-red-100 text-red-700"
@@ -683,15 +860,15 @@ export default function ProductVariationsManager({
                                 className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                                 title="Eliminar variación"
                               >
-                                <Trash2 size={14} />
+                                <Trash2 size={15} />
                               </button>
                             </div>
 
                             <div className="text-gray-400">
                               {isExpanded ? (
-                                <ChevronUp size={16} />
+                                <ChevronUp size={18} />
                               ) : (
-                                <ChevronDown size={16} />
+                                <ChevronDown size={18} />
                               )}
                             </div>
                           </div>
@@ -699,7 +876,45 @@ export default function ProductVariationsManager({
 
                         {/* Accordion Expanded Body */}
                         {isExpanded && (
-                          <div className="p-6 border-t border-gray-100 bg-white space-y-5 animate-fadeIn">
+                          <div className="p-6 border-t border-gray-100 bg-white space-y-6 animate-fadeIn">
+                            {/* Attribute dropdowns inside variation (WooCommerce faithful) */}
+                            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200/80 space-y-2">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">
+                                Combinación de Atributos de esta Variación:
+                              </span>
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                {Object.keys(v.attributes).map((attrName) => {
+                                  const attrObj = attributes.find((a) => a.name === attrName);
+                                  const termsList = attrObj ? attrObj.terms : [v.attributes[attrName]];
+
+                                  return (
+                                    <div key={attrName}>
+                                      <label className="block text-[10px] font-bold uppercase text-gray-600 mb-1">
+                                        {attrName}
+                                      </label>
+                                      <select
+                                        value={v.attributes[attrName]}
+                                        onChange={(e) => {
+                                          const nextAttrs = {
+                                            ...v.attributes,
+                                            [attrName]: e.target.value,
+                                          };
+                                          handleUpdateVariation(vIdx, { attributes: nextAttrs });
+                                        }}
+                                        className="w-full p-2 border border-gray-200 rounded-lg text-xs bg-white font-medium outline-none focus:border-[#FC7D00]"
+                                      >
+                                        {termsList.map((t) => (
+                                          <option key={t} value={t}>
+                                            {t}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                               {/* Left: Image Box */}
                               <div className="md:col-span-3 space-y-2">
