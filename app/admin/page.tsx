@@ -74,6 +74,19 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 
+function generatePageNumbers(currentPage: number, totalPages: number): (number | string)[] {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+  if (currentPage <= 4) {
+    return [1, 2, 3, 4, 5, "...", totalPages];
+  }
+  if (currentPage >= totalPages - 3) {
+    return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+  }
+  return [1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages];
+}
+
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "categories" | "attributes" | "media" | "orders" | "donweb">("dashboard");
   const [attributesList, setAttributesList] = useState<GlobalAttribute[]>([]);
@@ -105,6 +118,7 @@ export default function AdminDashboardPage() {
   // Search & filter
   const [productSearch, setProductSearch] = useState("");
   const [selectedCatFilter, setSelectedCatFilter] = useState("all");
+  const [productsPage, setProductsPage] = useState(1);
 
   // Product Form state (Inline Section, NOT Modal)
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
@@ -567,7 +581,17 @@ export default function AdminDashboardPage() {
     setSelectedCatFilter("all");
     setSelectedSubcatFilter("all");
     setProductSearch("");
+    setProductsPage(1);
   };
+
+  // Products Pagination (12 items per page)
+  const PRODUCTS_PER_PAGE = 12;
+  const productsTotalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE) || 1;
+  const currentProductsPage = Math.min(Math.max(productsPage, 1), productsTotalPages);
+  const paginatedProducts = filteredProducts.slice(
+    (currentProductsPage - 1) * PRODUCTS_PER_PAGE,
+    currentProductsPage * PRODUCTS_PER_PAGE
+  );
 
   // Analytics totals & ratios
   const totalLineInteractions =
@@ -2294,6 +2318,7 @@ export default function AdminDashboardPage() {
                         onChange={(e) => {
                           setSelectedCatFilter(e.target.value);
                           setSelectedSubcatFilter("all");
+                          setProductsPage(1);
                         }}
                         className="text-xs border border-gray-300 rounded-xl px-3 py-2.5 outline-none bg-white font-medium"
                       >
@@ -2309,7 +2334,10 @@ export default function AdminDashboardPage() {
                       {availableFilterSubcategories.length > 0 && (
                         <select
                           value={selectedSubcatFilter}
-                          onChange={(e) => setSelectedSubcatFilter(e.target.value)}
+                          onChange={(e) => {
+                            setSelectedSubcatFilter(e.target.value);
+                            setProductsPage(1);
+                          }}
                           className="text-xs border border-gray-300 rounded-xl px-3 py-2.5 outline-none bg-white font-medium"
                         >
                           <option value="all">Todas las subcategorías</option>
@@ -2340,14 +2368,20 @@ export default function AdminDashboardPage() {
                         type="text"
                         placeholder="Buscar por título o SKU..."
                         value={productSearch}
-                        onChange={(e) => setProductSearch(e.target.value)}
+                        onChange={(e) => {
+                          setProductSearch(e.target.value);
+                          setProductsPage(1);
+                        }}
                         className="w-full text-xs pl-9 pr-8 py-2.5 border border-gray-300 rounded-xl outline-none focus:border-black bg-white"
                       />
                       <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       {productSearch && (
                         <button
                           type="button"
-                          onClick={() => setProductSearch("")}
+                          onClick={() => {
+                            setProductSearch("");
+                            setProductsPage(1);
+                          }}
                           className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 p-0.5 rounded-full"
                           title="Limpiar búsqueda"
                         >
@@ -2398,7 +2432,7 @@ export default function AdminDashboardPage() {
                             </td>
                           </tr>
                         ) : (
-                          filteredProducts.map((p) => (
+                          paginatedProducts.map((p) => (
                           <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
                             <td className="p-4 font-semibold text-gray-900">
                               <div className="flex flex-col">
@@ -2480,6 +2514,80 @@ export default function AdminDashboardPage() {
                       )}
                       </tbody>
                     </table>
+
+                    {/* Pagination Controls */}
+                    {filteredProducts.length > 0 && (
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t border-gray-100 bg-[#faf9f8]/60 text-xs text-gray-500">
+                        <div className="font-medium">
+                          Mostrando{" "}
+                          <span className="font-bold text-gray-900">
+                            {(currentProductsPage - 1) * PRODUCTS_PER_PAGE + 1}
+                          </span>{" "}
+                          -{" "}
+                          <span className="font-bold text-gray-900">
+                            {Math.min(currentProductsPage * PRODUCTS_PER_PAGE, filteredProducts.length)}
+                          </span>{" "}
+                          de{" "}
+                          <span className="font-bold text-gray-900">
+                            {filteredProducts.length}
+                          </span>{" "}
+                          productos
+                        </div>
+
+                        {productsTotalPages > 1 && (
+                          <div className="flex items-center space-x-1">
+                            {/* Previous button */}
+                            <button
+                              type="button"
+                              onClick={() => setProductsPage((p) => Math.max(1, p - 1))}
+                              disabled={currentProductsPage === 1}
+                              className="px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white font-medium hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1 transition-colors cursor-pointer"
+                            >
+                              <ChevronLeft size={14} />
+                              <span className="hidden sm:inline">Anterior</span>
+                            </button>
+
+                            {/* Page buttons */}
+                            {generatePageNumbers(currentProductsPage, productsTotalPages).map((item, idx) => {
+                              if (item === "...") {
+                                return (
+                                  <span key={`dots-${idx}`} className="px-1.5 py-1 text-gray-400">
+                                    ...
+                                  </span>
+                                );
+                              }
+                              const pageNum = Number(item);
+                              const isCurrent = pageNum === currentProductsPage;
+                              return (
+                                <button
+                                  key={`page-${pageNum}`}
+                                  type="button"
+                                  onClick={() => setProductsPage(pageNum)}
+                                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg font-bold text-xs flex items-center justify-center transition-all cursor-pointer ${
+                                    isCurrent
+                                      ? "bg-[#FC7D00] text-white shadow-sm"
+                                      : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-100"
+                                  }`}
+                                >
+                                  {pageNum}
+                                </button>
+                              );
+                            })}
+
+                            {/* Next button */}
+                            <button
+                              type="button"
+                              onClick={() => setProductsPage((p) => Math.min(productsTotalPages, p + 1))}
+                              disabled={currentProductsPage === productsTotalPages}
+                              className="px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white font-medium hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1 transition-colors cursor-pointer"
+                            >
+                              <span className="hidden sm:inline">Siguiente</span>
+                              <ChevronRight size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
