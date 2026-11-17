@@ -24,7 +24,7 @@ export default function InteriorismoPage() {
 
   // Products for Interiorismo & Diseño (Línea Premium & Autor)
   const interiorismoProducts = products.filter(
-    (p) => p.linea === "premium" || (p.slug !== "puff-cama" && p.slug !== "sofa-cama-but-carrito")
+    (p) => p.linea === "premium"
   );
 
   return (

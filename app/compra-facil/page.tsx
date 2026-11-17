@@ -30,18 +30,7 @@ export default function CompraFacilPage() {
 
   // Filter products for Línea Práctica / Económica
   const practicaProducts = useMemo(() => {
-    return products.filter(
-      (p) =>
-        p.linea === "practica" ||
-        p.slug === "puff-cama" ||
-        p.slug === "sofa-cama-but-carrito" ||
-        p.slug === "rack-tv-escandinavo" ||
-        p.slug === "silla-clasica" ||
-        p.slug === "mesa-de-luz-sendai" ||
-        p.slug === "espejo-organico-arco" ||
-        p.slug === "lampara-colgante-raphia" ||
-        p.slug === "sommier-colchon-pocket-king"
-    );
+    return products.filter((p) => p.linea === "practica");
   }, [products]);
 
   // Show up to 16 products on the Compra Fácil homepage
