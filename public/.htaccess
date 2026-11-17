@@ -1,16 +1,42 @@
+Options +MultiViews
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # Serve existing files and directories directly
+  # 1. Serve existing files and directories directly
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # Check if an HTML file exists for the requested path (e.g., /productos -> /productos.html)
-  RewriteCond %{DOCUMENT_ROOT}/$1.html -f
-  RewriteRule ^(.*)$ $1.html [L]
+  # 2. If someone pastes just the slug (/sillon-gamer-180) and /producto/slug.html exists, redirect to /producto/slug
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{DOCUMENT_ROOT}/producto/$1.html -f
+  RewriteRule ^([^/]+)$ /producto/$1 [L,R=301]
 
-  # Fallback for dynamic routes or client-side navigation
-  RewriteRule ^ index.html [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}/../producto/$1.html -f
+  RewriteRule ^([^/]+)$ /producto/$1 [L,R=301]
+
+  # 3. Rewrite extensionless paths if physical .html exists on disk
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.*)$ /$1.html [L]
+
+  # 4. Rewrite extensionless paths if DOCUMENT_ROOT/.html exists
+  RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+  RewriteRule ^(.*)$ /$1.html [L]
+
+  # 5. Remove trailing slashes (unless it's an existing directory)
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)/$ /$1 [L,R=301]
+
+  # 6. Fallback for not-found paths to 404.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{DOCUMENT_ROOT}/404.html -f
+  RewriteRule ^ /404.html [L]
+
+  # 7. Fallback
+  RewriteRule ^ /index.html [L]
 </IfModule>
