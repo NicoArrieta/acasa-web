@@ -16,6 +16,7 @@ import AttributesManagerView from "@/components/AttributesManagerView";
 import ProductVariationsManager from "@/components/ProductVariationsManager";
 import MediaPickerModal from "@/components/MediaPickerModal";
 import ProductImportExportModal from "@/components/ProductImportExportModal";
+import WordPressEditor from "@/components/WordPressEditor";
 import { uploadMediaItem } from "@/lib/media";
 import { getStoredMedia, getStoredCategories, saveStoredCategories, getStoredAttributes, saveStoredAttributes } from "@/lib/store";
 import {
@@ -1959,12 +1960,11 @@ export default function AdminDashboardPage() {
                           <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">
                             Descripción Completa & Materiales
                           </label>
-                          <textarea
-                            rows={4}
+                          <WordPressEditor
                             value={editingProduct.description || ""}
-                            onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
+                            onChange={(val) => setEditingProduct({ ...editingProduct, description: val })}
                             placeholder="Detalles sobre terminaciones, resistencia, tipos de lustre, medidas exactas y recomendaciones de limpieza..."
-                            className="w-full p-3.5 border border-gray-200 rounded-xl outline-none text-xs bg-gray-50/30 focus:bg-white leading-relaxed"
+                            minHeight="220px"
                           />
                         </div>
                       </div>

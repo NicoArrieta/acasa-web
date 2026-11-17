@@ -410,18 +410,44 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
             <h2 className="font-heading font-bold text-[4.5vw] sm:text-[2.2vw] lg:text-[1.2vw] uppercase tracking-wider text-gray-900">
               Descripción
             </h2>
-            <div className="text-[3.4vw] sm:text-[1.4vw] lg:text-[0.88vw] text-gray-700 leading-relaxed">
-              <ul className="list-disc list-inside space-y-[0.6vh]">
-                {product.dimensions && (
-                  <li>
-                    <strong className="text-black">Medidas:</strong> {product.dimensions.widthCm}X{product.dimensions.depthCm} cm (Alto: {product.dimensions.heightCm} cm)
-                  </li>
-                )}
-                {product.shortDescription && <li>{product.shortDescription}</li>}
-                {product.description && product.description !== product.shortDescription && (
-                  <li>{product.description}</li>
-                )}
-              </ul>
+            <div className="text-[3.4vw] sm:text-[1.4vw] lg:text-[0.88vw] text-gray-700 leading-relaxed space-y-[1vh]">
+              {(product.dimensions || product.shortDescription) && (
+                <ul className="list-disc list-inside space-y-[0.6vh]">
+                  {product.dimensions && (
+                    <li>
+                      <strong className="text-black">Medidas:</strong> {product.dimensions.widthCm}X{product.dimensions.depthCm} cm (Alto: {product.dimensions.heightCm} cm)
+                    </li>
+                  )}
+                  {product.shortDescription && (
+                    <li>{product.shortDescription.replace(/\\r\\n|\\n|\\r/g, " ").trim()}</li>
+                  )}
+                </ul>
+              )}
+
+              {product.description && product.description !== product.shortDescription && (
+                /<[a-z][\s\S]*>/i.test(product.description) ? (
+                  <div
+                    className="product-description-content text-gray-700 leading-relaxed [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-[0.6vh] [&_ol]:list-decimal [&_ol]:list-inside [&_ol]:space-y-[0.6vh] [&_li]:text-gray-700 [&_strong]:text-black [&_p]:mb-2 [&_h2]:text-[1.1em] [&_h2]:font-bold [&_h2]:text-black [&_h3]:text-[1em] [&_h3]:font-bold [&_h3]:text-black [&_h4]:text-[0.95em] [&_h4]:font-semibold [&_h4]:text-black [&_a]:text-blue-600 [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-3 [&_blockquote]:italic"
+                    dangerouslySetInnerHTML={{
+                      __html: product.description
+                        .replace(/\\r\\n/g, "\n")
+                        .replace(/\\n/g, "\n")
+                        .replace(/\\r/g, "\n")
+                        .replace(/\\t/g, " ")
+                        .trim(),
+                    }}
+                  />
+                ) : (
+                  <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+                    {product.description
+                      .replace(/\\r\\n/g, "\n")
+                      .replace(/\\n/g, "\n")
+                      .replace(/\\r/g, "\n")
+                      .replace(/\\t/g, " ")
+                      .trim()}
+                  </div>
+                )
+              )}
             </div>
           </div>
 
