@@ -41,6 +41,7 @@ import {
   ShoppingCart,
   UploadCloud,
   ExternalLink,
+  Eye,
   Plus,
   Pencil,
   Trash2,
@@ -623,10 +624,10 @@ export default function AdminDashboardPage() {
       : "0.0";
 
   return (
-    <div className="flex h-screen bg-[#fcfbfa] font-sans antialiased text-[#1a1a1a]">
+    <div className="flex h-screen w-full max-w-full overflow-hidden bg-[#fcfbfa] font-sans antialiased text-[#1a1a1a]">
       {/* 1. ACASA LUXURY ORANGE SIDEBAR */}
       <aside
-        className={`bg-[#FC7D00] text-white flex flex-col flex-shrink-0 select-none shadow-xl transition-all duration-300 ease-in-out relative h-full max-h-screen overflow-hidden ${
+        className={`bg-[#FC7D00] text-white flex flex-col flex-shrink-0 select-none shadow-xl transition-all duration-300 ease-in-out relative h-full max-h-screen overflow-x-hidden overflow-y-hidden ${
           sidebarCollapsed ? "w-20" : "w-72"
         }`}
       >
@@ -684,7 +685,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Navigation items */}
-        <nav className={`flex-1 min-h-0 overflow-y-auto py-2.5 space-y-1 text-xs scrollbar-none ${sidebarCollapsed ? "px-2" : "px-3"}`}>
+        <nav className={`flex-1 min-h-0 overflow-y-auto overflow-x-hidden py-2.5 space-y-1 text-xs scrollbar-none ${sidebarCollapsed ? "px-2" : "px-3"}`}>
           {/* Dashboard */}
           <button
             onClick={() => {
@@ -710,12 +711,6 @@ export default function AdminDashboardPage() {
           >
             <LayoutDashboard size={20} className={activeTab === "dashboard" ? "text-[#FC7D00]" : "text-white"} />
             {!sidebarCollapsed && <span className="tracking-wide text-[13px]">Escritorio & Tablero</span>}
-
-            {sidebarCollapsed && (
-              <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                Escritorio & Tablero
-              </span>
-            )}
           </button>
 
           {/* Products */}
@@ -755,18 +750,13 @@ export default function AdminDashboardPage() {
               </div>
             )}
             {sidebarCollapsed && (
-              <>
-                <span className="absolute top-2 right-2 text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-[#b85000] text-white">
-                  {products.length}
-                </span>
-                <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                  Catálogo de Productos ({products.length})
-                </span>
-              </>
+              <span className="absolute top-2 right-2 text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-[#b85000] text-white">
+                {products.length}
+              </span>
             )}
           </button>
 
-                              {/* Categories */}
+          {/* Categories */}
           <button
             onClick={() => {
               safelyNavigate(() => {
@@ -803,14 +793,9 @@ export default function AdminDashboardPage() {
               </div>
             )}
             {sidebarCollapsed && (
-              <>
-                <span className="absolute top-2 right-2 text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-[#b85000] text-white">
-                  {categoriesList.length}
-                </span>
-                <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                  Categorías ({categoriesList.length})
-                </span>
-              </>
+              <span className="absolute top-2 right-2 text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-[#b85000] text-white">
+                {categoriesList.length}
+              </span>
             )}
           </button>
 
@@ -851,14 +836,9 @@ export default function AdminDashboardPage() {
               </div>
             )}
             {sidebarCollapsed && (
-              <>
-                <span className="absolute top-2 right-2 text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-[#b85000] text-white">
-                  {attributesList.length}
-                </span>
-                <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                  Atributos ({attributesList.length})
-                </span>
-              </>
+              <span className="absolute top-2 right-2 text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-[#b85000] text-white">
+                {attributesList.length}
+              </span>
             )}
           </button>
 
@@ -899,14 +879,9 @@ export default function AdminDashboardPage() {
               </div>
             )}
             {sidebarCollapsed && (
-              <>
-                <span className="absolute top-2 right-2 text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-[#b85000] text-white">
-                  {mediaLibraryCount}
-                </span>
-                <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                  Biblioteca Multimedia ({mediaLibraryCount})
-                </span>
-              </>
+              <span className="absolute top-2 right-2 text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-[#b85000] text-white">
+                {mediaLibraryCount}
+              </span>
             )}
           </button>
 
@@ -951,9 +926,6 @@ export default function AdminDashboardPage() {
                 {activeOrdersCount > 0 && (
                   <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-white ring-2 ring-[#FC7D00]" />
                 )}
-                <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                  Gestión de Pedidos {activeOrdersCount > 0 ? `(${activeOrdersCount})` : ""}
-                </span>
               </>
             )}
           </button>
@@ -983,11 +955,6 @@ export default function AdminDashboardPage() {
           >
             <UploadCloud size={20} className={activeTab === "donweb" ? "text-[#FC7D00]" : "text-white"} />
             {!sidebarCollapsed && <span className="tracking-wide text-[13px]">Multimedia DonWeb</span>}
-            {sidebarCollapsed && (
-              <span className="absolute left-full ml-3 px-3 py-1.5 bg-[#0e0e10] text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                Multimedia DonWeb
-              </span>
-            )}
           </button>
         </nav>
 
@@ -997,14 +964,9 @@ export default function AdminDashboardPage() {
           {sidebarCollapsed ? (
             <div
               className="p-2 rounded-xl bg-[#c45600] text-white flex justify-center py-2.5 relative group cursor-pointer"
-              title="Sucursales Activas"
+              title="Sucursales Activas: Ciudad: Av. Mitre 1398 | Luján: Alma Gardenia"
             >
               <MapPin size={16} className="text-white" />
-              <span className="absolute left-full ml-3 px-3 py-2 bg-[#0e0e10] text-white text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 leading-relaxed">
-                <strong>Sucursales:</strong><br />
-                Ciudad: Av. Mitre 1398<br />
-                Luján: Alma Gardenia
-              </span>
             </div>
           ) : (
             <div className="p-3 rounded-xl bg-[#c45600] text-white space-y-1.5 shadow-xs">
@@ -1043,15 +1005,15 @@ export default function AdminDashboardPage() {
       </aside>
 
       {/* 2. MAIN WORKSPACE */}
-      <main className="flex-1 flex flex-col overflow-hidden bg-[#faf9f8]">
+      <main className="flex-1 min-w-0 flex flex-col overflow-x-hidden overflow-y-hidden bg-[#faf9f8]">
         {/* Top bar con naranja oficial del logo #FC7D00 */}
-        <header className="h-16 bg-[#FC7D00] text-white px-8 flex items-center justify-between shadow-md">
-          <div className="flex items-center space-x-3">
-            <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/90">
+        <header className="h-16 bg-[#FC7D00] text-white px-4 sm:px-8 flex items-center justify-between shadow-md flex-shrink-0">
+          <div className="flex items-center space-x-3 min-w-0">
+            <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/90 whitespace-nowrap">
               ACASA TIENDA
             </span>
             <span className="text-white/40 font-light">/</span>
-            <h2 className="font-heading text-base font-bold text-white uppercase tracking-wider">
+            <h2 className="font-heading text-base font-bold text-white uppercase tracking-wider truncate">
               {activeTab === "dashboard" && "Tablero de Tráfico & Conversión en Tiempo Real"}
               {activeTab === "products" && (editingProduct ? "Configuración y Detalle del Mueble" : "Gestión y Catálogo de Muebles")}
               {activeTab === "categories" && "Gestión de Categorías & Subcategorías"}
@@ -1062,7 +1024,7 @@ export default function AdminDashboardPage() {
             </h2>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 flex-shrink-0">
             {/* Admin Avatar */}
             <div className="flex items-center space-x-2.5">
               <div className="w-8 h-8 rounded-full bg-white text-[#FC7D00] text-xs font-black font-heading flex items-center justify-center shadow-md">
@@ -1077,7 +1039,7 @@ export default function AdminDashboardPage() {
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto py-8">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden py-8">
           {/* TAB 1: DASHBOARD & LIVE ANALYTICS */}
           {activeTab === "dashboard" && (
             <div className="w-[97%] mx-auto space-y-7">
@@ -1634,6 +1596,32 @@ export default function AdminDashboardPage() {
                     </div>
 
                     <div className="flex items-center space-x-3 self-end sm:self-auto">
+                      {/* Botón Ver Producto */}
+                      {Boolean(editingProduct.slug || editingProduct.title) && (
+                        <a
+                          href={`/producto/${
+                            editingProduct.slug ||
+                            (editingProduct.title
+                              ? editingProduct.title
+                                  .toLowerCase()
+                                  .replace(/[^a-z0-9]+/g, "-")
+                                  .replace(/(^-|-$)/g, "")
+                              : "")
+                          }`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2.5 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center space-x-1.5 cursor-pointer group"
+                          title="Ver este producto en la tienda pública"
+                        >
+                          <Eye size={15} className="text-[#FC7D00]" />
+                          <span>Ver Producto</span>
+                          <ArrowUpRight
+                            size={13}
+                            className="text-gray-400 group-hover:text-black group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                          />
+                        </a>
+                      )}
+
                       <button
                         type="button"
                         onClick={() => safelyNavigate(() => setEditingProduct(null))}
@@ -2484,6 +2472,15 @@ export default function AdminDashboardPage() {
                             <td className="p-4 uppercase font-bold text-gray-600 text-[11px]">{p.category}</td>
                             <td className="p-4 text-right">
                               <div className="flex items-center justify-end space-x-1.5">
+                                <a
+                                  href={`/producto/${p.slug}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-2 text-gray-500 hover:text-[#FC7D00] hover:bg-orange-50 rounded-lg transition-colors inline-flex items-center justify-center cursor-pointer"
+                                  title="Ver Producto en la tienda pública"
+                                >
+                                  <Eye size={15} />
+                                </a>
                                 <button
                                   onClick={() => {
                                     startEditingProduct(p);
