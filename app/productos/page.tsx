@@ -7,7 +7,22 @@ import { CATEGORIES } from "@/lib/data";
 import { Product } from "@/lib/types";
 import ProductCard from "@/components/ProductCard";
 import PriceRangeFilter from "@/components/PriceRangeFilter";
-import { Search, X, RotateCcw, Zap } from "lucide-react";
+import { Search, X, RotateCcw, Zap, ChevronLeft, ChevronRight } from "lucide-react";
+
+const PRODUCTS_PER_PAGE = 16;
+
+function generatePageNumbers(currentPage: number, totalPages: number): (number | string)[] {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+  if (currentPage <= 4) {
+    return [1, 2, 3, 4, 5, "...", totalPages];
+  }
+  if (currentPage >= totalPages - 3) {
+    return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+  }
+  return [1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages];
+}
 
 interface ProductsCatalogProps {
   initialCategory?: string;
@@ -29,6 +44,7 @@ export function ProductsCatalog({ initialCategory }: ProductsCatalogProps) {
   const [only48hs, setOnly48hs] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>(queryParam);
   const [sortBy, setSortBy] = useState<string>("featured");
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   // Load products from store / localStorage
   useEffect(() => {
@@ -152,6 +168,27 @@ export function ProductsCatalog({ initialCategory }: ProductsCatalogProps) {
     priceRange,
   ]);
 
+  // Reset page when any filter or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    selectedCategory,
+    selectedSubcategory,
+    selectedLinea,
+    only48hs,
+    searchTerm,
+    sortBy,
+    isPriceFilterActive,
+    priceRange,
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE));
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    return filteredProducts.slice(start, start + PRODUCTS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
+
   return (
     <div className="w-[90%] mx-auto py-[3vh] sm:py-[5vh]">
       {/* Clean Catalog Header */}
@@ -173,8 +210,14 @@ export function ProductsCatalog({ initialCategory }: ProductsCatalogProps) {
           )}
         </div>
         <p className="text-[3.2vw] sm:text-[1.4vw] lg:text-[0.75vw] text-gray-500 mt-[0.5vh] uppercase tracking-widest">
-          {filteredProducts.length}{" "}
-          {filteredProducts.length === 1 ? "producto encontrado" : "productos encontrados"}
+          {filteredProducts.length > 0
+            ? `Mostrando ${Math.min((currentPage - 1) * PRODUCTS_PER_PAGE + 1, filteredProducts.length)}–${Math.min(
+                currentPage * PRODUCTS_PER_PAGE,
+                filteredProducts.length
+              )} de ${filteredProducts.length} ${
+                filteredProducts.length === 1 ? "producto" : "productos"
+              }`
+            : "0 productos"}
         </p>
       </div>
 
@@ -368,11 +411,100 @@ export function ProductsCatalog({ initialCategory }: ProductsCatalogProps) {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-[2.5vw] sm:gap-x-[2vw] lg:gap-x-[1.5vw] gap-y-[3vh] sm:gap-y-[4vh] mt-[3vh]">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-[2.5vw] sm:gap-x-[2vw] lg:gap-x-[1.5vw] gap-y-[3vh] sm:gap-y-[4vh] mt-[3vh]">
+            {paginatedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="mt-[5vh] sm:mt-[6vh] pt-[3vh] border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-[2vh]">
+              {/* Range Counter */}
+              <p className="text-[3vw] sm:text-[1.3vw] lg:text-[0.8vw] text-gray-500 font-light">
+                Página <strong className="font-semibold text-black">{currentPage}</strong> de{" "}
+                <strong className="font-semibold text-black">{totalPages}</strong> ({filteredProducts.length} productos en total)
+              </p>
+
+              {/* Numbered pagination buttons */}
+              <div className="flex items-center space-x-[1.5vw] sm:space-x-[0.4vw]">
+                {/* Previous button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (currentPage > 1) {
+                      setCurrentPage(currentPage - 1);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                  }}
+                  disabled={currentPage === 1}
+                  className={`inline-flex items-center justify-center p-[2vw] sm:p-[0.6vw] rounded-[1vw] sm:rounded-[0.3vw] border text-[3vw] sm:text-[1.2vw] lg:text-[0.8vw] font-medium transition-all ${
+                    currentPage === 1
+                      ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                      : "border-gray-300 text-black hover:bg-black hover:text-white hover:border-black"
+                  }`}
+                  aria-label="Página anterior"
+                >
+                  <ChevronLeft className="w-[4vw] sm:w-[1.4vw] lg:w-[1vw] h-[4vw] sm:h-[1.4vw] lg:h-[1vw]" />
+                </button>
+
+                {/* Page numbers */}
+                {generatePageNumbers(currentPage, totalPages).map((item, idx) => {
+                  if (item === "...") {
+                    return (
+                      <span
+                        key={`dots-${idx}`}
+                        className="px-[2vw] sm:px-[0.6vw] py-[1vw] sm:py-[0.4vw] text-gray-400 text-[3.2vw] sm:text-[1.3vw] lg:text-[0.85vw]"
+                      >
+                        ...
+                      </span>
+                    );
+                  }
+                  const pageNum = Number(item);
+                  const isCurrent = pageNum === currentPage;
+                  return (
+                    <button
+                      key={`page-${pageNum}`}
+                      type="button"
+                      onClick={() => {
+                        setCurrentPage(pageNum);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className={`min-w-[7.5vw] sm:min-w-[2.4vw] h-[7.5vw] sm:h-[2.4vw] rounded-[1vw] sm:rounded-[0.3vw] text-[3.2vw] sm:text-[1.3vw] lg:text-[0.85vw] font-semibold flex items-center justify-center transition-all ${
+                        isCurrent
+                          ? "bg-black text-white shadow-sm"
+                          : "bg-white text-gray-700 border border-gray-200 hover:border-black hover:text-black"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                {/* Next button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (currentPage < totalPages) {
+                      setCurrentPage(currentPage + 1);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                  }}
+                  disabled={currentPage === totalPages}
+                  className={`inline-flex items-center justify-center p-[2vw] sm:p-[0.6vw] rounded-[1vw] sm:rounded-[0.3vw] border text-[3vw] sm:text-[1.2vw] lg:text-[0.8vw] font-medium transition-all ${
+                    currentPage === totalPages
+                      ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                      : "border-gray-300 text-black hover:bg-black hover:text-white hover:border-black"
+                  }`}
+                  aria-label="Página siguiente"
+                >
+                  <ChevronRight className="w-[4vw] sm:w-[1.4vw] lg:w-[1vw] h-[4vw] sm:h-[1.4vw] lg:h-[1vw]" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
