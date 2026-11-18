@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { getStoredProducts } from "@/lib/store";
 import { Product } from "@/lib/types";
@@ -22,10 +22,10 @@ export default function InteriorismoPage() {
     return () => window.removeEventListener("products_updated", handleUpdate);
   }, []);
 
-  // Products for Interiorismo & Diseño (Línea Premium & Autor)
-  const interiorismoProducts = products.filter(
-    (p) => p.linea === "premium"
-  );
+  // Products for Interiorismo & Diseño (Línea Premium & Autor) - hasta 16 productos
+  const interiorismoProducts = useMemo(() => {
+    return products.filter((p) => p.linea === "premium").slice(0, 16);
+  }, [products]);
 
   return (
     <div className="space-y-[6vh] sm:space-y-[8vh] w-full pb-0 mb-0 bg-white text-gray-900">
