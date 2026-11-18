@@ -2,7 +2,7 @@ import { Product, Order, Category, DonWebFtpSettings, MediaItem, GlobalAttribute
 import { INITIAL_PRODUCTS, INITIAL_ORDERS, CATEGORIES, INITIAL_ATTRIBUTES } from "./data";
 
 const STORAGE_KEYS = {
-  PRODUCTS: "acasa_products_v1",
+  PRODUCTS: "acasa_products_v2",
   ORDERS: "acasa_orders_v1",
   CATEGORIES: "acasa_categories_v1",
   ATTRIBUTES: "acasa_attributes_v1",
@@ -43,6 +43,13 @@ export function getStoredProducts(): Product[] {
         p = {
           ...p,
           entrega48hs: initial.entrega48hs,
+        };
+      }
+      if (initial && initial.linea && p.linea !== initial.linea) {
+        hasChanges = true;
+        p = {
+          ...p,
+          linea: initial.linea,
         };
       }
       return p;
