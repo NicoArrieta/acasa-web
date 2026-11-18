@@ -22,9 +22,11 @@ export default function InteriorismoPage() {
     return () => window.removeEventListener("products_updated", handleUpdate);
   }, []);
 
-  // Products for Interiorismo & Diseño (Línea Premium & Autor) - hasta 16 productos
+  // Products for Interiorismo & Diseño (Línea Premium & Autor) - hasta 16 productos reales con precio
   const interiorismoProducts = useMemo(() => {
-    return products.filter((p) => p.linea === "premium").slice(0, 16);
+    return products
+      .filter((p) => p.linea === "premium" && p.regularPrice > 0 && p.title.toLowerCase().trim() !== "producto")
+      .slice(0, 16);
   }, [products]);
 
   return (

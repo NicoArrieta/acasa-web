@@ -93,6 +93,11 @@ export function ProductsCatalog({ initialCategory }: ProductsCatalogProps) {
   const filteredProducts = useMemo(() => {
     return products
       .filter((p) => {
+        // Exclude dummy or price 0 products
+        if (!p.regularPrice || p.regularPrice <= 0 || p.title.toLowerCase().trim() === "producto") {
+          return false;
+        }
+
         // Category filter
         if (selectedCategory !== "todas" && p.category !== selectedCategory) {
           return false;

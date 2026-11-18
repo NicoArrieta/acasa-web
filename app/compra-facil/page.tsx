@@ -28,9 +28,9 @@ export default function CompraFacilPage() {
     return () => window.removeEventListener("products_updated", handleUpdate);
   }, []);
 
-  // Filter products for Línea Práctica / Económica
+  // Filter products for Línea Práctica / Económica con precio válido
   const practicaProducts = useMemo(() => {
-    return products.filter((p) => p.linea === "practica");
+    return products.filter((p) => p.linea === "practica" && p.regularPrice > 0 && p.title.toLowerCase().trim() !== "producto");
   }, [products]);
 
   // Show up to 16 products on the Compra Fácil homepage
