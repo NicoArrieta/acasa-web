@@ -161,14 +161,14 @@ export default function Navbar() {
                 <div className="flex items-center space-x-[0.8vw] sm:space-x-[0.5vw]">
                   <div className="h-[2.2vh] w-[1px] bg-gray-300" />
                   <span className="text-[2.2vw] sm:text-[0.9vw] lg:text-[0.68vw] font-bold uppercase tracking-[0.22em] text-[#c25e1a]">
-                    COMPRA FÁCIL Y ESTÁNDAR
+                    LÍNEA PRÁCTICA · COMPRA FÁCIL
                   </span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-[0.8vw] sm:space-x-[0.5vw]">
                   <div className="h-[2.2vh] w-[1px] bg-white/20" />
-                  <span className="text-[2.2vw] sm:text-[0.9vw] lg:text-[0.68vw] font-medium uppercase tracking-[0.22em] text-gray-300">
-                    COMPRA PERSONALIZADA Y DE DISEÑO
+                  <span className="text-[2.2vw] sm:text-[0.9vw] lg:text-[0.68vw] font-semibold uppercase tracking-[0.22em] text-[#f39200]">
+                    LÍNEA PERSONALIZADA · DISEÑO
                   </span>
                 </div>
               )}
@@ -231,7 +231,7 @@ export default function Navbar() {
                   Sucursales
                 </Link>
 
-                {/* Switcher as a clean, integrated nav item (without heavy pill, without 'ir') */}
+                {/* Switcher resaltado para alternar de línea */}
                 {isCompraFacil ? (
                   <Link
                     href="/interiorismo"
@@ -241,9 +241,10 @@ export default function Navbar() {
                         localStorage.setItem("acasa_line", "premium");
                       } catch (_) {}
                     }}
-                    className="text-black hover:text-[#c25e1a] transition-colors font-medium text-[0.9vw]"
+                    className="inline-flex items-center space-x-[0.4vw] px-[0.9vw] py-[0.55vh] rounded-full text-[0.82vw] font-bold uppercase tracking-wider bg-black text-white hover:bg-zinc-800 border border-black shadow-sm transition-all transform hover:scale-105"
                   >
-                    Compra personalizada y de diseño
+                    <Sparkles className="w-[0.8vw] h-[0.8vw] text-[#f39200]" />
+                    <span>Línea Personalizada</span>
                   </Link>
                 ) : (
                   <Link
@@ -254,9 +255,10 @@ export default function Navbar() {
                         localStorage.setItem("acasa_line", "practica");
                       } catch (_) {}
                     }}
-                    className="text-white hover:text-[#f39200] transition-colors font-medium text-[0.9vw]"
+                    className="inline-flex items-center space-x-[0.4vw] px-[0.9vw] py-[0.55vh] rounded-full text-[0.82vw] font-bold uppercase tracking-wider bg-[#f39200] text-black hover:bg-[#e08500] shadow-sm transition-all transform hover:scale-105"
                   >
-                    Compra fácil y estándar
+                    <Zap className="w-[0.8vw] h-[0.8vw] text-black fill-black" />
+                    <span>Línea Práctica</span>
                   </Link>
                 )}
               </nav>
@@ -500,11 +502,11 @@ export default function Navbar() {
               </span>
               {isCompraFacil ? (
                 <span className="text-[#c25e1a] text-[2.6vw] font-bold uppercase tracking-wider">
-                  COMPRA FÁCIL Y ESTÁNDAR
+                  LÍNEA PRÁCTICA · COMPRA FÁCIL
                 </span>
               ) : (
-                <span className="text-gray-300 text-[2.6vw] font-bold uppercase tracking-wider">
-                  COMPRA PERSONALIZADA Y DE DISEÑO
+                <span className="text-[#f39200] text-[2.6vw] font-bold uppercase tracking-wider">
+                  LÍNEA PERSONALIZADA · DISEÑO
                 </span>
               )}
             </div>
@@ -583,9 +585,10 @@ export default function Navbar() {
                       localStorage.setItem("acasa_line", "premium");
                     } catch (_) {}
                   }}
-                  className="block text-[3.8vw] font-semibold uppercase tracking-wider py-[0.8vh] text-black hover:text-[#c25e1a]"
+                  className="flex items-center justify-center space-x-[2vw] text-[3.8vw] font-bold uppercase tracking-wider py-[1.2vh] px-[4vw] rounded-full bg-black text-white hover:bg-zinc-800 transition-colors shadow-md mt-[1vh]"
                 >
-                  Compra personalizada y de diseño
+                  <Sparkles className="w-[4.2vw] h-[4.2vw] text-[#f39200]" />
+                  <span>Línea Personalizada</span>
                 </Link>
               ) : (
                 <Link
@@ -597,9 +600,10 @@ export default function Navbar() {
                       localStorage.setItem("acasa_line", "practica");
                     } catch (_) {}
                   }}
-                  className="block text-[3.8vw] font-semibold uppercase tracking-wider py-[0.8vh] text-white hover:text-[#f39200]"
+                  className="flex items-center justify-center space-x-[2vw] text-[3.8vw] font-bold uppercase tracking-wider py-[1.2vh] px-[4vw] rounded-full bg-[#f39200] text-black hover:bg-[#e08500] transition-colors shadow-md mt-[1vh]"
                 >
-                  Compra fácil y estándar
+                  <Zap className="w-[4.2vw] h-[4.2vw] text-black fill-black" />
+                  <span>Línea Práctica</span>
                 </Link>
               )}
             </div>
