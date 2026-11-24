@@ -7,6 +7,7 @@ import { Product } from "@/lib/types";
 import ProductCard from "@/components/ProductCard";
 import CategoriesCarousel from "@/components/CategoriesCarousel";
 import MostChosenSection from "@/components/MostChosenSection";
+import HeroSlider from "@/components/HeroSlider";
 import { ArrowRight, ChevronRight, Sparkles } from "lucide-react";
 
 export default function InteriorismoPage() {
@@ -31,63 +32,8 @@ export default function InteriorismoPage() {
 
   return (
     <div className="space-y-[6vh] sm:space-y-[8vh] w-full pb-0 mb-0 bg-white text-gray-900">
-      {/* 1. Hero Banner (90vh) con fondo verde bosque oscuro elegante y textos de la maqueta */}
-      <section className="relative h-[85vh] sm:h-[90vh] w-full bg-[#263527] overflow-hidden flex items-center justify-center">
-        {/* Background image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 scale-105"
-          style={{
-            backgroundImage: `url('/split-premium.webp')`,
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-[#1c291d]/90 via-[#223323]/80 to-[#182319]/75" />
-        </div>
-
-        {/* Hero Content */}
-        <div className="relative z-10 w-[90%] mx-auto flex flex-col md:flex-row items-center justify-between gap-[4vh] md:gap-[3vw] text-white">
-          {/* Left Title */}
-          <div className="space-y-[2vh] text-center md:text-left max-w-[85vw] md:max-w-[55vw]">
-            <span className="inline-block text-[2.8vw] sm:text-[1.3vw] lg:text-[0.75vw] uppercase tracking-[0.25em] font-semibold text-[#a7f3d0] border-b border-[#a7f3d0]/30 pb-[0.4vh]">
-              COMPRA PERSONALIZADA Y DE DISEÑO
-            </span>
-            <h1 className="font-heading text-[8vw] sm:text-[5.5vw] lg:text-[4.2vw] font-bold tracking-tight uppercase leading-[1.1] text-white">
-              Muebles con carácter. <br />
-              <span className="italic font-serif font-normal text-white">Un espacio muy tuyo.</span>
-            </h1>
-            <div className="pt-[1.5vh] flex flex-col sm:flex-row items-center justify-center md:justify-start gap-[1.5vh] sm:gap-[1vw]">
-              <Link
-                href="/productos?linea=premium"
-                className="w-full sm:w-auto inline-flex items-center justify-center bg-white text-black text-[3.6vw] sm:text-[1.4vw] lg:text-[0.8vw] uppercase font-bold tracking-widest px-[6vw] sm:px-[3vw] lg:px-[2vw] py-[1.8vh] rounded-[1vw] sm:rounded-[0.4vw] lg:rounded-[0.2vw] hover:bg-black hover:text-white transition-all duration-300 shadow-xl"
-              >
-                <span>Explorar Catálogo</span>
-                <ArrowRight className="w-[4vw] sm:w-[1.8vw] lg:w-[1vw] h-[4vw] sm:h-[1.8vw] lg:h-[1vw] ml-[1vw] sm:ml-[0.5vw]" />
-              </Link>
-              <Link
-                href="#areas"
-                className="w-full sm:w-auto inline-flex items-center justify-center bg-transparent border border-white text-white text-[3.6vw] sm:text-[1.4vw] lg:text-[0.8vw] uppercase font-semibold tracking-widest px-[6vw] sm:px-[3vw] lg:px-[2vw] py-[1.8vh] rounded-[1vw] sm:rounded-[0.4vw] lg:rounded-[0.2vw] hover:bg-white/10 transition-all duration-300"
-              >
-                Ver Ambientes
-              </Link>
-            </div>
-          </div>
-
-          {/* Right Description block (como en la captura) */}
-          <div className="max-w-[85vw] md:max-w-[32vw] text-center md:text-left space-y-[1.5vh] bg-black/25 backdrop-blur-sm p-[4vw] sm:p-[2vw] rounded-[1.5vw] sm:rounded-[0.6vw] border border-white/10">
-            <p className="text-[3.4vw] sm:text-[1.6vw] lg:text-[0.95vw] text-gray-200 font-light leading-relaxed">
-              Muebles, decoración y opciones de terminación para crear tu ambiente. Explorá el catálogo de ACASA Tienda o dejá que te acompañemos a elegir. Materiales, personalización y plazos según cada modelo.
-            </p>
-            <a
-              href="https://wa.me/5492616843330?text=Hola!%20Quiero%20asesoramiento%20personalizado%20para%20diseñar%20mi%20ambiente"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center text-[3vw] sm:text-[1.3vw] lg:text-[0.8vw] text-[#a7f3d0] hover:text-white font-semibold uppercase tracking-wider transition-colors pt-[0.5vh]"
-            >
-              <span>Quiero asesoramiento personal</span>
-              <ArrowRight className="w-[3.5vw] sm:w-[1.4vw] lg:w-[0.9vw] h-[3.5vw] sm:h-[1.4vw] lg:h-[0.9vw] ml-[0.5vw]" />
-            </a>
-          </div>
-        </div>
-      </section>
+      {/* 1. Hero Slider dinámico de 3 diapositivas */}
+      <HeroSlider variant="premium" />
 
       {/* 2. ÁREAS PARA TU HOGAR - Carousel exactamente igual */}
       <CategoriesCarousel theme="original" />

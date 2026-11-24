@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getStoredProducts, formatCurrency } from "@/lib/store";
 import { Product } from "@/lib/types";
 import ProductCard from "@/components/ProductCard";
+import HeroSlider from "@/components/HeroSlider";
 import {
   ArrowRight,
   ChevronRight,
@@ -40,66 +41,8 @@ export default function CompraFacilPage() {
 
   return (
     <div className="space-y-[4vh] sm:space-y-[6vh] w-full pb-0 mb-0 bg-[#fdfbf9] text-gray-900">
-      {/* 1. Hero Banner (exacto a la maqueta) */}
-      <section className="relative h-[80vh] sm:h-[85vh] w-full bg-[#1e130e] overflow-hidden flex items-center justify-center">
-        {/* Background image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 scale-105"
-          style={{
-            backgroundImage: `url('/split-practica.webp')`,
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/35" />
-        </div>
-
-        {/* Hero Content */}
-        <div className="relative z-10 w-[90%] mx-auto flex flex-col md:flex-row items-center justify-between gap-[4vh] md:gap-[3vw] text-white">
-          <div className="space-y-[2vh] text-center md:text-left max-w-[85vw] md:max-w-[55vw]">
-            <span className="inline-block text-[2.8vw] sm:text-[1.3vw] lg:text-[0.75vw] uppercase tracking-[0.25em] font-bold text-[#f6ad55] border-b border-[#c25e1a] pb-[0.4vh]">
-              COMPRA FÁCIL Y ESTÁNDAR · LÍNEA PRÁCTICA
-            </span>
-            <h1 className="font-heading text-[8vw] sm:text-[5.5vw] lg:text-[4.2vw] font-bold tracking-tight uppercase leading-[1.1] text-white">
-              Más para tu casa. <br />
-              <span className="italic font-serif font-normal text-gray-100">Mejor para tu bolsillo.</span>
-            </h1>
-            <p className="text-[3.6vw] sm:text-[1.8vw] lg:text-[1.1vw] font-light text-gray-200 max-w-[75vw] md:max-w-[48vw] leading-relaxed">
-              Melamina y muebles prácticos. Precios accesibles, modelos definidos y mayor disponibilidad.
-            </p>
-            <div className="pt-[1.5vh] flex flex-col sm:flex-row items-center justify-center md:justify-start gap-[1.5vh] sm:gap-[1vw]">
-              <a
-                href="#catalogo-productos"
-                className="w-full sm:w-auto inline-flex items-center justify-center bg-[#c25e1a] text-white text-[3.6vw] sm:text-[1.4vw] lg:text-[0.8vw] uppercase font-bold tracking-widest px-[6vw] sm:px-[3vw] lg:px-[2vw] py-[1.8vh] rounded-[1vw] sm:rounded-[0.4vw] lg:rounded-[0.2vw] hover:bg-[#a94f13] transition-all duration-300 shadow-xl"
-              >
-                <span>Explorar Compra fácil y estándar</span>
-                <ArrowRight className="w-[4vw] sm:w-[1.8vw] lg:w-[1vw] h-[4vw] sm:h-[1.8vw] lg:h-[1vw] ml-[1vw] sm:ml-[0.5vw]" />
-              </a>
-              <Link
-                href="/sucursales?linea=practica"
-                className="w-full sm:w-auto inline-flex items-center justify-center bg-transparent border border-[#f6ad55] text-white text-[3.6vw] sm:text-[1.4vw] lg:text-[0.8vw] uppercase font-semibold tracking-widest px-[6vw] sm:px-[3vw] lg:px-[2vw] py-[1.8vh] rounded-[1vw] sm:rounded-[0.4vw] lg:rounded-[0.2vw] hover:bg-white/10 transition-all duration-300"
-              >
-                Ver Showroom Ciudad
-              </Link>
-            </div>
-          </div>
-
-          {/* Highlight Card: Entrega en 48 h */}
-          <div className="flex-shrink-0 w-full sm:w-auto flex flex-col items-center md:items-end space-y-[1vh]">
-            <div className="bg-[#dcfce7] border border-[#86efac] text-[#14532d] rounded-[2vw] sm:rounded-[1vw] lg:rounded-[0.6vw] p-[4vw] sm:p-[2vw] lg:p-[1.4vw] flex items-center space-x-[3vw] sm:space-x-[1.2vw] shadow-2xl">
-              <div className="w-[10vw] sm:w-[4vw] lg:w-[2.6vw] h-[10vw] sm:h-[4vw] lg:h-[2.6vw] rounded-full bg-[#15803d] text-white flex items-center justify-center flex-shrink-0">
-                <Zap className="w-[5vw] sm:w-[2vw] lg:w-[1.3vw] h-[5vw] sm:h-[2vw] lg:h-[1.3vw] fill-white" />
-              </div>
-              <div className="text-left">
-                <p className="font-heading font-bold text-[3.8vw] sm:text-[1.8vw] lg:text-[1.1vw] tracking-wide text-[#14532d]">
-                  Entrega en 48 h
-                </p>
-                <p className="text-[2.6vw] sm:text-[1.1vw] lg:text-[0.75vw] text-[#166534] font-medium">
-                  En productos y zonas habilitados
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 1. Hero Slider dinámico de 3 diapositivas */}
+      <HeroSlider variant="practica" />
 
       {/* =========================================================================
           2. SECCIÓN DE PRODUCTOS CON TÍTULO Y SUBTÍTULO
