@@ -241,10 +241,9 @@ export default function Navbar() {
                         localStorage.setItem("acasa_line", "premium");
                       } catch (_) {}
                     }}
-                    className="inline-flex items-center space-x-[0.4vw] px-[0.9vw] py-[0.55vh] rounded-full text-[0.82vw] font-bold uppercase tracking-wider bg-black text-white hover:bg-zinc-800 border border-black shadow-sm transition-all transform hover:scale-105"
+                    className="px-[1vw] py-[0.55vh] rounded-full text-[0.82vw] font-bold uppercase tracking-wider bg-black text-white hover:bg-zinc-800 border border-black shadow-sm transition-all transform hover:scale-105 text-center"
                   >
-                    <Sparkles className="w-[0.8vw] h-[0.8vw] text-[#f39200]" />
-                    <span>Línea Personalizada</span>
+                    Línea Personalizada
                   </Link>
                 ) : (
                   <Link
@@ -255,10 +254,9 @@ export default function Navbar() {
                         localStorage.setItem("acasa_line", "practica");
                       } catch (_) {}
                     }}
-                    className="inline-flex items-center space-x-[0.4vw] px-[0.9vw] py-[0.55vh] rounded-full text-[0.82vw] font-bold uppercase tracking-wider bg-[#f39200] text-black hover:bg-[#e08500] shadow-sm transition-all transform hover:scale-105"
+                    className="px-[1vw] py-[0.55vh] rounded-full text-[0.82vw] font-bold uppercase tracking-wider bg-[#f39200] text-black hover:bg-[#e08500] shadow-sm transition-all transform hover:scale-105 text-center"
                   >
-                    <Zap className="w-[0.8vw] h-[0.8vw] text-black fill-black" />
-                    <span>Línea Práctica</span>
+                    Línea Práctica
                   </Link>
                 )}
               </nav>
@@ -585,10 +583,9 @@ export default function Navbar() {
                       localStorage.setItem("acasa_line", "premium");
                     } catch (_) {}
                   }}
-                  className="flex items-center justify-center space-x-[2vw] text-[3.8vw] font-bold uppercase tracking-wider py-[1.2vh] px-[4vw] rounded-full bg-black text-white hover:bg-zinc-800 transition-colors shadow-md mt-[1vh]"
+                  className="block text-center text-[3.8vw] font-bold uppercase tracking-wider py-[1.2vh] px-[4vw] rounded-full bg-black text-white hover:bg-zinc-800 transition-colors shadow-md mt-[1vh]"
                 >
-                  <Sparkles className="w-[4.2vw] h-[4.2vw] text-[#f39200]" />
-                  <span>Línea Personalizada</span>
+                  Línea Personalizada
                 </Link>
               ) : (
                 <Link
@@ -600,10 +597,9 @@ export default function Navbar() {
                       localStorage.setItem("acasa_line", "practica");
                     } catch (_) {}
                   }}
-                  className="flex items-center justify-center space-x-[2vw] text-[3.8vw] font-bold uppercase tracking-wider py-[1.2vh] px-[4vw] rounded-full bg-[#f39200] text-black hover:bg-[#e08500] transition-colors shadow-md mt-[1vh]"
+                  className="block text-center text-[3.8vw] font-bold uppercase tracking-wider py-[1.2vh] px-[4vw] rounded-full bg-[#f39200] text-black hover:bg-[#e08500] transition-colors shadow-md mt-[1vh]"
                 >
-                  <Zap className="w-[4.2vw] h-[4.2vw] text-black fill-black" />
-                  <span>Línea Práctica</span>
+                  Línea Práctica
                 </Link>
               )}
             </div>
