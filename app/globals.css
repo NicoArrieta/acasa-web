@@ -39,3 +39,97 @@ h1, h2, h3, h4, .font-heading {
 ::-webkit-scrollbar-thumb:hover {
   background: #999;
 }
+
+/* =========================================================================
+   HERO SLIDER ENTRANCE ANIMATIONS
+========================================================================= */
+@keyframes heroFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroFadeDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroFadeLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-35px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes heroFadeRight {
+  0% {
+    opacity: 0;
+    transform: translateX(35px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes heroZoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.anim-hero-up {
+  animation: heroFadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.anim-hero-down {
+  animation: heroFadeDown 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.anim-hero-left {
+  animation: heroFadeLeft 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.anim-hero-right {
+  animation: heroFadeRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.anim-hero-zoom {
+  animation: heroZoomIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.anim-delay-75 {
+  animation-delay: 75ms;
+}
+
+.anim-delay-150 {
+  animation-delay: 150ms;
+}
+
+.anim-delay-250 {
+  animation-delay: 250ms;
+}
+
+.anim-delay-350 {
+  animation-delay: 350ms;
+}
