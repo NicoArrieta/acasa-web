@@ -449,42 +449,46 @@ export default function HeroSlider({ variant }: HeroSliderProps) {
 
             {/* SLIDE 2 (PREMIUM): Estructura Centrada / Manifiesto de Materialidad */}
             {currentIndex === 1 && (
-              <div className="w-full max-w-[70vw] text-center space-y-[3.5vh]">
+              <div className="w-full max-w-[85vw] sm:max-w-[70vw] text-center space-y-[2.5vh] sm:space-y-[3.5vh]">
                 <span className="inline-block text-[2.8vw] sm:text-[1.3vw] lg:text-[0.78vw] uppercase tracking-[0.3em] font-semibold text-[#a7f3d0] border-b border-[#a7f3d0]/30 pb-[0.5vh] anim-hero-down">
                   MATERIALES NOBLES & OFICIO ARTESANAL
                 </span>
 
-                <h1 className="font-heading text-[8vw] sm:text-[5.5vw] lg:text-[4.5vw] font-bold tracking-tight uppercase leading-[1.05] text-white anim-hero-up anim-delay-75">
-                  Maderas macizas <br />
-                  <span className="italic font-serif font-normal text-[#d1fae5]">
+                <h1 className="font-heading text-[6.5vw] sm:text-[5.5vw] lg:text-[4.5vw] font-bold tracking-tight uppercase leading-[1.1] text-white anim-hero-up anim-delay-75">
+                  <span className="block whitespace-nowrap">Maderas macizas</span>
+                  <span className="block italic font-serif font-normal text-[#d1fae5] whitespace-nowrap">
                     y texturas que perduran.
                   </span>
                 </h1>
 
-                <p className="text-[3.6vw] sm:text-[1.8vw] lg:text-[1.15vw] font-light text-gray-200 max-w-[50vw] mx-auto leading-relaxed anim-hero-up anim-delay-150">
+                <p className="text-[3.4vw] sm:text-[1.8vw] lg:text-[1.15vw] font-light text-gray-200 max-w-[80vw] sm:max-w-[50vw] mx-auto leading-relaxed anim-hero-up anim-delay-150">
                   Petiribí seleccionado, paraíso natural, fibras orgánicas y géneros de alta gama. Cada pieza está construida para convertirse en el corazón de tu casa.
                 </p>
 
-                {/* Sellos de Materialidad */}
-                <div className="flex flex-wrap items-center justify-center gap-[2vw] sm:gap-[1vw] pt-[1vh] anim-hero-zoom anim-delay-250">
-                  <span className="px-[3vw] py-[0.8vh] rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[2.8vw] sm:text-[1.1vw] lg:text-[0.8vw] font-medium tracking-wide">
-                    🌿 Petiribí Macizo
-                  </span>
-                  <span className="px-[3vw] py-[0.8vh] rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[2.8vw] sm:text-[1.1vw] lg:text-[0.8vw] font-medium tracking-wide">
-                    🪵 Paraíso Lustrado
-                  </span>
-                  <span className="px-[3vw] py-[0.8vh] rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[2.8vw] sm:text-[1.1vw] lg:text-[0.8vw] font-medium tracking-wide">
-                    🧵 Tapicería Premium
-                  </span>
-                  <span className="px-[3vw] py-[0.8vh] rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[2.8vw] sm:text-[1.1vw] lg:text-[0.8vw] font-medium tracking-wide">
-                    📐 Medidas Especiales
-                  </span>
+                {/* Sellos de Materialidad en 2 renglones, sin iconos */}
+                <div className="flex flex-col items-center justify-center gap-[1.2vh] sm:gap-[1vw] pt-[1vh] anim-hero-zoom anim-delay-250">
+                  <div className="flex items-center justify-center gap-[2vw] sm:gap-[1vw]">
+                    <span className="px-[3.5vw] sm:px-[2vw] py-[0.8vh] rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[2.8vw] sm:text-[1.1vw] lg:text-[0.8vw] font-medium tracking-wide whitespace-nowrap">
+                      Petiribí Macizo
+                    </span>
+                    <span className="px-[3.5vw] sm:px-[2vw] py-[0.8vh] rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[2.8vw] sm:text-[1.1vw] lg:text-[0.8vw] font-medium tracking-wide whitespace-nowrap">
+                      Paraíso Lustrado
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center gap-[2vw] sm:gap-[1vw]">
+                    <span className="px-[3.5vw] sm:px-[2vw] py-[0.8vh] rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[2.8vw] sm:text-[1.1vw] lg:text-[0.8vw] font-medium tracking-wide whitespace-nowrap">
+                      Tapicería Premium
+                    </span>
+                    <span className="px-[3.5vw] sm:px-[2vw] py-[0.8vh] rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[2.8vw] sm:text-[1.1vw] lg:text-[0.8vw] font-medium tracking-wide whitespace-nowrap">
+                      Medidas Especiales
+                    </span>
+                  </div>
                 </div>
 
                 <div className="pt-[1.5vh] anim-hero-up anim-delay-350">
                   <Link
                     href="/productos?linea=premium"
-                    className="inline-flex items-center justify-center bg-white text-black text-[3.6vw] sm:text-[1.4vw] lg:text-[0.85vw] uppercase font-bold tracking-widest px-[8vw] sm:px-[4vw] lg:px-[2.8vw] py-[1.8vh] rounded-full hover:bg-black hover:text-white transition-all duration-300 shadow-2xl"
+                    className="inline-flex items-center justify-center bg-white text-black text-[3.2vw] sm:text-[1.4vw] lg:text-[0.85vw] uppercase font-bold tracking-widest px-[6vw] sm:px-[4vw] lg:px-[2.8vw] py-[1.8vh] rounded-full hover:bg-black hover:text-white transition-all duration-300 shadow-2xl whitespace-nowrap"
                   >
                     <span>Ver Colección de Autor</span>
                     <ArrowRight className="w-[4vw] sm:w-[1.6vw] lg:w-[1vw] h-[4vw] sm:h-[1.6vw] lg:h-[1vw] ml-[1vw] sm:ml-[0.5vw]" />
