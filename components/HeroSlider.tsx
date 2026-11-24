@@ -7,7 +7,6 @@ import {
   ChevronRight,
   ArrowRight,
   Zap,
-  Sparkles,
   ShieldCheck,
   Compass,
   CreditCard,
@@ -415,59 +414,35 @@ export default function HeroSlider({ variant }: HeroSliderProps) {
         ===================================================================== */}
         {!isPractica && (
           <>
-            {/* SLIDE 1 (PREMIUM): Estructura Clásica Split + Card de Vidrio Asesoramiento */}
+            {/* SLIDE 1 (PREMIUM): Hero Principal Limpio */}
             {currentIndex === 0 && (
-              <div className="w-full flex flex-col md:flex-row items-center justify-between gap-[4vh] md:gap-[3vw] text-white">
-                <div className="space-y-[2vh] text-center md:text-left max-w-[85vw] md:max-w-[55vw] animate-in fade-in slide-in-from-left duration-700">
-                  <span className="inline-block text-[2.8vw] sm:text-[1.3vw] lg:text-[0.75vw] uppercase tracking-[0.25em] font-semibold text-[#a7f3d0] border-b border-[#a7f3d0]/30 pb-[0.4vh]">
-                    COMPRA PERSONALIZADA Y DE DISEÑO
+              <div className="w-full max-w-[85vw] md:max-w-[58vw] space-y-[2vh] text-center md:text-left animate-in fade-in slide-in-from-left duration-700 text-white">
+                <span className="inline-block text-[2.8vw] sm:text-[1.3vw] lg:text-[0.75vw] uppercase tracking-[0.25em] font-semibold text-[#a7f3d0] border-b border-[#a7f3d0]/30 pb-[0.4vh]">
+                  COMPRA PERSONALIZADA Y DE DISEÑO
+                </span>
+                <h1 className="font-heading text-[8vw] sm:text-[5.5vw] lg:text-[4.2vw] font-bold tracking-tight uppercase leading-[1.1] text-white">
+                  Muebles con carácter. <br />
+                  <span className="italic font-serif font-normal text-white">
+                    Un espacio muy tuyo.
                   </span>
-                  <h1 className="font-heading text-[8vw] sm:text-[5.5vw] lg:text-[4.2vw] font-bold tracking-tight uppercase leading-[1.1] text-white">
-                    Muebles con carácter. <br />
-                    <span className="italic font-serif font-normal text-white">
-                      Un espacio muy tuyo.
-                    </span>
-                  </h1>
-                  <p className="text-[3.4vw] sm:text-[1.8vw] lg:text-[1.1vw] font-light text-gray-200 max-w-[75vw] md:max-w-[48vw] leading-relaxed">
-                    Muebles de autor, maderas nobles y asesoramiento integral para diseñar ambientes únicos que perduran en el tiempo.
-                  </p>
-                  <div className="pt-[1.5vh] flex flex-col sm:flex-row items-center justify-center md:justify-start gap-[1.5vh] sm:gap-[1vw]">
-                    <Link
-                      href="/productos?linea=premium"
-                      className="w-full sm:w-auto inline-flex items-center justify-center bg-white text-black text-[3.6vw] sm:text-[1.4vw] lg:text-[0.8vw] uppercase font-bold tracking-widest px-[6vw] sm:px-[3vw] lg:px-[2vw] py-[1.8vh] rounded-[1vw] sm:rounded-[0.4vw] lg:rounded-[0.2vw] hover:bg-black hover:text-white transition-all duration-300 shadow-xl"
-                    >
-                      <span>Explorar Catálogo</span>
-                      <ArrowRight className="w-[4vw] sm:w-[1.8vw] lg:w-[1vw] h-[4vw] sm:h-[1.8vw] lg:h-[1vw] ml-[1vw] sm:ml-[0.5vw]" />
-                    </Link>
-                    <Link
-                      href="#areas"
-                      className="w-full sm:w-auto inline-flex items-center justify-center bg-transparent border border-white text-white text-[3.6vw] sm:text-[1.4vw] lg:text-[0.8vw] uppercase font-semibold tracking-widest px-[6vw] sm:px-[3vw] lg:px-[2vw] py-[1.8vh] rounded-[1vw] sm:rounded-[0.4vw] lg:rounded-[0.2vw] hover:bg-white/10 transition-all duration-300"
-                    >
-                      Ver Ambientes
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Right Description block Glassmorphism */}
-                <div className="max-w-[85vw] md:max-w-[32vw] text-center md:text-left space-y-[1.5vh] bg-black/40 backdrop-blur-md p-[4vw] sm:p-[2vw] rounded-[1.5vw] sm:rounded-[0.6vw] border border-white/15 shadow-2xl animate-in fade-in zoom-in-95 duration-700 delay-200">
-                  <div className="flex items-center justify-center md:justify-start space-x-[1vw]">
-                    <Sparkles className="w-[4.5vw] sm:w-[1.8vw] lg:w-[1.1vw] h-[4.5vw] sm:h-[1.8vw] lg:h-[1.1vw] text-[#a7f3d0]" />
-                    <span className="text-[2.8vw] sm:text-[1.2vw] lg:text-[0.8vw] font-bold uppercase tracking-wider text-white">
-                      Diseño a tu medida
-                    </span>
-                  </div>
-                  <p className="text-[3.4vw] sm:text-[1.6vw] lg:text-[0.9vw] text-gray-200 font-light leading-relaxed">
-                    Muebles, decoración y opciones de terminación para crear tu ambiente. Explorá el catálogo de ACASA Tienda o dejá que te acompañemos a elegir.
-                  </p>
-                  <a
-                    href="https://wa.me/5492616843330?text=Hola!%20Quiero%20asesoramiento%20personalizado%20para%20diseñar%20mi%20ambiente"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center text-[3vw] sm:text-[1.3vw] lg:text-[0.8vw] text-[#a7f3d0] hover:text-white font-semibold uppercase tracking-wider transition-colors pt-[0.5vh]"
+                </h1>
+                <p className="text-[3.4vw] sm:text-[1.8vw] lg:text-[1.1vw] font-light text-gray-200 max-w-[75vw] md:max-w-[48vw] mx-auto md:mx-0 leading-relaxed">
+                  Muebles de autor, maderas nobles y asesoramiento integral para diseñar ambientes únicos que perduran en el tiempo.
+                </p>
+                <div className="pt-[1.5vh] flex flex-col sm:flex-row items-center justify-center md:justify-start gap-[1.5vh] sm:gap-[1vw]">
+                  <Link
+                    href="/productos?linea=premium"
+                    className="w-full sm:w-auto inline-flex items-center justify-center bg-white text-black text-[3.6vw] sm:text-[1.4vw] lg:text-[0.8vw] uppercase font-bold tracking-widest px-[6vw] sm:px-[3vw] lg:px-[2vw] py-[1.8vh] rounded-[1vw] sm:rounded-[0.4vw] lg:rounded-[0.2vw] hover:bg-black hover:text-white transition-all duration-300 shadow-xl"
                   >
-                    <span>Quiero asesoramiento personal</span>
-                    <ArrowRight className="w-[3.5vw] sm:w-[1.4vw] lg:w-[0.9vw] h-[3.5vw] sm:h-[1.4vw] lg:h-[0.9vw] ml-[0.5vw]" />
-                  </a>
+                    <span>Explorar Catálogo</span>
+                    <ArrowRight className="w-[4vw] sm:w-[1.8vw] lg:w-[1vw] h-[4vw] sm:h-[1.8vw] lg:h-[1vw] ml-[1vw] sm:ml-[0.5vw]" />
+                  </Link>
+                  <Link
+                    href="#areas"
+                    className="w-full sm:w-auto inline-flex items-center justify-center bg-transparent border border-white text-white text-[3.6vw] sm:text-[1.4vw] lg:text-[0.8vw] uppercase font-semibold tracking-widest px-[6vw] sm:px-[3vw] lg:px-[2vw] py-[1.8vh] rounded-[1vw] sm:rounded-[0.4vw] lg:rounded-[0.2vw] hover:bg-white/10 transition-all duration-300"
+                  >
+                    Ver Ambientes
+                  </Link>
                 </div>
               </div>
             )}
