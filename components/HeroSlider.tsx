@@ -245,63 +245,66 @@ export default function HeroSlider({ variant }: HeroSliderProps) {
 
             {/* SLIDE 2 (PRÁCTICA): Estructura Centrada / Editorial / Píldoras de Ventajas */}
             {currentIndex === 1 && (
-              <div className="w-full max-w-[70vw] text-center space-y-[3vh]">
-                <div className="inline-flex items-center space-x-[1vw] bg-white/10 backdrop-blur-md px-[3vw] py-[0.8vh] rounded-full border border-white/20 anim-hero-down">
+              <div className="w-full max-w-[92vw] sm:max-w-[70vw] text-center space-y-[1.8vh] sm:space-y-[3vh]">
+                <div className="inline-flex items-center space-x-[1vw] bg-white/10 backdrop-blur-md px-[3vw] py-[0.6vh] sm:py-[0.8vh] rounded-full border border-white/20 anim-hero-down">
                   <span className="w-[2vw] sm:w-[0.6vw] h-[2vw] sm:h-[0.6vw] rounded-full bg-[#f6ad55] animate-pulse" />
-                  <span className="text-[2.6vw] sm:text-[1.1vw] lg:text-[0.75vw] uppercase tracking-[0.22em] font-bold text-white">
+                  <span className="text-[2.3vw] sm:text-[1.1vw] lg:text-[0.75vw] uppercase tracking-[0.22em] font-bold text-white">
                     STOCK PERMANENTE PARA TODO TU HOGAR
                   </span>
                 </div>
 
-                <h1 className="font-heading text-[8vw] sm:text-[5.5vw] lg:text-[4.5vw] font-bold tracking-tight uppercase leading-[1.05] text-white anim-hero-up anim-delay-75">
-                  Muebles listos <br />
+                <h1 className="font-heading text-[6.5vw] sm:text-[5.5vw] lg:text-[4.5vw] font-bold tracking-tight uppercase leading-[1.1] text-white anim-hero-up anim-delay-75">
+                  <span className="block md:inline">Muebles </span>
+                  <span className="block md:inline">listos </span>
+                  <br className="hidden md:block" />
                   <span className="italic font-serif font-normal text-[#f6ad55]">
-                    para disfrutar hoy.
+                    <span className="block md:inline">para disfrutar </span>
+                    <span className="block md:inline">hoy.</span>
                   </span>
                 </h1>
 
-                <p className="text-[3.6vw] sm:text-[1.8vw] lg:text-[1.15vw] font-light text-gray-200 max-w-[55vw] mx-auto leading-relaxed anim-hero-up anim-delay-150">
+                <p className="text-[3.2vw] sm:text-[1.8vw] lg:text-[1.15vw] font-light text-gray-200 max-w-[85vw] sm:max-w-[55vw] mx-auto leading-relaxed anim-hero-up anim-delay-150">
                   Llevate tu placard, mesa o rack sin esperas de fabricación. Modelos funcionales en melamina de alta calidad listos para armar y usar.
                 </p>
 
-                {/* 3 Píldoras de Beneficio Centradas */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-[2vw] max-w-[55vw] mx-auto pt-[1vh] anim-hero-up anim-delay-250">
-                  <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-xl p-[2vw] sm:p-[1vw] text-center">
-                    <CheckCircle2 className="w-[5vw] sm:w-[1.6vw] h-[5vw] sm:h-[1.6vw] text-[#86efac] mx-auto mb-[0.6vh]" />
-                    <p className="text-[3vw] sm:text-[1.1vw] lg:text-[0.8vw] font-bold text-white uppercase tracking-wider">
+                {/* 3 Píldoras de Beneficio en UNA SOLA FILA */}
+                <div className="grid grid-cols-3 gap-[1.5vw] sm:gap-[2vw] w-full max-w-[90vw] sm:max-w-[55vw] mx-auto pt-[0.5vh] anim-hero-up anim-delay-250">
+                  <div className="bg-black/50 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl p-[2vw] sm:p-[1vw] text-center flex flex-col items-center justify-center">
+                    <CheckCircle2 className="w-[4.5vw] sm:w-[1.6vw] h-[4.5vw] sm:h-[1.6vw] text-[#86efac] mx-auto mb-[0.4vh]" />
+                    <p className="text-[2.2vw] sm:text-[1.1vw] lg:text-[0.8vw] font-bold text-white uppercase tracking-wider leading-tight">
                       Stock Inmediato
                     </p>
-                    <p className="text-[2.4vw] sm:text-[0.9vw] lg:text-[0.68vw] text-gray-300">
-                      Sin demoras de espera
+                    <p className="text-[1.8vw] sm:text-[0.9vw] lg:text-[0.68vw] text-gray-300 hidden xs:block pt-[0.2vh]">
+                      Sin demoras
                     </p>
                   </div>
-                  <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-xl p-[2vw] sm:p-[1vw] text-center">
-                    <CreditCard className="w-[5vw] sm:w-[1.6vw] h-[5vw] sm:h-[1.6vw] text-[#f6ad55] mx-auto mb-[0.6vh]" />
-                    <p className="text-[3vw] sm:text-[1.1vw] lg:text-[0.8vw] font-bold text-white uppercase tracking-wider">
+                  <div className="bg-black/50 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl p-[2vw] sm:p-[1vw] text-center flex flex-col items-center justify-center">
+                    <CreditCard className="w-[4.5vw] sm:w-[1.6vw] h-[4.5vw] sm:h-[1.6vw] text-[#f6ad55] mx-auto mb-[0.4vh]" />
+                    <p className="text-[2.2vw] sm:text-[1.1vw] lg:text-[0.8vw] font-bold text-white uppercase tracking-wider leading-tight">
                       Cuotas Sin Interés
                     </p>
-                    <p className="text-[2.4vw] sm:text-[0.9vw] lg:text-[0.68vw] text-gray-300">
-                      Promociones bancarias
+                    <p className="text-[1.8vw] sm:text-[0.9vw] lg:text-[0.68vw] text-gray-300 hidden xs:block pt-[0.2vh]">
+                      Bancos
                     </p>
                   </div>
-                  <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-xl p-[2vw] sm:p-[1vw] text-center">
-                    <Truck className="w-[5vw] sm:w-[1.6vw] h-[5vw] sm:h-[1.6vw] text-white mx-auto mb-[0.6vh]" />
-                    <p className="text-[3vw] sm:text-[1.1vw] lg:text-[0.8vw] font-bold text-white uppercase tracking-wider">
+                  <div className="bg-black/50 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl p-[2vw] sm:p-[1vw] text-center flex flex-col items-center justify-center">
+                    <Truck className="w-[4.5vw] sm:w-[1.6vw] h-[4.5vw] sm:h-[1.6vw] text-white mx-auto mb-[0.4vh]" />
+                    <p className="text-[2.2vw] sm:text-[1.1vw] lg:text-[0.8vw] font-bold text-white uppercase tracking-wider leading-tight">
                       Envíos Seguros
                     </p>
-                    <p className="text-[2.4vw] sm:text-[0.9vw] lg:text-[0.68vw] text-gray-300">
-                      Directo a tu puerta
+                    <p className="text-[1.8vw] sm:text-[0.9vw] lg:text-[0.68vw] text-gray-300 hidden xs:block pt-[0.2vh]">
+                      A tu puerta
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-[1.5vh] anim-hero-up anim-delay-350">
+                <div className="pt-[0.8vh] anim-hero-up anim-delay-350">
                   <Link
                     href="/productos?linea=practica"
-                    className="inline-flex items-center justify-center bg-[#c25e1a] text-white text-[3.6vw] sm:text-[1.4vw] lg:text-[0.85vw] uppercase font-bold tracking-widest px-[8vw] sm:px-[4vw] lg:px-[2.8vw] py-[1.8vh] rounded-full hover:bg-[#a94f13] transition-all duration-300 shadow-2xl"
+                    className="inline-flex items-center justify-center bg-[#c25e1a] text-white text-[3vw] sm:text-[1.4vw] lg:text-[0.85vw] uppercase font-bold tracking-widest px-[5vw] sm:px-[4vw] lg:px-[2.8vw] py-[1.4vh] sm:py-[1.8vh] rounded-full hover:bg-[#a94f13] transition-all duration-300 shadow-2xl whitespace-nowrap"
                   >
                     <span>Ver Catálogo con Stock Inmediato</span>
-                    <ArrowRight className="w-[4vw] sm:w-[1.6vw] lg:w-[1vw] h-[4vw] sm:h-[1.6vw] lg:h-[1vw] ml-[1vw] sm:ml-[0.5vw]" />
+                    <ArrowRight className="w-[3.8vw] sm:w-[1.6vw] lg:w-[1vw] h-[3.8vw] sm:h-[1.6vw] lg:h-[1vw] ml-[1vw] sm:ml-[0.5vw]" />
                   </Link>
                 </div>
               </div>
