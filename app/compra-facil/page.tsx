@@ -1,100 +1,62 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
-import { getStoredProducts, formatCurrency } from "@/lib/store";
-import { Product } from "@/lib/types";
-import ProductCard from "@/components/ProductCard";
 import HeroSlider from "@/components/HeroSlider";
-import {
-  ArrowRight,
-  ChevronRight,
-  Zap,
-  Search,
-  SlidersHorizontal,
-  ChevronDown,
-  X,
-} from "lucide-react";
+import ProductsCatalog from "@/components/ProductsCatalog";
+import { ArrowRight, ChevronRight } from "lucide-react";
 
 export default function CompraFacilPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    setProducts(getStoredProducts());
-
-    const handleUpdate = () => {
-      setProducts(getStoredProducts());
-    };
-    window.addEventListener("products_updated", handleUpdate);
-    return () => window.removeEventListener("products_updated", handleUpdate);
-  }, []);
-
-  // Filter products for Línea Práctica / Económica con precio válido
-  const practicaProducts = useMemo(() => {
-    return products.filter((p) => p.linea === "practica" && p.regularPrice > 0 && p.title.toLowerCase().trim() !== "producto");
-  }, [products]);
-
-  // Show up to 16 products on the Compra Fácil homepage
-  const displayedProducts = useMemo(() => {
-    return practicaProducts.slice(0, 16);
-  }, [practicaProducts]);
-
   return (
     <div className="space-y-[4vh] sm:space-y-[6vh] w-full pb-0 mb-0 bg-[#fdfbf9] text-gray-900">
       {/* 1. Hero Slider dinámico de 3 diapositivas */}
       <HeroSlider variant="practica" />
 
       {/* =========================================================================
-          2. SECCIÓN DE PRODUCTOS CON TÍTULO Y SUBTÍTULO
+          2. SECCIÓN DE PRODUCTOS CON FILTROS, CATEGORÍAS Y NAVEGACIÓN
       ========================================================================= */}
-      <section id="catalogo-productos" className="w-[90%] mx-auto space-y-[4vh] pt-[2vh]">
-        {/* Título y Subtítulo de Sección */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-gray-200 pb-[3vh] gap-[2vh]">
-          <div className="space-y-[0.8vh]">
-            <span className="text-[3vw] sm:text-[1.3vw] lg:text-[0.72vw] uppercase tracking-[0.25em] text-[#c25e1a] font-semibold block">
-              TU SELECCIÓN DE COMPRA FÁCIL Y ESTÁNDAR
-            </span>
-            <h2 className="font-heading text-[6vw] sm:text-[3.5vw] lg:text-[2.2vw] font-bold tracking-wider uppercase text-gray-900">
-              MUEBLES PRÁCTICOS <span className="italic font-serif font-normal">AL MEJOR PRECIO</span>
-            </h2>
-            <p className="text-[3.2vw] sm:text-[1.5vw] lg:text-[0.9vw] text-gray-500 font-light max-w-[65ch] leading-relaxed">
-              Modelos listos para tu hogar, pensados para resolver tus espacios con rapidez, diseño funcional y la mejor relación precio-calidad.
-            </p>
-          </div>
-          <Link
-            href="/productos?linea=practica"
-            className="inline-flex items-center text-[3.2vw] sm:text-[1.4vw] lg:text-[0.85vw] font-semibold text-[#c25e1a] hover:text-[#9e460e] uppercase tracking-wider transition-colors pb-[0.5vh] border-b-2 border-[#c25e1a] flex-shrink-0"
-          >
-            <span>Ver Catálogo Completo</span>
-            <ArrowRight className="w-[3.6vw] sm:w-[1.6vw] lg:w-[0.9vw] h-[3.6vw] sm:h-[1.6vw] lg:h-[0.9vw] ml-[0.5vw]" />
-          </Link>
-        </div>
-
-        {/* Grilla de Productos (Hasta 16 productos) */}
-        {displayedProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-[2.5vw] sm:gap-x-[2vw] lg:gap-x-[1.5vw] gap-y-[3vh] sm:gap-y-[4vh]">
-            {displayedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-[8vh] bg-white rounded-[1vw] border border-gray-200 p-[4vw]">
-            <p className="text-gray-500 text-[3.6vw] sm:text-[1.6vw] lg:text-[1vw]">
-              Cargando catálogo de Compra fácil y estándar...
-            </p>
-          </div>
-        )}
-
-        {/* Botón para ver más productos */}
-        <div className="mt-[5vh] sm:mt-[6vh] text-center">
-          <Link
-            href="/productos?linea=practica"
-            className="w-full sm:w-auto inline-flex items-center justify-center bg-[#c25e1a] text-white text-[3.6vw] sm:text-[1.5vw] lg:text-[0.85vw] uppercase font-bold tracking-widest px-[8vw] sm:px-[4vw] lg:px-[3vw] py-[1.8vh] rounded-[1vw] sm:rounded-[0.4vw] lg:rounded-[0.2vw] hover:bg-[#a04a11] transition-all duration-300 shadow-md hover:shadow-lg"
-          >
-            <span>Ver Más Productos</span>
-            <ArrowRight className="w-[4vw] sm:w-[1.8vw] lg:w-[1vw] h-[4vw] sm:h-[1.8vw] lg:h-[1vw] ml-[1vw] sm:ml-[0.5vw]" />
-          </Link>
-        </div>
+      <section id="catalogo-productos" className="w-[90%] mx-auto pt-[2vh]">
+        <Suspense
+          fallback={
+            <div className="text-center py-[8vh] bg-white rounded-[1vw] border border-gray-200 p-[4vw]">
+              <p className="text-gray-500 text-[3.6vw] sm:text-[1.6vw] lg:text-[1vw]">
+                Cargando catálogo de Compra fácil y estándar...
+              </p>
+            </div>
+          }
+        >
+          <ProductsCatalog
+            initialLinea="practica"
+            containerClassName="w-full"
+            customHeader={
+              <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-gray-200 pb-[3vh] gap-[2vh]">
+                <div className="space-y-[0.8vh]">
+                  <span className="text-[3vw] sm:text-[1.3vw] lg:text-[0.72vw] uppercase tracking-[0.25em] text-[#c25e1a] font-semibold block">
+                    TU SELECCIÓN DE COMPRA FÁCIL Y ESTÁNDAR
+                  </span>
+                  <h2 className="font-heading text-[6vw] sm:text-[3.5vw] lg:text-[2.2vw] font-bold tracking-wider uppercase text-gray-900">
+                    MUEBLES PRÁCTICOS{" "}
+                    <span className="italic font-serif font-normal">
+                      AL MEJOR PRECIO
+                    </span>
+                  </h2>
+                  <p className="text-[3.2vw] sm:text-[1.5vw] lg:text-[0.9vw] text-gray-500 font-light max-w-[65ch] leading-relaxed">
+                    Modelos listos para tu hogar, pensados para resolver tus
+                    espacios con rapidez, diseño funcional y la mejor relación
+                    precio-calidad.
+                  </p>
+                </div>
+                <Link
+                  href="/productos?linea=practica"
+                  className="inline-flex items-center text-[3.2vw] sm:text-[1.4vw] lg:text-[0.85vw] font-semibold text-[#c25e1a] hover:text-[#9e460e] uppercase tracking-wider transition-colors pb-[0.5vh] border-b-2 border-[#c25e1a] flex-shrink-0"
+                >
+                  <span>Ver Catálogo Completo</span>
+                  <ArrowRight className="w-[3.6vw] sm:w-[1.6vw] lg:w-[0.9vw] h-[3.6vw] sm:h-[1.6vw] lg:h-[0.9vw] ml-[0.5vw]" />
+                </Link>
+              </div>
+            }
+          />
+        </Suspense>
       </section>
 
       {/* 3. Banner de Filosofía Compra Fácil */}

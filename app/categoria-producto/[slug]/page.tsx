@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { ProductsCatalog } from "@/app/productos/page";
+import ProductsCatalog from "@/components/ProductsCatalog";
 import { CATEGORIES } from "@/lib/data";
 
 export function generateStaticParams() {
