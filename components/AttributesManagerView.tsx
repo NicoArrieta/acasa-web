@@ -176,12 +176,12 @@ export default function AttributesManagerView() {
   return (
     <div className="w-[96%] sm:w-[97%] mx-auto space-y-5 sm:space-y-7 animate-fadeIn">
       {/* 1. Header Banner */}
-      <div className="bg-white p-4 sm:p-7 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-[0_4px_25px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
-        <div className="flex items-start space-x-3.5 min-w-0">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#FC7D00]/10 text-[#FC7D00] flex items-center justify-center shadow-xs flex-shrink-0 mt-0.5">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-[0_4px_25px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div className="flex items-center space-x-3.5 min-w-0">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#FC7D00]/10 text-[#FC7D00] flex items-center justify-center shadow-xs flex-shrink-0">
             <SlidersHorizontal size={22} />
           </div>
-          <div className="min-w-0 space-y-1">
+          <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="font-heading text-lg sm:text-xl font-black text-gray-900 uppercase tracking-wider leading-tight">
                 Atributos & Variaciones
@@ -190,9 +190,6 @@ export default function AttributesManagerView() {
                 {attributes.length} atributos
               </span>
             </div>
-            <p className="text-xs text-gray-500 font-light leading-relaxed">
-              Configurá atributos globales (Madera, Medida, Tapizado, Color, etc.) y sus términos para generar variaciones con fotos, precios y stock en los productos.
-            </p>
           </div>
         </div>
 
