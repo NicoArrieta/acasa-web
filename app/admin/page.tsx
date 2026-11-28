@@ -1761,21 +1761,21 @@ export default function AdminDashboardPage() {
               {editingProduct ? (
                 <div className="space-y-6">
                   {/* Form Header with Back Button */}
-                  <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-center space-x-3.5">
+                  <div className="bg-white p-4 sm:p-6 rounded-2xl border border-gray-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center space-x-3.5 min-w-0">
                       <button
                         type="button"
                         onClick={() => safelyNavigate(() => setEditingProduct(null))}
-                        className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:text-black hover:bg-gray-100 transition-colors flex items-center justify-center cursor-pointer"
+                        className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:text-black hover:bg-gray-100 transition-colors flex items-center justify-center cursor-pointer flex-shrink-0"
                         title="Volver al Catálogo"
                       >
                         <ArrowLeft size={18} />
                       </button>
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#FC7D00]">
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#FC7D00] block">
                           {editingProduct.id ? "EDICIÓN DE MUEBLE" : "NUEVA ALTA DE CATÁLOGO"}
                         </span>
-                        <h3 className="font-heading text-lg font-bold text-gray-900 uppercase tracking-wide">
+                        <h3 className="font-heading text-base sm:text-lg font-bold text-gray-900 uppercase tracking-wide truncate">
                           {editingProduct.id
                             ? `Editar: ${editingProduct.title || "Producto"}`
                             : "Añadir Nuevo Mueble al Catálogo"}
@@ -1783,7 +1783,7 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-3 self-end sm:self-auto">
+                    <div className="grid grid-cols-2 sm:flex items-center gap-2.5 sm:space-x-3 w-full sm:w-auto">
                       {/* Botón Ver Producto */}
                       {Boolean(editingProduct.slug || editingProduct.title) && (
                         <a
@@ -1798,14 +1798,14 @@ export default function AdminDashboardPage() {
                           }`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-4 py-2.5 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center space-x-1.5 cursor-pointer group"
+                          className="col-span-1 justify-center px-3.5 py-2.5 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center space-x-1.5 cursor-pointer group text-center"
                           title="Ver este producto en la tienda pública"
                         >
-                          <Eye size={15} className="text-[#FC7D00]" />
-                          <span>Ver Producto</span>
+                          <Eye size={15} className="text-[#FC7D00] flex-shrink-0" />
+                          <span className="truncate">Ver Producto</span>
                           <ArrowUpRight
                             size={13}
-                            className="text-gray-400 group-hover:text-black group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                            className="text-gray-400 group-hover:text-black group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform hidden sm:inline flex-shrink-0"
                           />
                         </a>
                       )}
@@ -1813,7 +1813,7 @@ export default function AdminDashboardPage() {
                       <button
                         type="button"
                         onClick={() => safelyNavigate(() => setEditingProduct(null))}
-                        className="px-4 py-2.5 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                        className="col-span-1 justify-center px-4 py-2.5 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer text-center"
                       >
                         Cancelar
                       </button>
@@ -1821,7 +1821,7 @@ export default function AdminDashboardPage() {
                         type="button"
                         onClick={handleSaveProduct}
                         disabled={isSavingProduct}
-                        className={`text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center space-x-2 cursor-pointer disabled:opacity-75 ${
+                        className={`col-span-2 sm:col-span-1 justify-center text-white text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center space-x-2 cursor-pointer disabled:opacity-75 ${
                           saveSuccessMessage
                             ? "bg-[#065f46] hover:bg-[#065f46]"
                             : "bg-[#FC7D00] hover:bg-[#e66c00]"
@@ -1852,7 +1852,7 @@ export default function AdminDashboardPage() {
                     {/* Left 2 Columns: Main Info */}
                     <div className="lg:col-span-2 space-y-6">
                       {/* Card 1: Essential Information */}
-                      <div className="bg-white p-7 rounded-2xl border border-gray-200/80 shadow-sm space-y-5">
+                      <div className="bg-white p-4 sm:p-7 rounded-2xl border border-gray-200/80 shadow-sm space-y-5">
                         <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider pb-3 border-b border-gray-100">
                           1. Información Principal del Mueble
                         </h4>
@@ -2163,7 +2163,7 @@ export default function AdminDashboardPage() {
                     {/* Right 1 Column: Price, Stock & Image Preview */}
                     <div className="space-y-6">
                       {/* Price & Stock Card */}
-                      <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-4">
+                      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-4">
                         <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider pb-3 border-b border-gray-100">
                           3. Precio & Stock
                         </h4>
@@ -2235,7 +2235,7 @@ export default function AdminDashboardPage() {
                       </div>
 
                       {/* 4. Carrusel de Fotografías del Producto */}
-                      <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-4">
+                      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-4">
                         <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                           <div>
                             <h4 className="font-heading text-sm font-bold text-gray-900 uppercase tracking-wider">
