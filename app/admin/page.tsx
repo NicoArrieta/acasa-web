@@ -13,6 +13,7 @@ import { CATEGORIES } from "@/lib/data";
 import MediaLibraryView from "@/components/MediaLibraryView";
 import CategoriesManagerView from "@/components/CategoriesManagerView";
 import AttributesManagerView from "@/components/AttributesManagerView";
+import OrdersManagerView from "@/components/OrdersManagerView";
 import ProductVariationsManager from "@/components/ProductVariationsManager";
 import MediaPickerModal from "@/components/MediaPickerModal";
 import ProductImportExportModal from "@/components/ProductImportExportModal";
@@ -2948,87 +2949,10 @@ export default function AdminDashboardPage() {
 
           {/* TAB 3: ORDERS */}
           {activeTab === "orders" && (
-            <div className="w-[97%] mx-auto space-y-4">
-              <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-200/80 shadow-xs flex justify-between items-center">
-                <div className="text-xs font-semibold text-gray-600">
-                  <span className="font-mono font-bold text-gray-900 text-sm">{orders.length}</span> pedidos registrados
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] text-gray-400 uppercase tracking-wider block font-semibold">Total Facturado</span>
-                  <span className="font-heading text-lg sm:text-xl font-bold text-gray-900 font-mono">
-                    {formatCurrency(totalSales)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-left min-w-[700px]">
-                  <thead className="bg-[#faf9f8] border-b text-gray-500 uppercase font-bold text-[10px] tracking-wider">
-                    <tr>
-                      <th className="p-4">Pedido</th>
-                      <th className="p-4">Fecha</th>
-                      <th className="p-4">Cliente</th>
-                      <th className="p-4">Contacto</th>
-                      <th className="p-4">Estado</th>
-                      <th className="p-4">Unidades</th>
-                      <th className="p-4 text-right">Total</th>
-                      <th className="p-4 text-center">Cambiar Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {orders.map((o) => (
-                      <tr key={o.id} className="hover:bg-gray-50/80 transition-colors">
-                        <td className="p-4 font-bold text-gray-900 font-mono">{o.orderNumber}</td>
-                        <td className="p-4 text-gray-400 font-mono">{o.createdAt}</td>
-                        <td className="p-4 font-semibold text-gray-900">{o.customerName}</td>
-                        <td className="p-4 text-gray-600">
-                          <div>{o.customerPhone}</div>
-                          <div className="text-[11px] text-gray-400 font-mono">{o.customerEmail}</div>
-                        </td>
-                        <td className="p-4">
-                          <span
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              o.status === "completed"
-                                ? "bg-green-100 text-green-800"
-                                : o.status === "processing"
-                                ? "bg-blue-100 text-blue-800"
-                                : o.status === "shipped"
-                                ? "bg-purple-100 text-purple-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}
-                          >
-                            {o.status}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <span className="text-gray-700 font-semibold font-mono">
-                            {o.items.reduce((acc, it) => acc + it.quantity, 0)}
-                          </span>
-                        </td>
-                        <td className="p-4 text-right font-bold text-gray-900 font-mono text-sm">
-                          {formatCurrency(o.total)}
-                        </td>
-                        <td className="p-4 text-center">
-                          <select
-                            value={o.status}
-                            onChange={(e) => handleUpdateOrderStatus(o.id, e.target.value as any)}
-                            className="text-[11px] border border-gray-300 rounded-lg px-2.5 py-1.5 bg-white outline-none font-medium"
-                          >
-                            <option value="pending">Pendiente</option>
-                            <option value="processing">En preparación</option>
-                            <option value="shipped">Despachado</option>
-                            <option value="completed">Completado</option>
-                            <option value="cancelled">Cancelado</option>
-                          </select>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                </div>
-              </div>
-            </div>
+            <OrdersManagerView
+              orders={orders}
+              onUpdateOrderStatus={handleUpdateOrderStatus}
+            />
           )}
 
           {/* TAB 4: DONWEB */}
