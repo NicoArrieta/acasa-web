@@ -190,35 +190,33 @@ export default function CategoriesManagerView() {
   );
 
   return (
-    <div className="w-[97%] mx-auto space-y-7 animate-fadeIn">
+    <div className="w-[96%] sm:w-[97%] mx-auto space-y-5 sm:space-y-7 animate-fadeIn">
       {/* 1. Header Banner */}
-      <div className="bg-white p-7 rounded-3xl border border-gray-200/80 shadow-[0_4px_25px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="space-y-1.5">
-          <div className="flex items-center space-x-3">
-            <div className="w-11 h-11 rounded-2xl bg-[#FC7D00]/10 text-[#FC7D00] flex items-center justify-center shadow-xs">
-              <FolderTree size={24} />
+      <div className="bg-white p-4 sm:p-7 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-[0_4px_25px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
+        <div className="flex items-start space-x-3.5 min-w-0">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#FC7D00]/10 text-[#FC7D00] flex items-center justify-center shadow-xs flex-shrink-0 mt-0.5">
+            <FolderTree size={22} />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="font-heading text-lg sm:text-xl font-black text-gray-900 uppercase tracking-wider leading-tight">
+                Gestión de Categorías
+              </h2>
+              <span className="text-[11px] sm:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#FC7D00]/10 text-[#FC7D00] border border-[#FC7D00]/20 whitespace-nowrap">
+                {categories.length} categorías
+              </span>
             </div>
-            <div>
-              <div className="flex items-center space-x-2.5">
-                <h2 className="font-heading text-xl font-black text-gray-900 uppercase tracking-wider">
-                  Gestión de Categorías
-                </h2>
-                <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#FC7D00]/10 text-[#FC7D00] border border-[#FC7D00]/20">
-                  {categories.length} categorías
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 font-light mt-0.5">
-                Organizá las categorías y subcategorías de la tienda, asigná fotos destacadas y revisá cuántos productos tiene cada una.
-              </p>
-            </div>
+            <p className="text-xs text-gray-500 font-light leading-relaxed">
+              Organizá las categorías y subcategorías de la tienda, asigná fotos destacadas y revisá cuántos productos tiene cada una.
+            </p>
           </div>
         </div>
 
         <button
           onClick={handleStartCreate}
-          className="flex items-center space-x-2 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider py-3.5 px-6 rounded-2xl shadow-md transition-all hover:scale-102 cursor-pointer"
+          className="w-full sm:w-auto justify-center flex items-center space-x-2 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider py-3 px-5 sm:px-6 rounded-xl sm:rounded-2xl shadow-md transition-all cursor-pointer flex-shrink-0"
         >
-          <Plus size={17} />
+          <Plus size={16} />
           <span>Nueva Categoría</span>
         </button>
       </div>

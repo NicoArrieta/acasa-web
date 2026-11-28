@@ -266,61 +266,59 @@ export default function MediaLibraryView() {
   };
 
   return (
-    <div className="w-[97%] mx-auto space-y-7 animate-fadeIn">
+    <div className="w-[96%] sm:w-[97%] mx-auto space-y-5 sm:space-y-7 animate-fadeIn">
       {/* 1. Header & Summary Banner */}
-      <div className="bg-white p-7 rounded-3xl border border-gray-200/80 shadow-[0_4px_25px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="space-y-1.5">
-          <div className="flex items-center space-x-3">
-            <div className="w-11 h-11 rounded-2xl bg-[#FC7D00]/10 text-[#FC7D00] flex items-center justify-center shadow-xs">
-              <ImageIcon size={24} />
+      <div className="bg-white p-4 sm:p-7 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-[0_4px_25px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
+        <div className="flex items-start space-x-3.5 min-w-0">
+          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#FC7D00]/10 text-[#FC7D00] flex items-center justify-center shadow-xs flex-shrink-0 mt-0.5">
+            <ImageIcon size={22} />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="font-heading text-lg sm:text-xl font-black text-gray-900 uppercase tracking-wider leading-tight">
+                Biblioteca Multimedia
+              </h2>
+              <span className="text-[11px] sm:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#FC7D00]/10 text-[#FC7D00] border border-[#FC7D00]/20 whitespace-nowrap">
+                {items.length} imágenes
+              </span>
             </div>
-            <div>
-              <div className="flex items-center space-x-2.5">
-                <h2 className="font-heading text-xl font-black text-gray-900 uppercase tracking-wider">
-                  Biblioteca Multimedia
-                </h2>
-                <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#FC7D00]/10 text-[#FC7D00] border border-[#FC7D00]/20">
-                  {items.length} imágenes
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 font-light mt-0.5">
-                Hacé clic en cualquier imagen para abrir su <strong>Ficha de edición</strong>, previsualizar en grande y navegar con flechas.
-              </p>
-            </div>
+            <p className="text-xs text-gray-500 font-light leading-relaxed">
+              Hacé clic en cualquier imagen para abrir su <strong>Ficha de edición</strong>, previsualizar en grande y navegar con flechas.
+            </p>
           </div>
         </div>
 
-        {/* Stats badges */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="px-4 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 text-xs">
-            <span className="text-gray-400 uppercase text-[10px] font-bold block tracking-wider">
+        {/* Stats badges & Upload */}
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full md:w-auto">
+          <div className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl sm:rounded-2xl bg-gray-50 border border-gray-200 text-xs">
+            <span className="text-gray-400 uppercase text-[9px] font-bold block tracking-wider">
               Total Archivos
             </span>
-            <span className="text-sm font-bold text-gray-900 font-mono">
+            <span className="text-xs sm:text-sm font-bold text-gray-900 font-mono">
               {items.length} imágenes
             </span>
           </div>
 
-          <div className="px-4 py-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs">
-            <span className="text-emerald-600 uppercase text-[10px] font-bold block tracking-wider flex items-center space-x-1">
+          <div className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl sm:rounded-2xl bg-emerald-50 border border-emerald-200 text-xs">
+            <span className="text-emerald-600 uppercase text-[9px] font-bold block tracking-wider flex items-center space-x-1">
               <Sparkles size={11} />
               <span>Optimización</span>
             </span>
-            <span className="text-sm font-bold text-emerald-800 font-mono">
-              100% WebP Activo
+            <span className="text-xs sm:text-sm font-bold text-emerald-800 font-mono">
+              100% WebP
             </span>
           </div>
 
-          <label className="flex items-center space-x-2 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider py-3.5 px-5 rounded-2xl cursor-pointer transition-all shadow-md">
-            <UploadCloud size={17} />
+          <label className="w-full sm:w-auto justify-center flex items-center space-x-2 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider py-3 px-5 rounded-xl sm:rounded-2xl cursor-pointer transition-all shadow-md">
+            <UploadCloud size={16} />
             <span>Subir Imágenes</span>
             <input
               type="file"
               accept="image/*"
               multiple
               onChange={handleFileInputChange}
-              className="hidden"
               disabled={isUploading}
+              className="hidden"
             />
           </label>
         </div>
