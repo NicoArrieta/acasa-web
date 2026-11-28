@@ -1227,32 +1227,32 @@ export default function AdminDashboardPage() {
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden py-8">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 sm:py-8">
           {/* TAB 1: DASHBOARD & LIVE ANALYTICS */}
           {activeTab === "dashboard" && (
-            <div className="w-[97%] mx-auto space-y-7">
+            <div className="w-[96%] sm:w-[97%] mx-auto space-y-5 sm:space-y-7">
               {/* Luxury Control Bar: Period Filter & Refresh */}
-              <div className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+              <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-black text-[#FC7D00] flex items-center justify-center shadow-md">
+                  <div className="w-10 h-10 rounded-xl bg-black text-[#FC7D00] flex items-center justify-center shadow-md flex-shrink-0">
                     <Activity size={20} />
                   </div>
                   <div>
-                    <h3 className="font-heading text-base font-bold text-gray-900 uppercase tracking-wide">
+                    <h3 className="font-heading text-sm sm:text-base font-bold text-gray-900 uppercase tracking-wide">
                       Métricas Comerciales & Preferencia de Clientes
                     </h3>
-                    <p className="text-xs text-gray-500 font-light">
+                    <p className="text-[11px] sm:text-xs text-gray-500 font-light">
                       Visualizá el comportamiento de tus visitantes entre Línea Práctica y Personalizada.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3 self-end md:self-auto">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:space-x-3 w-full md:w-auto">
                   {/* Period Filter Selector */}
-                  <div className="inline-flex rounded-xl bg-gray-100 p-1 text-xs border border-gray-200">
+                  <div className="grid grid-cols-4 sm:inline-flex rounded-xl bg-gray-100 p-1 text-xs border border-gray-200 text-center w-full sm:w-auto">
                     <button
                       onClick={() => setTimeRange("today")}
-                      className={`px-3.5 py-1.5 rounded-lg font-medium transition-all duration-200 ${
+                      className={`py-1.5 px-2 sm:px-3.5 rounded-lg font-medium transition-all duration-200 text-center ${
                         timeRange === "today"
                           ? "bg-black text-white font-bold shadow-sm"
                           : "text-gray-600 hover:text-black"
@@ -1262,7 +1262,7 @@ export default function AdminDashboardPage() {
                     </button>
                     <button
                       onClick={() => setTimeRange("7d")}
-                      className={`px-3.5 py-1.5 rounded-lg font-medium transition-all duration-200 ${
+                      className={`py-1.5 px-2 sm:px-3.5 rounded-lg font-medium transition-all duration-200 text-center ${
                         timeRange === "7d"
                           ? "bg-black text-white font-bold shadow-sm"
                           : "text-gray-600 hover:text-black"
@@ -1272,7 +1272,7 @@ export default function AdminDashboardPage() {
                     </button>
                     <button
                       onClick={() => setTimeRange("30d")}
-                      className={`px-3.5 py-1.5 rounded-lg font-medium transition-all duration-200 ${
+                      className={`py-1.5 px-2 sm:px-3.5 rounded-lg font-medium transition-all duration-200 text-center ${
                         timeRange === "30d"
                           ? "bg-black text-white font-bold shadow-sm"
                           : "text-gray-600 hover:text-black"
@@ -1282,7 +1282,7 @@ export default function AdminDashboardPage() {
                     </button>
                     <button
                       onClick={() => setTimeRange("all")}
-                      className={`px-3.5 py-1.5 rounded-lg font-medium transition-all duration-200 ${
+                      className={`py-1.5 px-2 sm:px-3.5 rounded-lg font-medium transition-all duration-200 text-center ${
                         timeRange === "all"
                           ? "bg-black text-white font-bold shadow-sm"
                           : "text-gray-600 hover:text-black"
@@ -1296,7 +1296,7 @@ export default function AdminDashboardPage() {
                   <button
                     onClick={fetchAnalytics}
                     disabled={analyticsLoading}
-                    className="flex items-center space-x-2 px-4 py-2 bg-black hover:bg-neutral-800 text-white text-xs font-semibold rounded-xl shadow-sm transition-all duration-200 disabled:opacity-50"
+                    className="flex items-center justify-center space-x-2 px-4 py-2 bg-black hover:bg-neutral-800 text-white text-xs font-semibold rounded-xl shadow-sm transition-all duration-200 disabled:opacity-50 w-full sm:w-auto cursor-pointer"
                   >
                     <RefreshCw size={13} className={analyticsLoading ? "animate-spin text-[#FC7D00]" : "text-[#FC7D00]"} />
                     <span className="tracking-wider uppercase text-[11px]">Actualizar</span>
@@ -1442,9 +1442,9 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Comparative Dual Analysis Section */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-7">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-7">
                 {/* Visual Preference: Práctica vs Premium */}
-                <div className="bg-white p-7 rounded-2xl border border-gray-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+                <div className="bg-white p-4 sm:p-7 rounded-2xl border border-gray-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2.5">
@@ -1520,7 +1520,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {/* WhatsApp Inquiries Breakdown by Line */}
-                <div className="bg-white p-7 rounded-2xl border border-gray-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+                <div className="bg-white p-4 sm:p-7 rounded-2xl border border-gray-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2.5">
