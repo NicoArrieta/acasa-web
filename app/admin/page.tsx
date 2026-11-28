@@ -1231,23 +1231,14 @@ export default function AdminDashboardPage() {
           {/* TAB 1: DASHBOARD & LIVE ANALYTICS */}
           {activeTab === "dashboard" && (
             <div className="w-[96%] sm:w-[97%] mx-auto space-y-5 sm:space-y-7">
-              {/* Luxury Control Bar: Period Filter & Refresh */}
-              <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-black text-[#FC7D00] flex items-center justify-center shadow-md flex-shrink-0">
-                    <Activity size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-heading text-sm sm:text-base font-bold text-gray-900 uppercase tracking-wide">
-                      Métricas Comerciales & Preferencia de Clientes
-                    </h3>
-                    <p className="text-[11px] sm:text-xs text-gray-500 font-light">
-                      Visualizá el comportamiento de tus visitantes entre Línea Práctica y Personalizada.
-                    </p>
-                  </div>
+              {/* Control Bar: Period Filter & Refresh */}
+              <div className="bg-white p-3 sm:p-4 rounded-2xl border border-gray-200/80 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <div className="flex items-center space-x-2 text-xs font-semibold text-gray-500">
+                  <Activity size={16} className="text-[#FC7D00]" />
+                  <span className="uppercase tracking-wider text-[11px]">Filtrar métricas por rango</span>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:space-x-3 w-full md:w-auto">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:space-x-3 w-full sm:w-auto">
                   {/* Period Filter Selector */}
                   <div className="grid grid-cols-4 sm:inline-flex rounded-xl bg-gray-100 p-1 text-xs border border-gray-200 text-center w-full sm:w-auto">
                     <button
@@ -2957,17 +2948,14 @@ export default function AdminDashboardPage() {
 
           {/* TAB 3: ORDERS */}
           {activeTab === "orders" && (
-            <div className="w-[97%] mx-auto space-y-5">
-              <div className="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-sm flex justify-between items-center">
-                <div>
-                  <h3 className="font-heading text-base font-bold text-gray-900 uppercase tracking-wide">
-                    Gestión de Pedidos & Checkout
-                  </h3>
-                  <p className="text-xs text-gray-500">{orders.length} pedidos registrados</p>
+            <div className="w-[97%] mx-auto space-y-4">
+              <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-200/80 shadow-xs flex justify-between items-center">
+                <div className="text-xs font-semibold text-gray-600">
+                  <span className="font-mono font-bold text-gray-900 text-sm">{orders.length}</span> pedidos registrados
                 </div>
                 <div className="text-right">
-                  <span className="text-xs text-gray-400 uppercase tracking-wider block">Total Facturado</span>
-                  <span className="font-heading text-2xl font-bold text-gray-900 font-mono">
+                  <span className="text-[10px] text-gray-400 uppercase tracking-wider block font-semibold">Total Facturado</span>
+                  <span className="font-heading text-lg sm:text-xl font-bold text-gray-900 font-mono">
                     {formatCurrency(totalSales)}
                   </span>
                 </div>
@@ -3045,22 +3033,8 @@ export default function AdminDashboardPage() {
 
           {/* TAB 4: DONWEB */}
           {activeTab === "donweb" && (
-            <div className="w-[97%] mx-auto space-y-6">
-              <div className="bg-white p-7 rounded-2xl border border-gray-200/80 shadow-sm space-y-5">
-                <div className="flex items-center space-x-3.5 pb-4 border-b border-gray-100">
-                  <div className="w-10 h-10 rounded-xl bg-black text-[#FC7D00] flex items-center justify-center">
-                    <UploadCloud size={22} />
-                  </div>
-                  <div>
-                    <h3 className="font-heading text-base font-bold text-gray-900 uppercase tracking-wide">
-                      Conexión FTP DonWeb Hosting
-                    </h3>
-                    <p className="text-xs text-gray-500 font-light">
-                      Configuración para subir y servir fotos de catálogo desde los servidores de DonWeb
-                    </p>
-                  </div>
-                </div>
-
+            <div className="w-[97%] mx-auto space-y-4">
+              <div className="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200/80 shadow-xs space-y-5">
                 <form onSubmit={handleSaveDonwebConfig} className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
                   <div>
                     <label className="block font-semibold text-gray-700 mb-1.5 uppercase tracking-wider text-[11px]">

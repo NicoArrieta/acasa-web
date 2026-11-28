@@ -174,35 +174,8 @@ export default function AttributesManagerView() {
     editingAttr?.slug?.toLowerCase().includes("color");
 
   return (
-    <div className="w-[96%] sm:w-[97%] mx-auto space-y-5 sm:space-y-7 animate-fadeIn">
-      {/* 1. Header Banner */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-[0_4px_25px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        <div className="flex items-center space-x-3.5 min-w-0">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#FC7D00]/10 text-[#FC7D00] flex items-center justify-center shadow-xs flex-shrink-0">
-            <SlidersHorizontal size={22} />
-          </div>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="font-heading text-lg sm:text-xl font-black text-gray-900 uppercase tracking-wider leading-tight">
-                Atributos & Variaciones
-              </h2>
-              <span className="text-[11px] sm:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#FC7D00]/10 text-[#FC7D00] border border-[#FC7D00]/20 whitespace-nowrap">
-                {attributes.length} atributos
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <button
-          onClick={handleStartCreate}
-          className="w-full sm:w-auto justify-center flex items-center space-x-2 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider py-3 px-5 sm:px-6 rounded-xl sm:rounded-2xl shadow-md transition-all cursor-pointer flex-shrink-0"
-        >
-          <Plus size={16} />
-          <span>Nuevo Atributo</span>
-        </button>
-      </div>
-
-      {/* 2. Modal Dialog: Create / Edit Attribute & Terms */}
+    <div className="w-[96%] sm:w-[97%] mx-auto space-y-4 animate-fadeIn">
+      {/* Modal Dialog: Create / Edit Attribute & Terms */}
       {editingAttr && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 sm:p-6 animate-fadeIn"
@@ -412,10 +385,18 @@ export default function AttributesManagerView() {
         </div>
       )}
 
-      {/* 3. Attributes Grid & Toolbar */}
+      {/* Attributes Grid & Toolbar */}
       <div className="space-y-4">
-        {/* Search Toolbar */}
-        <div className="bg-white p-4 px-6 rounded-2xl border border-gray-200/80 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        {/* Toolbar with New Attribute & Search */}
+        <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-200/80 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <button
+            onClick={handleStartCreate}
+            className="w-full sm:w-auto justify-center flex items-center space-x-2 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider py-2.5 px-5 rounded-xl shadow-sm transition-all cursor-pointer flex-shrink-0"
+          >
+            <Plus size={16} />
+            <span>Nuevo Atributo</span>
+          </button>
+
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
             <input
@@ -427,8 +408,8 @@ export default function AttributesManagerView() {
             />
           </div>
 
-          <div className="text-xs text-gray-400 font-medium">
-            Mostrando {filteredAttributes.length} atributos globales
+          <div className="text-xs text-gray-400 font-medium hidden md:block">
+            {filteredAttributes.length} atributos
           </div>
         </div>
 

@@ -266,65 +266,8 @@ export default function MediaLibraryView() {
   };
 
   return (
-    <div className="w-[96%] sm:w-[97%] mx-auto space-y-5 sm:space-y-7 animate-fadeIn">
-      {/* 1. Header & Summary Banner */}
-      <div className="bg-white p-4 sm:p-7 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-[0_4px_25px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
-        <div className="flex items-start space-x-3.5 min-w-0">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#FC7D00]/10 text-[#FC7D00] flex items-center justify-center shadow-xs flex-shrink-0 mt-0.5">
-            <ImageIcon size={22} />
-          </div>
-          <div className="min-w-0 space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="font-heading text-lg sm:text-xl font-black text-gray-900 uppercase tracking-wider leading-tight">
-                Biblioteca Multimedia
-              </h2>
-              <span className="text-[11px] sm:text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#FC7D00]/10 text-[#FC7D00] border border-[#FC7D00]/20 whitespace-nowrap">
-                {items.length} imágenes
-              </span>
-            </div>
-            <p className="text-xs text-gray-500 font-light leading-relaxed">
-              Hacé clic en cualquier imagen para abrir su <strong>Ficha de edición</strong>, previsualizar en grande y navegar con flechas.
-            </p>
-          </div>
-        </div>
-
-        {/* Stats badges & Upload */}
-        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full md:w-auto">
-          <div className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl sm:rounded-2xl bg-gray-50 border border-gray-200 text-xs">
-            <span className="text-gray-400 uppercase text-[9px] font-bold block tracking-wider">
-              Total Archivos
-            </span>
-            <span className="text-xs sm:text-sm font-bold text-gray-900 font-mono">
-              {items.length} imágenes
-            </span>
-          </div>
-
-          <div className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl sm:rounded-2xl bg-emerald-50 border border-emerald-200 text-xs">
-            <span className="text-emerald-600 uppercase text-[9px] font-bold block tracking-wider flex items-center space-x-1">
-              <Sparkles size={11} />
-              <span>Optimización</span>
-            </span>
-            <span className="text-xs sm:text-sm font-bold text-emerald-800 font-mono">
-              100% WebP
-            </span>
-          </div>
-
-          <label className="w-full sm:w-auto justify-center flex items-center space-x-2 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider py-3 px-5 rounded-xl sm:rounded-2xl cursor-pointer transition-all shadow-md">
-            <UploadCloud size={16} />
-            <span>Subir Imágenes</span>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileInputChange}
-              disabled={isUploading}
-              className="hidden"
-            />
-          </label>
-        </div>
-      </div>
-
-      {/* 2. Drag & Drop Upload Zone */}
+    <div className="w-[96%] sm:w-[97%] mx-auto space-y-4 animate-fadeIn">
+      {/* 1. Drag & Drop Upload Zone */}
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -372,8 +315,21 @@ export default function MediaLibraryView() {
         </label>
       </div>
 
-      {/* 3. Toolbar: Search & Sort Filter */}
-      <div className="bg-white p-4 px-6 rounded-2xl border border-gray-200/80 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      {/* Toolbar: Upload, Search & Sort Filter */}
+      <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-200/80 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <label className="w-full sm:w-auto justify-center flex items-center space-x-2 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider py-2.5 px-5 rounded-xl cursor-pointer transition-all shadow-sm flex-shrink-0">
+          <UploadCloud size={16} />
+          <span>Subir Imágenes</span>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFileInputChange}
+            disabled={isUploading}
+            className="hidden"
+          />
+        </label>
+
         {/* Search */}
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
@@ -381,21 +337,21 @@ export default function MediaLibraryView() {
             type="text"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setVisibleCount(20); }}
-            placeholder="Buscar por nombre de archivo o texto alt..."
+            placeholder="Buscar por nombre o texto alt..."
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-xs focus:border-[#FC7D00] outline-none"
           />
         </div>
 
         {/* Sort Selector */}
         <div className="flex items-center space-x-3 text-xs">
-          <span className="text-gray-400 font-semibold uppercase text-[10px] tracking-wider flex items-center space-x-1">
+          <span className="text-gray-400 font-semibold uppercase text-[10px] tracking-wider hidden md:flex items-center space-x-1">
             <ArrowUpDown size={12} />
             <span>Ordenar:</span>
           </span>
           <select
             value={sortBy}
             onChange={(e) => { setSortBy(e.target.value as any); setVisibleCount(20); }}
-            className="p-2.5 px-3 border border-gray-200 rounded-xl bg-gray-50 text-xs font-medium outline-none focus:border-[#FC7D00]"
+            className="w-full sm:w-auto p-2.5 px-3 border border-gray-200 rounded-xl bg-gray-50 text-xs font-medium outline-none focus:border-[#FC7D00]"
           >
             <option value="recent">Más recientes primero</option>
             <option value="name">Nombre (A - Z)</option>
