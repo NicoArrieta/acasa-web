@@ -94,6 +94,7 @@ function generatePageNumbers(currentPage: number, totalPages: number): (number |
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "products" | "categories" | "attributes" | "media" | "orders" | "donweb">("dashboard");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [attributesList, setAttributesList] = useState<GlobalAttribute[]>([]);
   const [categoriesList, setCategoriesList] = useState<Category[]>([]);
   const [selectedSubcatFilter, setSelectedSubcatFilter] = useState<string>("all");
@@ -617,7 +618,7 @@ export default function AdminDashboardPage() {
     <div className="flex h-screen w-full max-w-full overflow-hidden bg-[#fcfbfa] font-sans antialiased text-[#1a1a1a]">
       {/* 1. ACASA LUXURY ORANGE SIDEBAR */}
       <aside
-        className={`bg-[#FC7D00] text-white flex flex-col flex-shrink-0 select-none shadow-xl transition-all duration-300 ease-in-out relative h-full max-h-screen overflow-x-hidden overflow-y-hidden ${
+        className={`hidden md:flex bg-[#FC7D00] text-white flex-col flex-shrink-0 select-none shadow-xl transition-all duration-300 ease-in-out relative h-full max-h-screen overflow-x-hidden overflow-y-hidden ${
           sidebarCollapsed ? "w-20" : "w-72"
         }`}
       >
@@ -994,16 +995,213 @@ export default function AdminDashboardPage() {
         </div>
       </aside>
 
+      {/* Mobile Navigation Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <div className="relative w-72 max-w-[85vw] bg-[#FC7D00] text-white h-full flex flex-col shadow-2xl z-10">
+            {/* Header */}
+            <div className="p-4 border-b border-[#c45600] flex items-center justify-between">
+              <div className="bg-white px-3 py-2 rounded-xl shadow-xs inline-flex items-center">
+                <img src="/logoAcasaTienda.webp" alt="Acasa" className="h-7 w-auto object-contain" />
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-xl bg-black/15 hover:bg-black/25 text-white transition-colors cursor-pointer"
+                title="Cerrar menú"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Mobile Nav Links */}
+            <nav className="flex-1 overflow-y-auto p-3 space-y-1.5 text-xs">
+              <button
+                onClick={() => {
+                  safelyNavigate(() => {
+                    setActiveTab("dashboard");
+                    setEditingProduct(null);
+                    setMobileMenuOpen(false);
+                  });
+                }}
+                className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl font-bold transition-all text-left cursor-pointer ${
+                  activeTab === "dashboard" ? "bg-white text-[#FC7D00] shadow-md" : "text-white hover:bg-black/10"
+                }`}
+              >
+                <LayoutDashboard size={20} />
+                <span className="tracking-wide text-[13px]">Escritorio & Tablero</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  safelyNavigate(() => {
+                    setActiveTab("products");
+                    setEditingProduct(null);
+                    setMobileMenuOpen(false);
+                  });
+                }}
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold transition-all text-left cursor-pointer ${
+                  activeTab === "products" ? "bg-white text-[#FC7D00] shadow-md" : "text-white hover:bg-black/10"
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <Package size={20} />
+                  <span className="tracking-wide text-[13px]">Catálogo de Productos</span>
+                </div>
+                <span
+                  className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
+                    activeTab === "products" ? "bg-[#FC7D00] text-white" : "bg-[#b85000] text-white"
+                  }`}
+                >
+                  {products.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => {
+                  safelyNavigate(() => {
+                    setActiveTab("categories");
+                    setEditingProduct(null);
+                    setMobileMenuOpen(false);
+                  });
+                }}
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold transition-all text-left cursor-pointer ${
+                  activeTab === "categories" ? "bg-white text-[#FC7D00] shadow-md" : "text-white hover:bg-black/10"
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <FolderTree size={20} />
+                  <span className="tracking-wide text-[13px]">Categorías</span>
+                </div>
+                <span
+                  className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
+                    activeTab === "categories" ? "bg-[#FC7D00] text-white" : "bg-[#b85000] text-white"
+                  }`}
+                >
+                  {categoriesList.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => {
+                  safelyNavigate(() => {
+                    setActiveTab("attributes");
+                    setEditingProduct(null);
+                    setMobileMenuOpen(false);
+                  });
+                }}
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold transition-all text-left cursor-pointer ${
+                  activeTab === "attributes" ? "bg-white text-[#FC7D00] shadow-md" : "text-white hover:bg-black/10"
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <SlidersHorizontal size={20} />
+                  <span className="tracking-wide text-[13px]">Atributos & Variaciones</span>
+                </div>
+                <span
+                  className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
+                    activeTab === "attributes" ? "bg-[#FC7D00] text-white" : "bg-[#b85000] text-white"
+                  }`}
+                >
+                  {attributesList.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => {
+                  safelyNavigate(() => {
+                    setActiveTab("media");
+                    setEditingProduct(null);
+                    setMobileMenuOpen(false);
+                  });
+                }}
+                className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl font-bold transition-all text-left cursor-pointer ${
+                  activeTab === "media" ? "bg-white text-[#FC7D00] shadow-md" : "text-white hover:bg-black/10"
+                }`}
+              >
+                <Images size={20} />
+                <span className="tracking-wide text-[13px]">Biblioteca Multimedia</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  safelyNavigate(() => {
+                    setActiveTab("orders");
+                    setEditingProduct(null);
+                    setMobileMenuOpen(false);
+                  });
+                }}
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl font-bold transition-all text-left cursor-pointer ${
+                  activeTab === "orders" ? "bg-white text-[#FC7D00] shadow-md" : "text-white hover:bg-black/10"
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <ShoppingCart size={20} />
+                  <span className="tracking-wide text-[13px]">Pedidos</span>
+                </div>
+                <span
+                  className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
+                    activeTab === "orders" ? "bg-[#FC7D00] text-white" : "bg-[#b85000] text-white"
+                  }`}
+                >
+                  {orders.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => {
+                  safelyNavigate(() => {
+                    setActiveTab("donweb");
+                    setEditingProduct(null);
+                    setMobileMenuOpen(false);
+                  });
+                }}
+                className={`w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl font-bold transition-all text-left cursor-pointer ${
+                  activeTab === "donweb" ? "bg-white text-[#FC7D00] shadow-md" : "text-white hover:bg-black/10"
+                }`}
+              >
+                <UploadCloud size={20} />
+                <span className="tracking-wide text-[13px]">FTP DonWeb</span>
+              </button>
+            </nav>
+
+            {/* Mobile Footer */}
+            <div className="p-4 border-t border-[#c45600]">
+              <Link
+                href="/"
+                target="_blank"
+                className="flex items-center justify-between text-xs text-white bg-[#b85000] hover:bg-[#a64800] rounded-xl py-3 px-4 font-bold transition-all shadow-xs"
+              >
+                <span>Abrir Tienda Pública</span>
+                <ArrowUpRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 2. MAIN WORKSPACE */}
       <main className="flex-1 min-w-0 flex flex-col overflow-x-hidden overflow-y-hidden bg-[#faf9f8]">
         {/* Top bar con naranja oficial del logo #FC7D00 */}
-        <header className="h-16 bg-[#FC7D00] text-white px-4 sm:px-8 flex items-center justify-between shadow-md flex-shrink-0">
-          <div className="flex items-center space-x-3 min-w-0">
-            <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/90 whitespace-nowrap">
+        <header className="h-16 bg-[#FC7D00] text-white px-3 sm:px-8 flex items-center justify-between shadow-md flex-shrink-0">
+          <div className="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden p-2 -ml-1 rounded-xl bg-black/15 hover:bg-black/25 text-white transition-colors flex items-center justify-center flex-shrink-0 cursor-pointer"
+              aria-label="Abrir menú"
+            >
+              <Menu size={20} />
+            </button>
+            <span className="hidden sm:inline text-[11px] font-bold uppercase tracking-[0.25em] text-white/90 whitespace-nowrap">
               ACASA TIENDA
             </span>
-            <span className="text-white/40 font-light">/</span>
-            <h2 className="font-heading text-base font-bold text-white uppercase tracking-wider truncate">
+            <span className="hidden sm:inline text-white/40 font-light">/</span>
+            <h2 className="font-heading text-sm sm:text-base font-bold text-white uppercase tracking-wider truncate">
               {activeTab === "dashboard" && "Tablero de Tráfico & Conversión en Tiempo Real"}
               {activeTab === "products" && (editingProduct ? "Configuración y Detalle del Mueble" : "Gestión y Catálogo de Muebles")}
               {activeTab === "categories" && "Gestión de Categorías & Subcategorías"}
@@ -2237,6 +2435,42 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Floating Action Bar on Mobile */}
+                    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 p-3 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => safelyNavigate(() => setEditingProduct(null))}
+                        className="flex-1 py-3 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 hover:bg-gray-100 transition-colors text-center cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveProduct}
+                        disabled={isSavingProduct}
+                        className={`flex-[2] py-3 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-75 ${
+                          saveSuccessMessage ? "bg-[#065f46]" : "bg-[#FC7D00] hover:bg-[#e66c00]"
+                        }`}
+                      >
+                        {isSavingProduct ? (
+                          <>
+                            <RefreshCw size={15} className="animate-spin" />
+                            <span>Guardando...</span>
+                          </>
+                        ) : saveSuccessMessage ? (
+                          <>
+                            <Check size={16} />
+                            <span>¡Guardado!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Save size={15} />
+                            <span>Guardar Mueble</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </form>
                 </div>
               ) : (
@@ -2260,35 +2494,37 @@ export default function AdminDashboardPage() {
                             images: [],
                           });
                         }}
-                        className="bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-xl flex items-center space-x-2 transition-all shadow-sm"
+                        className="bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-sm w-full sm:w-auto cursor-pointer"
                       >
                         <Plus size={16} />
                         <span>Añadir Producto</span>
                       </button>
 
-                      <button
-                        onClick={() => {
-                          setImportExportModalTab("export");
-                          setIsImportExportModalOpen(true);
-                        }}
-                        className="bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold uppercase tracking-wider px-3.5 py-2.5 rounded-xl border border-gray-200 flex items-center space-x-1.5 transition-all shadow-sm"
-                        title="Exportar catálogo a CSV o JSON"
-                      >
-                        <Download size={14} className="text-[#FC7D00]" />
-                        <span>Exportar</span>
-                      </button>
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <button
+                          onClick={() => {
+                            setImportExportModalTab("export");
+                            setIsImportExportModalOpen(true);
+                          }}
+                          className="flex-1 sm:flex-none bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold uppercase tracking-wider px-3.5 py-2.5 rounded-xl border border-gray-200 flex items-center justify-center space-x-1.5 transition-all shadow-sm cursor-pointer"
+                          title="Exportar catálogo a CSV o JSON"
+                        >
+                          <Download size={14} className="text-[#FC7D00]" />
+                          <span>Exportar</span>
+                        </button>
 
-                      <button
-                        onClick={() => {
-                          setImportExportModalTab("import");
-                          setIsImportExportModalOpen(true);
-                        }}
-                        className="bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold uppercase tracking-wider px-3.5 py-2.5 rounded-xl border border-gray-200 flex items-center space-x-1.5 transition-all shadow-sm"
-                        title="Importar productos desde CSV o JSON"
-                      >
-                        <Upload size={14} className="text-[#FC7D00]" />
-                        <span>Importar</span>
-                      </button>
+                        <button
+                          onClick={() => {
+                            setImportExportModalTab("import");
+                            setIsImportExportModalOpen(true);
+                          }}
+                          className="flex-1 sm:flex-none bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold uppercase tracking-wider px-3.5 py-2.5 rounded-xl border border-gray-200 flex items-center justify-center space-x-1.5 transition-all shadow-sm cursor-pointer"
+                          title="Importar productos desde CSV o JSON"
+                        >
+                          <Upload size={14} className="text-[#FC7D00]" />
+                          <span>Importar</span>
+                        </button>
+                      </div>
 
                       {/* Category Filter */}
                       <select
@@ -2298,7 +2534,7 @@ export default function AdminDashboardPage() {
                           setSelectedSubcatFilter("all");
                           setProductsPage(1);
                         }}
-                        className="text-xs border border-gray-300 rounded-xl px-3 py-2.5 outline-none bg-white font-medium"
+                        className="w-full sm:w-auto text-xs border border-gray-300 rounded-xl px-3 py-2.5 outline-none bg-white font-medium"
                       >
                         <option value="all">Todas las categorías</option>
                         {categoriesList.map((c) => (
@@ -2316,7 +2552,7 @@ export default function AdminDashboardPage() {
                             setSelectedSubcatFilter(e.target.value);
                             setProductsPage(1);
                           }}
-                          className="text-xs border border-gray-300 rounded-xl px-3 py-2.5 outline-none bg-white font-medium"
+                          className="w-full sm:w-auto text-xs border border-gray-300 rounded-xl px-3 py-2.5 outline-none bg-white font-medium"
                         >
                           <option value="all">Todas las subcategorías</option>
                           {availableFilterSubcategories.map((s) => (
@@ -2332,7 +2568,7 @@ export default function AdminDashboardPage() {
                         <button
                           type="button"
                           onClick={handleClearFilters}
-                          className="bg-amber-50 hover:bg-amber-100 text-[#FC7D00] text-xs font-bold px-3 py-2.5 rounded-xl border border-amber-200/80 flex items-center space-x-1.5 transition-all shadow-sm"
+                          className="w-full sm:w-auto justify-center bg-amber-50 hover:bg-amber-100 text-[#FC7D00] text-xs font-bold px-3 py-2.5 rounded-xl border border-amber-200/80 flex items-center space-x-1.5 transition-all shadow-sm cursor-pointer"
                           title="Limpiar todos los filtros"
                         >
                           <FilterX size={14} />
@@ -2369,59 +2605,193 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
 
-                  {/* Table */}
+                  {/* Table & Mobile Cards */}
                   <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
-                    <table className="w-full text-xs text-left">
-                      <thead className="bg-[#faf9f8] border-b text-gray-500 uppercase font-bold text-[10px] tracking-wider">
-                        <tr>
-                          <th className="p-4">Nombre</th>
-                          <th className="p-4">Línea</th>
-                          <th className="p-4">SKU</th>
-                          <th className="p-4">Stock</th>
-                          <th className="p-4">Precio</th>
-                          <th className="p-4">Categoría</th>
-                          <th className="p-4 text-right">Acciones</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {filteredProducts.length === 0 ? (
+                    {/* Desktop Table */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <table className="w-full text-xs text-left">
+                        <thead className="bg-[#faf9f8] border-b text-gray-500 uppercase font-bold text-[10px] tracking-wider">
                           <tr>
-                            <td colSpan={7} className="p-12 text-center text-gray-500">
-                              <div className="flex flex-col items-center justify-center space-y-3">
-                                <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400">
-                                  <FilterX size={22} />
+                            <th className="p-4">Nombre</th>
+                            <th className="p-4">Línea</th>
+                            <th className="p-4">SKU</th>
+                            <th className="p-4">Stock</th>
+                            <th className="p-4">Precio</th>
+                            <th className="p-4">Categoría</th>
+                            <th className="p-4 text-right">Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {filteredProducts.length === 0 ? (
+                            <tr>
+                              <td colSpan={7} className="p-12 text-center text-gray-500">
+                                <div className="flex flex-col items-center justify-center space-y-3">
+                                  <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400">
+                                    <FilterX size={22} />
+                                  </div>
+                                  <p className="font-bold text-sm text-gray-800">
+                                    No se encontraron muebles con los filtros seleccionados
+                                  </p>
+                                  <p className="text-xs text-gray-400 max-w-sm">
+                                    Probá cambiando el término de búsqueda o la categoría seleccionada.
+                                  </p>
+                                  {hasActiveFilters && (
+                                    <button
+                                      type="button"
+                                      onClick={handleClearFilters}
+                                      className="mt-2 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+                                    >
+                                      Limpiar todos los filtros
+                                    </button>
+                                  )}
                                 </div>
-                                <p className="font-bold text-sm text-gray-800">
-                                  No se encontraron muebles con los filtros seleccionados
-                                </p>
-                                <p className="text-xs text-gray-400 max-w-sm">
-                                  Probá cambiando el término de búsqueda o la categoría seleccionada.
-                                </p>
-                                {hasActiveFilters && (
-                                  <button
-                                    type="button"
-                                    onClick={handleClearFilters}
-                                    className="mt-2 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+                              </td>
+                            </tr>
+                          ) : (
+                            paginatedProducts.map((p) => (
+                            <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
+                              <td className="p-4 font-semibold text-gray-900">
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-gray-900">{p.title}</span>
+                                  <span className="text-[11px] text-gray-400 font-mono">/{p.slug}</span>
+                                </div>
+                              </td>
+                              <td className="p-4">
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <span
+                                    className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                      p.linea === "premium"
+                                        ? "bg-emerald-100 text-emerald-800"
+                                        : "bg-orange-100 text-[#c25e1a]"
+                                    }`}
                                   >
-                                    Limpiar todos los filtros
+                                    {p.linea === "premium" ? "Premium" : "Práctica"}
+                                  </span>
+                                  {p.entrega48hs && (
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-100 text-[#c25e1a] border border-orange-200 inline-flex items-center gap-1">
+                                      <Zap size={10} className="fill-[#c25e1a]" />
+                                      <span>48hs</span>
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="p-4 text-gray-400 font-mono">{p.sku || "-"}</td>
+                              <td className="p-4">
+                                <span
+                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                    p.stock > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                  }`}
+                                >
+                                  {p.stock > 0 ? `Stock (${p.stock})` : "Agotado"}
+                                </span>
+                              </td>
+                              <td className="p-4">
+                                <div className="flex flex-col">
+                                  <span className="font-bold text-gray-900 font-mono">
+                                    {formatCurrency(p.salePrice ?? p.regularPrice)}
+                                  </span>
+                                  {p.salePrice && (
+                                    <span className="text-[10px] text-gray-400 line-through font-mono">
+                                      {formatCurrency(p.regularPrice)}
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="p-4 uppercase font-bold text-gray-600 text-[11px]">{p.category}</td>
+                              <td className="p-4 text-right">
+                                <div className="flex items-center justify-end space-x-1.5">
+                                  <a
+                                    href={`/producto/${p.slug}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-2 text-gray-500 hover:text-[#FC7D00] hover:bg-orange-50 rounded-lg transition-colors inline-flex items-center justify-center cursor-pointer"
+                                    title="Ver Producto en la tienda pública"
+                                  >
+                                    <Eye size={15} />
+                                  </a>
+                                  <button
+                                    onClick={() => {
+                                      startEditingProduct(p);
+                                    }}
+                                    className="p-2 text-gray-500 hover:text-[#FC7D00] hover:bg-orange-50 rounded-lg transition-colors"
+                                    title="Editar Mueble"
+                                  >
+                                    <Pencil size={15} />
                                   </button>
+                                  <button
+                                    onClick={() => handleDuplicateProduct(p)}
+                                    className="p-2 text-gray-500 hover:text-emerald-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title="Duplicar"
+                                  >
+                                    <Copy size={15} />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteProduct(p.id)}
+                                    className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title="Eliminar"
+                                  >
+                                    <Trash2 size={15} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Product Cards List */}
+                    <div className="md:hidden divide-y divide-gray-100">
+                      {filteredProducts.length === 0 ? (
+                        <div className="p-8 text-center text-gray-500">
+                          <div className="flex flex-col items-center justify-center space-y-3">
+                            <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400">
+                              <FilterX size={22} />
+                            </div>
+                            <p className="font-bold text-sm text-gray-800">
+                              No se encontraron muebles con los filtros seleccionados
+                            </p>
+                            {hasActiveFilters && (
+                              <button
+                                type="button"
+                                onClick={handleClearFilters}
+                                className="mt-2 bg-[#FC7D00] hover:bg-[#e66c00] text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
+                              >
+                                Limpiar todos los filtros
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        paginatedProducts.map((p) => (
+                          <div key={`mob-${p.id}`} className="p-3.5 space-y-3 hover:bg-gray-50/60 transition-colors">
+                            <div className="flex items-start gap-3">
+                              {/* Product Thumbnail */}
+                              <div className="w-14 h-14 rounded-xl bg-gray-100 border border-gray-200/80 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                                {p.images && p.images.length > 0 ? (
+                                  <img src={p.images[0]} alt={p.title} className="w-full h-full object-cover" />
+                                ) : (
+                                  <ImageIcon size={20} className="text-gray-400" />
                                 )}
                               </div>
-                            </td>
-                          </tr>
-                        ) : (
-                          paginatedProducts.map((p) => (
-                          <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
-                            <td className="p-4 font-semibold text-gray-900">
-                              <div className="flex flex-col">
-                                <span className="font-bold text-gray-900">{p.title}</span>
-                                <span className="text-[11px] text-gray-400 font-mono">/{p.slug}</span>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-bold text-gray-900 text-xs sm:text-sm leading-snug line-clamp-2">
+                                  {p.title}
+                                </h4>
+                                <div className="flex items-center gap-1.5 mt-1 text-[11px] text-gray-500 font-mono">
+                                  <span>SKU: {p.sku || "-"}</span>
+                                  <span>·</span>
+                                  <span className="uppercase text-gray-600 font-semibold">{p.category}</span>
+                                </div>
                               </div>
-                            </td>
-                            <td className="p-4">
+                            </div>
+
+                            {/* Badges & Price */}
+                            <div className="flex items-center justify-between pt-0.5">
                               <div className="flex flex-wrap items-center gap-1.5">
                                 <span
-                                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                                     p.linea === "premium"
                                       ? "bg-emerald-100 text-emerald-800"
                                       : "bg-orange-100 text-[#c25e1a]"
@@ -2435,72 +2805,67 @@ export default function AdminDashboardPage() {
                                     <span>48hs</span>
                                   </span>
                                 )}
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                    p.stock > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                  }`}
+                                >
+                                  {p.stock > 0 ? `Stock ${p.stock}` : "Agotado"}
+                                </span>
                               </div>
-                            </td>
-                            <td className="p-4 text-gray-400 font-mono">{p.sku || "-"}</td>
-                            <td className="p-4">
-                              <span
-                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                                  p.stock > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                                }`}
-                              >
-                                {p.stock > 0 ? `Stock (${p.stock})` : "Agotado"}
-                              </span>
-                            </td>
-                            <td className="p-4">
-                              <div className="flex flex-col">
-                                <span className="font-bold text-gray-900 font-mono">
+
+                              <div className="text-right">
+                                <span className="font-bold text-gray-900 font-mono text-sm">
                                   {formatCurrency(p.salePrice ?? p.regularPrice)}
                                 </span>
                                 {p.salePrice && (
-                                  <span className="text-[10px] text-gray-400 line-through font-mono">
+                                  <span className="block text-[10px] text-gray-400 line-through font-mono">
                                     {formatCurrency(p.regularPrice)}
                                   </span>
                                 )}
                               </div>
-                            </td>
-                            <td className="p-4 uppercase font-bold text-gray-600 text-[11px]">{p.category}</td>
-                            <td className="p-4 text-right">
-                              <div className="flex items-center justify-end space-x-1.5">
-                                <a
-                                  href={`/producto/${p.slug}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="p-2 text-gray-500 hover:text-[#FC7D00] hover:bg-orange-50 rounded-lg transition-colors inline-flex items-center justify-center cursor-pointer"
-                                  title="Ver Producto en la tienda pública"
-                                >
-                                  <Eye size={15} />
-                                </a>
-                                <button
-                                  onClick={() => {
-                                    startEditingProduct(p);
-                                  }}
-                                  className="p-2 text-gray-500 hover:text-[#FC7D00] hover:bg-orange-50 rounded-lg transition-colors"
-                                  title="Editar Mueble"
-                                >
-                                  <Pencil size={15} />
-                                </button>
+                            </div>
+
+                            {/* Mobile Action Buttons */}
+                            <div className="grid grid-cols-4 gap-2 pt-2 border-t border-gray-100">
+                              <button
+                                onClick={() => startEditingProduct(p)}
+                                className="col-span-2 py-2.5 px-3 rounded-xl bg-orange-50 text-[#FC7D00] hover:bg-[#FC7D00] hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                              >
+                                <Pencil size={13} />
+                                <span>Editar</span>
+                              </button>
+                              <a
+                                href={`/producto/${p.slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="py-2.5 px-2 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 font-medium text-xs flex items-center justify-center gap-1 transition-colors"
+                                title="Ver en tienda"
+                              >
+                                <Eye size={13} />
+                                <span className="text-[11px]">Ver</span>
+                              </a>
+                              <div className="flex gap-1 justify-end">
                                 <button
                                   onClick={() => handleDuplicateProduct(p)}
-                                  className="p-2 text-gray-500 hover:text-emerald-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                  className="p-2 rounded-xl text-gray-500 hover:text-emerald-700 hover:bg-gray-100 transition-colors flex-1 flex items-center justify-center cursor-pointer"
                                   title="Duplicar"
                                 >
-                                  <Copy size={15} />
+                                  <Copy size={13} />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteProduct(p.id)}
-                                  className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                  className="p-2 rounded-xl text-gray-500 hover:text-red-600 hover:bg-gray-100 transition-colors flex-1 flex items-center justify-center cursor-pointer"
                                   title="Eliminar"
                                 >
-                                  <Trash2 size={15} />
+                                  <Trash2 size={13} />
                                 </button>
                               </div>
-                            </td>
-                          </tr>
+                            </div>
+                          </div>
                         ))
                       )}
-                      </tbody>
-                    </table>
+                    </div>
 
                     {/* Pagination Controls */}
                     {filteredProducts.length > 0 && (
@@ -2609,7 +2974,8 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
-                <table className="w-full text-xs text-left">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left min-w-[700px]">
                   <thead className="bg-[#faf9f8] border-b text-gray-500 uppercase font-bold text-[10px] tracking-wider">
                     <tr>
                       <th className="p-4">Pedido</th>
@@ -2672,6 +3038,7 @@ export default function AdminDashboardPage() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           )}
