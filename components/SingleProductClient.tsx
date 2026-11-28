@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { getStoredProducts, formatCurrency } from "@/lib/store";
+import { getStoredProducts, formatCurrency, fetchProductBySlug, fetchProducts } from "@/lib/store";
 import { INITIAL_PRODUCTS } from "@/lib/data";
 import { useCart } from "@/context/CartContext";
 import { Product } from "@/lib/types";
@@ -47,10 +47,7 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
   const [isAddedToast, setIsAddedToast] = useState(false);
 
   useEffect(() => {
-    const list = getStoredProducts();
-    setAllProducts(list);
-    const found = list.find((p) => p.slug === slug);
-    if (found) {
+    const applyFoundProduct = (found: Product) => {
       setProduct(found);
       if (!selectedImage) setSelectedImage(found.images[0] || "");
 
@@ -67,7 +64,25 @@ export default function SingleProductClient({ slug: propSlug }: { slug?: string 
         });
       }
       setSelectedVariations((prev) => (Object.keys(prev).length ? prev : initialVars));
+    };
+
+    const list = getStoredProducts();
+    setAllProducts(list);
+    const initialFound = list.find((p) => p.slug === slug);
+    if (initialFound) {
+      applyFoundProduct(initialFound);
     }
+
+    // Always fetch live product from Supabase to guarantee fresh data & 48hs status
+    fetchProductBySlug(slug).then((live) => {
+      if (live) {
+        applyFoundProduct(live);
+      }
+    });
+
+    fetchProducts().then((all) => {
+      setAllProducts(all);
+    });
   }, [slug]);
 
   if (!product) {

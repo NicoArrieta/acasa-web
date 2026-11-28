@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { getStoredProducts } from "@/lib/store";
+import { getStoredProducts, fetchProducts } from "@/lib/store";
 import { Product } from "@/lib/types";
 import ProductCard from "@/components/ProductCard";
 import CategoriesCarousel from "@/components/CategoriesCarousel";
@@ -15,6 +15,9 @@ export default function InteriorismoPage() {
 
   useEffect(() => {
     setProducts(getStoredProducts());
+    fetchProducts().then((live) => {
+      if (live && live.length > 0) setProducts(live);
+    });
 
     const handleUpdate = () => {
       setProducts(getStoredProducts());

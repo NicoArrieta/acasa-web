@@ -22,6 +22,9 @@ import { getStoredMedia, getStoredCategories, saveStoredCategories, getStoredAtt
 import {
   getStoredProducts,
   saveStoredProducts,
+  fetchProducts,
+  saveProductToSupabase,
+  deleteProductFromSupabase,
   getStoredOrders,
   saveStoredOrders,
   getStoredDonWebConfig,
@@ -150,7 +153,7 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
-    setProducts(getStoredProducts());
+    fetchProducts().then((prods) => setProducts(prods));
     setOrders(getStoredOrders());
     setDonwebConfig(getStoredDonWebConfig());
   }, []);
@@ -315,11 +318,12 @@ export default function AdminDashboardPage() {
           ? [editingProduct.subcategory]
           : [];
 
+      let existingIdx = -1;
       if (editingProduct.id) {
         // Update
-        const idx = currentList.findIndex((p) => p.id === editingProduct.id);
+        existingIdx = currentList.findIndex((p) => p.id === editingProduct.id);
         targetProduct = {
-          ...(currentList[idx] as Product),
+          ...(currentList[existingIdx] as Product),
           ...(editingProduct as Product),
           entrega48hs: Boolean(editingProduct.entrega48hs),
           productType: editingProduct.productType || "simple",
@@ -331,8 +335,8 @@ export default function AdminDashboardPage() {
           subcategories: finalSubcats,
           updatedAt: new Date().toISOString().split("T")[0],
         };
-        if (idx > -1) {
-          currentList[idx] = targetProduct;
+        if (existingIdx > -1) {
+          currentList[existingIdx] = targetProduct;
         }
       } else {
         // Create new
@@ -367,38 +371,27 @@ export default function AdminDashboardPage() {
         currentList.unshift(targetProduct);
       }
 
-      setProducts(currentList);
-      saveStoredProducts(currentList);
-
-      // Sync to Supabase in background
-      try {
-        await supabase.from("products").upsert({
-          id: targetProduct.id,
-          slug: targetProduct.slug,
-          title: targetProduct.title,
-          sku: targetProduct.sku,
-          short_description: targetProduct.shortDescription,
-          description: targetProduct.description,
-          regular_price: targetProduct.regularPrice,
-          sale_price: targetProduct.salePrice,
-          category: targetProduct.category,
-          subcategory: targetProduct.subcategory,
-          linea: targetProduct.linea,
-          stock: targetProduct.stock,
-          images: targetProduct.images,
-          variations: targetProduct.variations,
-          dimensions: targetProduct.dimensions,
-          updated_at: new Date().toISOString(),
-        });
-      } catch (err) {
-        console.debug("Supabase product sync:", err);
+      // Save directly to Supabase and memory cache
+      const saveRes = await saveProductToSupabase(targetProduct);
+      if (!saveRes.success) {
+        throw new Error(saveRes.error?.message || "Error al sincronizar con Supabase");
       }
+      if (saveRes.data) {
+        targetProduct = saveRes.data;
+        if (existingIdx > -1) {
+          currentList[existingIdx] = targetProduct;
+        } else {
+          currentList[0] = targetProduct;
+        }
+      }
+
+      setProducts([...currentList]);
 
       // Keep user on the product edit screen and update clean snapshot
       setEditingProduct(targetProduct);
       initialProductSnapshotRef.current = JSON.stringify(targetProduct);
 
-      setSaveSuccessMessage(`¡"${targetProduct.title}" guardado con éxito!`);
+      setSaveSuccessMessage(`¡"${targetProduct.title}" guardado en Supabase con éxito!`);
       setTimeout(() => {
         setSaveSuccessMessage(null);
       }, 4000);
@@ -413,14 +406,11 @@ export default function AdminDashboardPage() {
     if (confirm("¿Estás seguro de que querés eliminar este producto?")) {
       const updated = products.filter((p) => p.id !== id);
       setProducts(updated);
-      saveStoredProducts(updated);
-      try {
-        await supabase.from("products").delete().eq("id", id);
-      } catch (_) {}
+      await deleteProductFromSupabase(id);
     }
   };
 
-  const handleDuplicateProduct = (prod: Product) => {
+  const handleDuplicateProduct = async (prod: Product) => {
     const duplicated: Product = {
       ...prod,
       id: `prod-${Date.now()}`,
@@ -428,10 +418,10 @@ export default function AdminDashboardPage() {
       title: `${prod.title} (Copia)`,
       sku: `${prod.sku || "PROD"}-COP`,
       createdAt: new Date().toISOString().split("T")[0],
+      updatedAt: new Date().toISOString().split("T")[0],
     };
-    const updated = [duplicated, ...products];
-    setProducts(updated);
-    saveStoredProducts(updated);
+    await saveProductToSupabase(duplicated);
+    setProducts([duplicated, ...products]);
   };
 
   const handleImportProducts = async (importedList: Product[], overwrite: boolean) => {

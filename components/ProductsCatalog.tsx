@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { getStoredProducts, formatCurrency } from "@/lib/store";
+import { getStoredProducts, formatCurrency, fetchProducts } from "@/lib/store";
 import { CATEGORIES } from "@/lib/data";
 import { Product } from "@/lib/types";
 import ProductCard from "@/components/ProductCard";
@@ -54,9 +54,14 @@ export default function ProductsCatalog({
   const [sortBy, setSortBy] = useState<string>("featured");
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  // Load products from store / localStorage
+  // Load products from store / Supabase
   useEffect(() => {
     setProducts(getStoredProducts());
+    fetchProducts().then((live) => {
+      if (live && live.length > 0) {
+        setProducts(live);
+      }
+    });
 
     const handleUpdate = () => {
       setProducts(getStoredProducts());
